@@ -147,6 +147,7 @@ public:
 
 	void moveTo(double x, double y, double z);
 	void moveTo(double x, double y, double z, int relative, double time);
+	void moveTo(double x, double y, double z, int relative, double timeSpend, double servo_4_angle);
 
 	void drawCur(double length_1, double length_2,  int angle, double timeSpend);
 	void drawRec(double length_1, double length_2, double timeSpendPerLength);
@@ -175,7 +176,7 @@ protected:
 
 	void saveOffsetValue(double value, int servoNumber);
 	double getInterpolValueArray(int number) const { return interpolValueArray[10]; }
-	
+	double calYonly(double theta_1, double theta_2, double theta_3);
 	
 
 	// interpo 100 sets of data into the curve
@@ -203,6 +204,10 @@ protected:
 	double calX;
 	double calY;
 	double calZ;
+
+	double l3_1_2 ;
+	double l4_1_2 ;
+	double l5_2  ;
 
 	double currentX;
 	double currentY;

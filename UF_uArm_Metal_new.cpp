@@ -684,7 +684,7 @@ double UF_uArm::servoOffset(int servoNumber)
 	else if(servoNumber == 4)
 		return 0;
 	else{
-			Serial.println("input incorrect");
+			Serial.println("Incorrect");
 			
 	}
 }
@@ -701,8 +701,8 @@ void UF_uArm::calibrationServo(int servoNumber)
 	int address = addressServo + (servoNumber-1)*6;
 	
 	Serial.print("servo ");
-  Serial.print(servoNumber);
-  Serial.println(" begin calibration");
+  Serial.println(servoNumber);
+
 
 	int analogReadPin;
 	
@@ -726,7 +726,7 @@ void UF_uArm::calibrationServo(int servoNumber)
 
 			case 3:
 				analogReadPin = 1;
-				writeAngle(90, 40 , servoRangeIni+dot_i, 0,1);
+				writeAngle(90, 60 , servoRangeIni+dot_i, 0,1);
 			
 				break;
 
@@ -736,7 +736,7 @@ void UF_uArm::calibrationServo(int servoNumber)
 				break;
 
 			default:
-				Serial.println("Wrong servonumber");
+			
 				break;
 		}
 		
@@ -829,6 +829,8 @@ void UF_uArm::calAngles(double x, double y, double z)
 	Right_all = (1 - yIn*yIn - zIn*zIn - l43*l43) / (2 * l43);
 	sqrt_z_y = sqrt(zIn*zIn + yIn*yIn);
 	
+  if(z> (l1+l3))
+    {z = 25;}
 
 	if (x == 0)
 	{
@@ -898,9 +900,23 @@ void UF_uArm::calAngles(double x, double y, double z)
 		
 	theta_1 = abs(theta_1);
 	theta_2 = abs(theta_2);
-	theta_3 = abs(theta_3);
 	
+  
+	if (theta_3 < 0 ){}
+  else{
+    if ((calYonly(theta_1,theta_2, theta_3)>y+0.1)||(calYonly(theta_1,theta_2, theta_3)<y-0.1))
+    {
+      theta_2 = 180 - theta_2;
+    }  
+  }
+  
 
+  if(isnan(theta_1)||isinf(theta_1))
+    {theta_1 = readAngle(1);}
+  if(isnan(theta_2)||isinf(theta_2))
+    {theta_2 = readAngle(2);}
+  if(isnan(theta_3)||isinf(theta_3)||(theta_3<0))
+    {theta_3 = readAngle(3);}
 
 }
 
@@ -1047,13 +1063,13 @@ void UF_uArm::moveTo(double x, double y, double z, int relative, double timeSpen
 	if ((relative !=0)&&(relative != 1))
 	{	
 		relative = 0;
-		Serial.println("Relative value incorrect");
+
 	}
 
 	if (timeSpend <0)
 	{	
 		timeSpend = abs(timeSpend);
-		Serial.println("Travel time should be positive");
+		
 	}
 
 	interpolation(currentX, currentX*relative+x);
@@ -1088,6 +1104,73 @@ void UF_uArm::moveTo(double x, double y, double z, int relative, double timeSpen
 		delay(timeSpend*1000/50);
 
 	}
+
+}
+
+
+void UF_uArm::moveTo(double x, double y, double z, int relative, double timeSpend, double servo_4_angle)
+{
+
+
+
+  double xArray[50];
+  double yArray[50];
+  double zArray[50];
+
+  calXYZ();
+  currentX = calX;
+  currentY = calY;
+  currentZ = calZ;
+
+
+  
+  if ((relative !=0)&&(relative != 1))
+  { 
+    relative = 0;
+    
+  }
+
+  if (timeSpend <0)
+  { 
+    timeSpend = abs(timeSpend);
+    
+  }
+
+  interpolation(currentX, currentX*relative+x);
+
+  for (int i = 0; i < 50; i++){
+
+    xArray[i] = interpolValueArray[i];
+    
+  }
+
+  interpolation(currentY, currentY*relative+y);
+  
+  for (int i = 0; i < 50; i++){
+
+    yArray[i] = interpolValueArray[i];
+    
+  }
+
+  if ( currentZ*relative+z>25)
+   { interpolation(currentZ, 25); }
+    else
+  {interpolation(currentZ, currentZ*relative+z); }
+  
+  for (int i = 0; i < 50; i++){
+
+    zArray[i] = interpolValueArray[i];
+    
+  }
+    
+  for (int i = 0; i < 50; i++)
+  {
+    calAngles(xArray[i],yArray[i],zArray[i]);
+    writeAngle(theta_1, theta_2, theta_3, servo_4_angle);
+
+    delay(timeSpend*1000/50);
+
+  }
 
 }
 
@@ -1243,7 +1326,7 @@ void UF_uArm::setOffset()
 				double offsetL = readAngle(2,1) - 50;
 				double offsetR = readAngle(3,1) - 90;
 
-        Serial.print("Calculated offset for servo 1 to 3 are ");
+        Serial.print("Offsets for servo 1 to 3 are ");
         Serial.println(offsetRot);
         Serial.println(offsetL);
         Serial.println(offsetR);
@@ -1251,7 +1334,7 @@ void UF_uArm::setOffset()
 
 				if (abs(offsetRot)>25.4||abs(offsetL)>25.4||abs(offsetR)>25.4)
 				{
-					Serial.print("Check posture, the offset shouldn't be more than 25.4 degree");
+					Serial.print("Check posture");
           
 
 				}
@@ -1299,4 +1382,19 @@ void UF_uArm::saveOffsetValue(double value, int servoNumber)
 	EEPROM.write( addressOffset + (servoNumber-1)*2 +1, abs(Byte1));
 
 }
+
+
+
+double UF_uArm::calYonly(double theta_1, double theta_2, double theta_3)
+
+{
+
+    l3_1_2 = l3 * cos(theta_2 / trans);
+    l4_1_2 = l4*cos(theta_3 / trans);
+    l5_2 = (l2 + l3*cos(theta_2 / trans) + l4*cos(theta_3 / trans));
+
+    return -sin(abs(theta_1 / trans))*l5_2;
+
+}
+
 /* The code above is written by jerry song*/
