@@ -238,7 +238,6 @@ void UF_uArm::pumpOff()
 	digitalWrite(PUMP_EN, LOW);     // pump disnable
 }
 
-
 void UF_uArm::valveOn()
 {
 	digitalWrite(VALVE_EN, HIGH);   // valve enable, decompression
@@ -271,7 +270,6 @@ void UF_uArm::detachServo(char _servoNum)
 		default: break;
 	}
 }
-
 
 void UF_uArm::sendData(byte _dataAdd, int _dataIn)
 {
@@ -329,7 +327,6 @@ void UF_uArm::play(unsigned char buttonPin)
   servoHandRot.attach(SERVO_HAND_ROT);
   while(digitalRead(buttonPin))
   {
-  
   	readExternalEeprom(addr, data, 5);
     if(data[0] == DATA_FLAG)
 	{
@@ -362,7 +359,6 @@ void UF_uArm::play(unsigned char buttonPin)
             delay(5);	
 		}
 		else break;
-
 	}
 
     unsigned char leftServo  = data[0];
@@ -385,8 +381,7 @@ void UF_uArm::play(unsigned char buttonPin)
     rotServoLast   = rotServo;
     handrotLast    = handrot;
     delay(sampleDelay);
-    addr+=5;
-      
+    addr+=5; 
   }
   
   servoL.detach();
@@ -468,19 +463,19 @@ void UF_uArm::record(unsigned char buttonPin, unsigned char buttonPinC)
 
 
 			
-		data[4] =(btnSt==false)?0:1;
+		data[4] = (btnSt == false) ? 0 : 1;
 
-		if((addr%32768) >= MEMORY_SERVO_PER)
+		if((addr % 32768) >= MEMORY_SERVO_PER)
 		{
 			alert(3, 50, 100);
 			break;
 		}
 
     writeExternalEeprom(addr, data, 5);
-    addr+=5;
-    delay(sampleDelay-2);
+    addr += 5;
+    delay(sampleDelay - 2);
 
-    data[0]=255;
+    data[0] = 255;
 
     writeExternalEeprom(addr, data,1);
     gripperDirectDetach();
@@ -659,8 +654,8 @@ int UF_uArm::inputToReal(int servoNumber, int inputAngle)
 
 	int output = inputAngle + servoOffset(servoNumber);
 	
-	if (output>180) output = 180;
-	if (output<0) output = 0;
+	if (output > 180) output = 180;
+	if (output < 0) output = 0;
 	
 	return output;
 
@@ -763,14 +758,12 @@ void UF_uArm::calibrationServo(int servoNumber)
 	saveDataToRom(lr.getA(),address);
 	saveDataToRom(lr.getB(),address+3);
 
-
-	
 }
 
 
 void UF_uArm::calibrations(){
 	
-	for (int k = 1; k<5; k++){
+	for (int k = 1; k < 5; k++){
 
 		calibrationServo(k);
 		delay(2000);
@@ -792,16 +785,16 @@ void UF_uArm::saveDataToRom(double data, int address)
 	byte Byte1;
 	byte Byte2;
 
-	if(abs(data)<1)	{
-		dataWhole= (int) (data*100);
+	if(abs(data) < 1)	{
+		dataWhole = (int) (data*100);
 	}
 	else{
-		dataWhole= (int) (data*10);
+		dataWhole = (int) (data*10);
 	}
 
 
 
-	if (dataWhole>0){ 
+	if (dataWhole > 0){ 
 		Byte0 = 1;
 	}
 	else{ 
@@ -829,7 +822,7 @@ void UF_uArm::calAngles(double x, double y, double z)
 	Right_all = (1 - yIn*yIn - zIn*zIn - l43*l43) / (2 * l43);
 	sqrt_z_y = sqrt(zIn*zIn + yIn*yIn);
 	
-  if(z> (l1+l3))
+  if(z > (l1+l3))
     {z = 25;}
 
 	if (x == 0)
@@ -920,9 +913,6 @@ void UF_uArm::calAngles(double x, double y, double z)
 
 }
 
-
-
-
 void UF_uArm::interpolation(double initialValue, double finalValue)
 {
 	// by using the formula theta_t = a_0 + a_1 * t + a_2 * t^2 + a_3 * t^3
@@ -937,7 +927,6 @@ void UF_uArm::interpolation(double initialValue, double finalValue)
 	
 	int timeTotal = 1;
 
-
 	a_0 = initialValue;
 	a_1 = 0;
 	a_2 = (3 * (finalValue - initialValue)) / (timeTotal*timeTotal);
@@ -946,18 +935,11 @@ void UF_uArm::interpolation(double initialValue, double finalValue)
 	for (int i = 0; i < 50; i=i+1)
 	{
 		t_step = (timeTotal / 50.0) *i;
-		interpolValueArray[i] = a_0 + a_1 * (t_step) + a_2 * (t_step *t_step ) + a_3 * (t_step *t_step *t_step);
-		
+		interpolValueArray[i] = a_0 + a_1 * (t_step) + a_2 * (t_step *t_step ) + a_3 * (t_step *t_step *t_step);	
 	}
-	
-	
-	
 }
 
-
-
 void UF_uArm::calXYZ(double theta_1, double theta_2, double theta_3)
-
 {
 	
 	l3_1 = l3 * cos(theta_2 / trans);
@@ -977,8 +959,6 @@ void UF_uArm::calXYZ()
 	readToAngle(analogRead(2),1,0),
 	readToAngle(analogRead(0),2,0),
 	readToAngle(analogRead(1),3,0));
-
-
 
 }
 
@@ -1002,15 +982,11 @@ void UF_uArm::moveTo(double x, double y, double z)
 	currentY = calY;
 	currentZ = calZ;
 
-	
-	
-
 	interpolation(currentX, x);
 	for (int i = 0; i < 50; i++){
 		xArray[i] = interpolValueArray[i];
 		
 	}
-
 
 	interpolation(currentY, y);
 	for (int i = 0; i < 50; i++){
@@ -1018,37 +994,26 @@ void UF_uArm::moveTo(double x, double y, double z)
 		
 	}
 
-
-
 	interpolation(currentZ, z); 
 	for (int i = 0; i < 50; i++){
 		zArray[i] = interpolValueArray[i];
 		
 	}
-
-	
 		
 	for (int i = 0; i < 50; i++)
 	{
 		calAngles(xArray[i],yArray[i],zArray[i]);
 
 		writeAngle(theta_1, theta_2, theta_3,0);
-		
-		
 
 		delay(40);
 
 	}
 
-
-
-
 }
 
 void UF_uArm::moveTo(double x, double y, double z, int relative, double timeSpend)
 {
-
-
 
 	double xArray[50];
 	double yArray[50];
@@ -1058,7 +1023,6 @@ void UF_uArm::moveTo(double x, double y, double z, int relative, double timeSpen
 	currentX = calX;
 	currentY = calY;
 	currentZ = calZ;
-
 	
 	if ((relative !=0)&&(relative != 1))
 	{	
@@ -1111,8 +1075,6 @@ void UF_uArm::moveTo(double x, double y, double z, int relative, double timeSpen
 void UF_uArm::moveTo(double x, double y, double z, int relative, double timeSpend, double servo_4_angle)
 {
 
-
-
   double xArray[50];
   double yArray[50];
   double zArray[50];
@@ -1122,18 +1084,14 @@ void UF_uArm::moveTo(double x, double y, double z, int relative, double timeSpen
   currentY = calY;
   currentZ = calZ;
 
-
-  
   if ((relative !=0)&&(relative != 1))
   { 
     relative = 0;
-    
   }
 
   if (timeSpend <0)
   { 
     timeSpend = abs(timeSpend);
-    
   }
 
   interpolation(currentX, currentX*relative+x);
@@ -1153,9 +1111,9 @@ void UF_uArm::moveTo(double x, double y, double z, int relative, double timeSpen
   }
 
   if ( currentZ*relative+z>25)
-   { interpolation(currentZ, 25); }
-    else
-  {interpolation(currentZ, currentZ*relative+z); }
+    { interpolation(currentZ, 25); }
+  else
+    { interpolation(currentZ, currentZ*relative+z); }
   
   for (int i = 0; i < 50; i++){
 
@@ -1169,7 +1127,6 @@ void UF_uArm::moveTo(double x, double y, double z, int relative, double timeSpen
     writeAngle(theta_1, theta_2, theta_3, servo_4_angle);
 
     delay(timeSpend*1000/50);
-
   }
 
 }
@@ -1182,7 +1139,6 @@ void UF_uArm::drawRec(double length_1, double length_2, double timeSpendPerLengt
 	moveTo(-length_1,0,0,1,timeSpendPerLength);
 	moveTo(0,-length_2,0,1,timeSpendPerLength);
 	
-
 }
 
 void UF_uArm::drawCur(double length_1, double length_2, int angle, double timeSpend)
