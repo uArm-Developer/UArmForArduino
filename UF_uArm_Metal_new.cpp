@@ -91,25 +91,26 @@ void UF_uArm::recordingMode(unsigned char _sampleDelay)
 		servoR.detach();
 		servoRot.detach();
 		servoHandRot.detach();
-		    while(1)
+		
+    while(1)
 		{
-			
-            // D4 button - recording
-            if(!digitalRead(BTN_D4))
-	        {
-		           recordFlag = true;
-               alert(1, 50, 0);
+      // D4 button - recording
+      if(!digitalRead(BTN_D4))
+	     {
+		      recordFlag = true;
+          alert(1, 50, 0);
                lstTime = millis();
                while(!digitalRead(BTN_D4))
                {
                   if(millis() - lstTime > BTN_TIMEOUT_1000)//make the new data to the old data for long time storage
-		          {
+		              {
                      recordFlag = false;
-		             unsigned char dat[2];
+		                 unsigned char dat[2];
                      readExternalEeprom(0x0000, &dat[0],1);
                      delay(5);
                      readExternalEeprom(0x8000, &dat[1],1);
                      delay(5);
+
                      if((dat[0]==new_data)&&(dat[1]==old_data))
                      {
                         //addr = 1;
@@ -123,6 +124,7 @@ void UF_uArm::recordingMode(unsigned char _sampleDelay)
                         writeExternalEeprom(0x8001, dat,1);
                         delay(5);                      
                      }
+
                      else if((dat[0]==old_data)&&(dat[1]==new_data))
                      {
                         dat[0] = new_data;
@@ -135,6 +137,7 @@ void UF_uArm::recordingMode(unsigned char _sampleDelay)
                         writeExternalEeprom(0x8000, dat,1); 
                         delay(5);
                      }
+
                      else
                      {
   	                    //addr = 1;
@@ -154,15 +157,13 @@ void UF_uArm::recordingMode(unsigned char _sampleDelay)
       			         alert(1, 300, 0);
       			       
                      while(!digitalRead(BTN_D4));
-		          }
-		       }
+		              }
+		            }
                delay(20);
-
              
                if(recordFlag)
                  record(BTN_D4, BTN_D7);
-
-	        }
+	           }
 
       // D7 button - play
       if(!digitalRead(BTN_D7))
@@ -180,10 +181,10 @@ void UF_uArm::recordingMode(unsigned char _sampleDelay)
             while(!digitalRead(BTN_D7));
           }
         }
-        delay(20);
 
+        delay(20);
         play(BTN_D7);
-	  }
+	   }
 	}
   }
 }
@@ -474,7 +475,8 @@ void UF_uArm::record(unsigned char buttonPin, unsigned char buttonPinC)
     writeExternalEeprom(addr, data, 5);
     addr += 5;
     delay(sampleDelay - 2);
-
+    }
+    
     data[0] = 255;
 
     writeExternalEeprom(addr, data,1);
@@ -484,7 +486,7 @@ void UF_uArm::record(unsigned char buttonPin, unsigned char buttonPinC)
     alert(2, 50, 100);
 
     firstFlag = false;
-} 
+
 }
 
 void UF_uArm::writeExternalEeprom(unsigned int address, unsigned char * data_array, int num)
