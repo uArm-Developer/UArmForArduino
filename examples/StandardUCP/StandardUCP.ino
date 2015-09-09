@@ -49,7 +49,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
     case ACTION_CONTROL:
         switch(argv[0]){
           case AC_COOR_REAL_XYZ:
-            uArmLibrary.moveTo(argv[1] + (argv[2] << 7),argv[3] + (argv[4] << 7),argv[5] + (argv[6] << 7),REALTIVE,argv[7] + (argv[8] << 7));
+            uArmLibrary.moveTo(argv[1] + (argv[2] << 7),argv[3] + (argv[4] << 7),argv[5] + (argv[6] << 7),RELATIVE,argv[7] + (argv[8] << 7));
             //uArmLibrary.moveTo(UCP.convertNumToCM(argv[0],argv[1]),UCP.convertNumToCM(argv[2],argv[3]),UCP.convertNumToCM(argv[4],argv[5]),REALTIVE,UCP.convertDMSToSecond(argv[6],argv[7]));
             break;
           case AC_COOR_ABS_XYZ:

@@ -91,7 +91,7 @@ public:
     /* utility methods */
     void sendValueAsTwo7bitBytes(short value);
     double convertNumToCM(byte LSBs, byte MSBb);
-    short convertDMSToMS(byte LSBs, byte MSBb);
+    double convertDMSToSec(byte LSBs, byte MSBb);
     void startSysex(void);
     void endSysex(void);  
 private:

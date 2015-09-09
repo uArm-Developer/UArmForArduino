@@ -307,9 +307,9 @@ double UCPClass::convertNumToCM(byte LSBb,byte MSBb )
 } 
 
 
-short UCPClass::convertDMSToMS(byte LSBb, byte MSBb){
-    short millisecond = 0;
-    millisecond = (LSBb + (MSBb << 7))*100;
-    return millisecond;
+double UCPClass::convertDMSToSec(byte LSBb, byte MSBb){
+    double sec = 0;
+    sec = (LSBb + (MSBb << 7))/10;
+    return sec;
 }
 

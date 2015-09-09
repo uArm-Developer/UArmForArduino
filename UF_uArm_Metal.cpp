@@ -1015,7 +1015,7 @@ void UF_uArm::moveTo(double x, double y, double z)
 
 }
 
-void UF_uArm::moveTo(double x, double y, double z, int relative, int timeSpend)
+void UF_uArm::moveTo(double x, double y, double z, int relative, double timeSpend)
 {
 
 	double xArray[50];
@@ -1033,11 +1033,11 @@ void UF_uArm::moveTo(double x, double y, double z, int relative, int timeSpend)
 
 	}
 
-	if (timeSpend <0)
-	{	
-		timeSpend = abs(timeSpend);
+	// if (timeSpend <0)
+	// {	
+	// 	timeSpend = abs(timeSpend);
 		
-	}
+	// }
 
 	interpolation(currentX, currentX*relative+x);
 
@@ -1068,7 +1068,7 @@ void UF_uArm::moveTo(double x, double y, double z, int relative, int timeSpend)
 		calAngles(xArray[i],yArray[i],zArray[i]);
 		writeAngle(theta_1, theta_2, theta_3,0);
 
-		delay(timeSpend/50);
+		delay(timeSpend*1000/50);
 
 	}
 
