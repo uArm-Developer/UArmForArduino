@@ -71,7 +71,7 @@ void loop() {
       // (dot) dx = 4, dy = -3, dz = 2 in 5 seconds 
       
       if (readSerial == '3') {
-        uarm.moveTo(4,-3,2,1,5);
+        uarm.moveTo(1,1,1,1,2);
         delay(1000);
        }
        

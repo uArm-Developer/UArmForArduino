@@ -151,7 +151,7 @@ public:
 	void calXYZ();
 
 	void moveTo(double x, double y, double z);
-	void moveTo(double x, double y, double z, int relative, double time);
+	void moveTo(double x, double y, double z, int relative, int time);
 	void moveTo(double x, double y, double z, int relative, double timeSpend, double servo_4_angle);
 
 	void drawCur(double length_1, double length_2,  int angle, double timeSpend);
