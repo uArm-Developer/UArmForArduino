@@ -12,7 +12,6 @@
 #include "UCP.h"
 #include "HardwareSerial.h"
 
-#include <UF_uArm_Metal.h>
 
 
 
@@ -51,6 +50,7 @@ UCPClass::UCPClass()
 {
   firmwareVersionCount = 0;
   firmwareVersionVector = 0;
+  debugMode = false;
   systemReset();
 }
 
@@ -286,13 +286,13 @@ void UCPClass::detach(byte command)
   }
 }
 
-double UCPClass::convertNumToCM(byte LSBb,byte MSBb )
+double UCPClass::convertNumToCM(unsigned short num)
 {
   
-     double dis;
-     LSBb&=~0x80;
-     MSBb&=~0x80;
-     dis=LSBb+(((short)MSBb)<<7);
+     double dis = num;
+     // LSBb&=~0x80;
+     // MSBb&=~0x80;
+     // dis=LSBb+(((short)MSBb)<<7);
      if(dis<=8191)
      {
          dis=dis*100/8191;
@@ -307,9 +307,35 @@ double UCPClass::convertNumToCM(byte LSBb,byte MSBb )
 } 
 
 
-double UCPClass::convertDMSToSec(byte LSBb, byte MSBb){
-    double sec = 0;
-    sec = (LSBb + (MSBb << 7))/10;
-    return sec;
+double UCPClass::convertDMSToSec(unsigned short dms){
+    return dms /10;
 }
 
+void UCPClass::sendSysex(byte command, byte bytec, byte *bytev)
+{
+  byte i;
+  startSysex();
+  UCPStream->write(command);
+  for (i = 0; i < bytec; i++) {
+    sendValueAsTwo7bitBytes(bytev[i]);
+  }
+  endSysex();
+}
+
+void UCPClass::sendString(byte command, const char *string)
+{
+  sendSysex(command, strlen(string), (byte *)string);
+}
+
+
+// send a string as the protocol string type
+void UCPClass::sendString(const char *string)
+{
+  sendString(STRING_DATA, string);
+}
+
+unsigned short UCPClass::getValuesAsTwobitBytes(byte LSBb, byte MSBb){
+  if(LSBb < 0x7F || MSBb < 0x7F){
+      return (LSBb + (MSBb << 7));
+  }
+}

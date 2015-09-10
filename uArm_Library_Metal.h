@@ -1,5 +1,5 @@
 /******************************************************************************
-* File Name          : UF_uArm.h
+* File Name          : uArmLibrary.h
 * Author             : Evan
 * Updated            : Evan
 * Version            : V0.0.1 (BATE)
@@ -16,8 +16,8 @@
 #include <Servo.h>
 #include "linreg.h"
 
-#ifndef UF_uArm_Metal_h
-#define UF_uArm_Metal_h
+#ifndef uArm_Library_Metal_h
+#define uArm_Library_Metal_h
 
 /****************  Macro definitions  ****************/
 #define ARM_A                   148    // upper arm
@@ -98,10 +98,10 @@
 
 
 
-class UF_uArm
+class uArmLibrary
 {
 public:
-	UF_uArm();
+	uArmLibrary();
 	void init();    // initialize the uArm position
     void calibration();  //
 	void recordingMode(unsigned char _sampleDelay = 50);
@@ -274,7 +274,7 @@ private:
 
 };
 
-extern UF_uArm uArmLibrary;
+extern uArmLibrary uArm;
 
 #endif
 

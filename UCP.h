@@ -25,12 +25,16 @@
 
 
 // Extend Firmata SYSEX Command
-#define PRODUCT_INFO_QUERY			0x15 // ask for product information
-#define PRODUCT_INFO_RESPONSE		0x16 // reply with product information
+#define DEBUG_MODE                  0x2F // Enable Debug mode
 #define REPORT_FIRMWARE             0x20 // report name and version of the firmware
-#define ACTION_CONTROL				0x21 // action control
-#define UCP_TEST					0x10 // UCP TEST
+#define ACTION_CONTROL              0x21 // action control
+#define STRING_DATA                 0x22 // String Data
 #define UARM_INIT                   0x23 // UCP TEST
+#define PRODUCT_INFO_QUERY			0x24 // ask for product information
+#define PRODUCT_INFO_RESPONSE		0x25 // reply with product information
+
+#define UCP_TEST					0x10 // UCP TEST
+
 
 #define MAX_DATA_BYTES          64 // max number of data bytes in incoming messages
 
@@ -49,8 +53,11 @@
 // Position
 
 #define UCP_MAJOR_VERSION   		0 // for non-compatible changes
-#define UCP_MINOR_VERSION   		1 // for backwards compatible changes
-#define UCP_BUGFIX_VERSION  		1 // for bugfix releases
+#define UCP_MINOR_VERSION   		2 // for backwards compatible changes
+#define UCP_BUGFIX_VERSION  		3 // for bugfix releases
+
+#define UCP_SWITCH_ON               0x00
+#define UCP_SWITCH_OFF              0x01
 
 
 extern "C" {
@@ -90,10 +97,15 @@ public:
 
     /* utility methods */
     void sendValueAsTwo7bitBytes(short value);
-    double convertNumToCM(byte LSBs, byte MSBb);
-    double convertDMSToSec(byte LSBs, byte MSBb);
+    unsigned short getValuesAsTwobitBytes(byte LSBs, byte MSBb);
+    double convertNumToCM(unsigned short number);
+    double convertDMSToSec(unsigned short dms);
     void startSysex(void);
     void endSysex(void);  
+    void sendString(byte command, const char *string);
+    void sendString(const char *string);
+    void sendSysex(byte command, byte bytec, byte *bytev);
+    boolean debugMode;
 private:
     Stream *UCPStream;
     /* firmware name and version */

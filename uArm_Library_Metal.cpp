@@ -1,5 +1,5 @@
 /******************************************************************************
-* File Name          : UF_uArm.cpp
+* File Name          : uArmLibrary.cpp
 * Author             : Evan 
 * Updated            : Jerry Song 
 * Email              : jerry.song@evol.net
@@ -11,16 +11,16 @@
 * Copyright(C) 2014 UFactory Team. All right reserved.
 *******************************************************************************/
 
-#include "UF_uArm_Metal.h"
+#include "uArm_Library_Metal.h"
 #include <math.h>
 
 
-UF_uArm uArmLibrary;
+uArmLibrary uArm;
 int angleR;
 int angleL;
 int angleBottom;
 
-UF_uArm::UF_uArm()
+uArmLibrary::uArmLibrary()
 {
 	heightLst				  = 0;
 	height					  = 0;
@@ -47,7 +47,7 @@ UF_uArm::UF_uArm()
 	data[5] = 0;  // 0: L  1: R  2: Rotation 3: hand rotation 4:gripper
 }
 
-void UF_uArm::init()
+void uArmLibrary::init()
 {
     // read offset data
  
@@ -77,7 +77,7 @@ void UF_uArm::init()
   
 }
 
-void UF_uArm::recordingMode(unsigned char _sampleDelay)
+void uArmLibrary::recordingMode(unsigned char _sampleDelay)
 {
 	sampleDelay = _sampleDelay;
 
@@ -191,7 +191,7 @@ void UF_uArm::recordingMode(unsigned char _sampleDelay)
 }
 
 
-void UF_uArm::gripperCatch()
+void uArmLibrary::gripperCatch()
 {
   servoHand.attach(SERVO_HAND);
   servoHand.write(HAND_ANGLE_CLOSE);
@@ -200,7 +200,7 @@ void UF_uArm::gripperCatch()
   gripperRst = true;
 }
 
-void UF_uArm::gripperRelease()
+void uArmLibrary::gripperRelease()
 {
 	if(gripperRst)
 	{
@@ -213,7 +213,7 @@ void UF_uArm::gripperRelease()
   }
 }
 
-void UF_uArm::gripperDetach()
+void uArmLibrary::gripperDetach()
 {
 	if(++delay_loop > 300000)        // delay release valve
 	{
@@ -223,34 +223,34 @@ void UF_uArm::gripperDetach()
   }
 }
 
-void UF_uArm::gripperDirectDetach()
+void uArmLibrary::gripperDirectDetach()
 {
 	servoHand.detach();
 	digitalWrite(PUMP_EN, LOW);   // pump disnable
 	digitalWrite(VALVE_EN, LOW); // valve disnable
 }
 
-void UF_uArm::pumpOn()
+void uArmLibrary::pumpOn()
 {
 	digitalWrite(PUMP_EN, HIGH);    // pump enable
 }
 
-void UF_uArm::pumpOff()
+void uArmLibrary::pumpOff()
 {
 	digitalWrite(PUMP_EN, LOW);     // pump disnable
 }
 
-void UF_uArm::valveOn()
+void uArmLibrary::valveOn()
 {
 	digitalWrite(VALVE_EN, HIGH);   // valve enable, decompression
 }
 
-void UF_uArm::valveOff()
+void uArmLibrary::valveOff()
 {
 	digitalWrite(VALVE_EN, LOW);    // valve disnable
 }
 
-void UF_uArm::detachServo(char _servoNum)
+void uArmLibrary::detachServo(char _servoNum)
 {
 	switch(_servoNum)
 	{
@@ -273,7 +273,7 @@ void UF_uArm::detachServo(char _servoNum)
 	}
 }
 
-void UF_uArm::sendData(byte _dataAdd, int _dataIn)
+void uArmLibrary::sendData(byte _dataAdd, int _dataIn)
 {
 	Serial.write(0xFF); Serial.write(0xAA); // send data head
 	Serial.write(_dataAdd);
@@ -281,7 +281,7 @@ void UF_uArm::sendData(byte _dataAdd, int _dataIn)
 	Serial.write(*((char *)(&_dataIn)));
 }
 
-void UF_uArm::alert(int _times, int _runTime, int _stopTime)
+void uArmLibrary::alert(int _times, int _runTime, int _stopTime)
 {
 	for(int _ct=0; _ct < _times; _ct++)
 	{
@@ -292,7 +292,7 @@ void UF_uArm::alert(int _times, int _runTime, int _stopTime)
 	}
 }
 
-void UF_uArm::play(unsigned char buttonPin)
+void uArmLibrary::play(unsigned char buttonPin)
 {
   unsigned char dat[2];
   readExternalEeprom(0x8000, &dat[0],1); 
@@ -395,7 +395,7 @@ void UF_uArm::play(unsigned char buttonPin)
   delay(250);
 }
 
-void UF_uArm::record(unsigned char buttonPin, unsigned char buttonPinC)
+void uArmLibrary::record(unsigned char buttonPin, unsigned char buttonPinC)
 {
   unsigned char dat[2];
   readExternalEeprom(0x0000, &dat[0],1);
@@ -490,7 +490,7 @@ void UF_uArm::record(unsigned char buttonPin, unsigned char buttonPinC)
 
 }
 
-void UF_uArm::writeExternalEeprom(unsigned int address, unsigned char * data_array, int num)
+void uArmLibrary::writeExternalEeprom(unsigned int address, unsigned char * data_array, int num)
 {
   unsigned int i=0,j=0;
 
@@ -537,7 +537,7 @@ void UF_uArm::writeExternalEeprom(unsigned int address, unsigned char * data_arr
   }
 }
 
-void UF_uArm::readExternalEeprom(unsigned int address, unsigned char * data_array, int num)
+void uArmLibrary::readExternalEeprom(unsigned int address, unsigned char * data_array, int num)
 {
   int i=0;
   
@@ -554,7 +554,7 @@ void UF_uArm::readExternalEeprom(unsigned int address, unsigned char * data_arra
   
 }
 
-void UF_uArm::servoBufOutL(unsigned char _lastDt, unsigned char _dt)
+void uArmLibrary::servoBufOutL(unsigned char _lastDt, unsigned char _dt)
 {
 
 	_dt = inputToReal(2, _dt);
@@ -565,7 +565,7 @@ void UF_uArm::servoBufOutL(unsigned char _lastDt, unsigned char _dt)
 	servoL.write(_dt); 
 }
 
-void UF_uArm::servoBufOutR(unsigned char _lastDt, unsigned char _dt)
+void uArmLibrary::servoBufOutR(unsigned char _lastDt, unsigned char _dt)
 {
 	_dt = inputToReal(3, _dt);
 	if(abs(_dt - _lastDt) > BUFFER_OUTPUT)
@@ -574,7 +574,7 @@ void UF_uArm::servoBufOutR(unsigned char _lastDt, unsigned char _dt)
 	servoR.write(_dt);
 }
 
-void UF_uArm::servoBufOutRot(unsigned char _lastDt, unsigned char _dt)
+void uArmLibrary::servoBufOutRot(unsigned char _lastDt, unsigned char _dt)
 {
 	_dt = inputToReal(1, _dt);
 	if(abs(_dt - _lastDt) > BUFFER_OUTPUT)
@@ -582,7 +582,7 @@ void UF_uArm::servoBufOutRot(unsigned char _lastDt, unsigned char _dt)
 	else 
 	servoRot.write(_dt);
 }
-void UF_uArm::servoBufOutHandRot(unsigned char _lastDt, unsigned char _dt)
+void uArmLibrary::servoBufOutHandRot(unsigned char _lastDt, unsigned char _dt)
 {
 	_dt = inputToReal(4, _dt);
 	if(abs(_dt - _lastDt) > BUFFER_OUTPUT)
@@ -595,7 +595,7 @@ void UF_uArm::servoBufOutHandRot(unsigned char _lastDt, unsigned char _dt)
 
 /* The code below is written by jerry song */
 
-void UF_uArm::writeAngle(int servoRotAngle, int servoLAngle, int servoRAngle, int servoHandRotAngle, int trigger)
+void uArmLibrary::writeAngle(int servoRotAngle, int servoLAngle, int servoRAngle, int servoHandRotAngle, int trigger)
 {
 	attachAll();
 
@@ -613,7 +613,7 @@ void UF_uArm::writeAngle(int servoRotAngle, int servoLAngle, int servoRAngle, in
 
 }
 
-void UF_uArm::writeAngle(int servoRotAngle, int servoLAngle, int servoRAngle, int servoHandRotAngle)
+void uArmLibrary::writeAngle(int servoRotAngle, int servoLAngle, int servoRAngle, int servoHandRotAngle)
 {
 	attachAll();
 
@@ -631,7 +631,7 @@ void UF_uArm::writeAngle(int servoRotAngle, int servoLAngle, int servoRAngle, in
 
 }
 
-void UF_uArm::attachAll()
+void uArmLibrary::attachAll()
 {
 	
 
@@ -641,7 +641,7 @@ void UF_uArm::attachAll()
 	servoHandRot.attach(10);
 }
 
-void UF_uArm::detachAll()
+void uArmLibrary::detachAll()
 {
 	
 	servoRot.detach();
@@ -652,7 +652,7 @@ void UF_uArm::detachAll()
 }
 
 
-int UF_uArm::inputToReal(int servoNumber, int inputAngle)
+int uArmLibrary::inputToReal(int servoNumber, int inputAngle)
 {
 
 	int output = inputAngle + servoOffset(servoNumber);
@@ -666,7 +666,7 @@ int UF_uArm::inputToReal(int servoNumber, int inputAngle)
 }
 
 
-double UF_uArm::servoOffset(int servoNumber)
+double uArmLibrary::servoOffset(int servoNumber)
 {
 
 
@@ -688,7 +688,7 @@ double UF_uArm::servoOffset(int servoNumber)
 }
 
 
-void UF_uArm::calibrationServo(int servoNumber)
+void uArmLibrary::calibrationServo(int servoNumber)
 {
 
 	int servoRangeIni = 20 ;
@@ -764,7 +764,7 @@ void UF_uArm::calibrationServo(int servoNumber)
 }
 
 
-void UF_uArm::calibrations(){
+void uArmLibrary::calibrations(){
 	
 	for (int k = 1; k < 5; k++){
 
@@ -779,7 +779,7 @@ void UF_uArm::calibrations(){
 }
 
 
-void UF_uArm::saveDataToRom(double data, int address)
+void uArmLibrary::saveDataToRom(double data, int address)
 {
 	
 	int dataWhole;
@@ -817,7 +817,7 @@ void UF_uArm::saveDataToRom(double data, int address)
 
 }
 
-void UF_uArm::calAngles(double x, double y, double z)
+void uArmLibrary::calAngles(double x, double y, double z)
 {
 	yIn = (-y-l2)/l3;
 	zIn = (z - l1) / l3;
@@ -916,7 +916,7 @@ void UF_uArm::calAngles(double x, double y, double z)
 
 }
 
-void UF_uArm::interpolation(double initialValue, double finalValue)
+void uArmLibrary::interpolation(double initialValue, double finalValue)
 {
 	// by using the formula theta_t = a_0 + a_1 * t + a_2 * t^2 + a_3 * t^3
 	// theta(0) = initialValue; theta(t_f) = finalValue
@@ -942,7 +942,7 @@ void UF_uArm::interpolation(double initialValue, double finalValue)
 	}
 }
 
-void UF_uArm::calXYZ(double theta_1, double theta_2, double theta_3)
+void uArmLibrary::calXYZ(double theta_1, double theta_2, double theta_3)
 {
 	
 	l3_1 = l3 * cos(theta_2 / trans);
@@ -955,7 +955,7 @@ void UF_uArm::calXYZ(double theta_1, double theta_2, double theta_3)
 
 }
 
-void UF_uArm::calXYZ()
+void uArmLibrary::calXYZ()
 {
 	
 	calXYZ(
@@ -968,7 +968,7 @@ void UF_uArm::calXYZ()
 
 
 
-void UF_uArm::moveTo(double x, double y, double z)
+void uArmLibrary::moveTo(double x, double y, double z)
 {
 	attachAll();
 	
@@ -1015,7 +1015,7 @@ void UF_uArm::moveTo(double x, double y, double z)
 
 }
 
-void UF_uArm::moveTo(double x, double y, double z, int relative, double timeSpend)
+void uArmLibrary::moveTo(double x, double y, double z, int relative, double timeSpend)
 {
 
 	double xArray[50];
@@ -1075,7 +1075,7 @@ void UF_uArm::moveTo(double x, double y, double z, int relative, double timeSpen
 }
 
 
-void UF_uArm::moveTo(double x, double y, double z, int relative, double timeSpend, double servo_4_angle)
+void uArmLibrary::moveTo(double x, double y, double z, int relative, double timeSpend, double servo_4_angle)
 {
 
   double xArray[50];
@@ -1134,7 +1134,7 @@ void UF_uArm::moveTo(double x, double y, double z, int relative, double timeSpen
 
 }
 
-void UF_uArm::drawRec(double length_1, double length_2, double timeSpendPerLength)
+void uArmLibrary::drawRec(double length_1, double length_2, double timeSpendPerLength)
 {
 
 	moveTo(length_1,0,0,1,timeSpendPerLength);
@@ -1144,7 +1144,7 @@ void UF_uArm::drawRec(double length_1, double length_2, double timeSpendPerLengt
 	
 }
 
-void UF_uArm::drawCur(double length_1, double length_2, int angle, double timeSpend)
+void uArmLibrary::drawCur(double length_1, double length_2, int angle, double timeSpend)
 {
 	attachAll();
 	double xp;
@@ -1175,7 +1175,7 @@ void UF_uArm::drawCur(double length_1, double length_2, int angle, double timeSp
 
 
 
-double UF_uArm::readToAngle(double inputAnalog, int servoNumber , int trigger)
+double uArmLibrary::readToAngle(double inputAnalog, int servoNumber , int trigger)
 {
 	int address = 60+(servoNumber-1)*6;
 
@@ -1203,7 +1203,7 @@ double UF_uArm::readToAngle(double inputAnalog, int servoNumber , int trigger)
 
 
 
-double UF_uArm::readAngle(int servoNumber)
+double uArmLibrary::readAngle(int servoNumber)
 {
 
 	switch (servoNumber)
@@ -1234,7 +1234,7 @@ double UF_uArm::readAngle(int servoNumber)
 
 }
 
-double UF_uArm::readAngle(int servoNumber, int trigger)
+double uArmLibrary::readAngle(int servoNumber, int trigger)
 {
 
 	switch (servoNumber)
@@ -1265,7 +1265,7 @@ double UF_uArm::readAngle(int servoNumber, int trigger)
 }
 
 
-void UF_uArm::setOffset()
+void uArmLibrary::setOffset()
 {
 	int addressOffset = 90;
 	int setLoop = 1;
@@ -1324,7 +1324,7 @@ void UF_uArm::setOffset()
 }
 
 
-void UF_uArm::saveOffsetValue(double value, int servoNumber)
+void uArmLibrary::saveOffsetValue(double value, int servoNumber)
 {
 	int Byte0;
 	int Byte1;
@@ -1344,7 +1344,7 @@ void UF_uArm::saveOffsetValue(double value, int servoNumber)
 
 
 
-double UF_uArm::calYonly(double theta_1, double theta_2, double theta_3)
+double uArmLibrary::calYonly(double theta_1, double theta_2, double theta_3)
 
 {
 
