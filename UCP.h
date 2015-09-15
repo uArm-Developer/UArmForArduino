@@ -98,7 +98,7 @@ public:
     /* utility methods */
     void sendValueAsTwo7bitBytes(short value);
     unsigned short getValuesAsTwobitBytes(byte LSBs, byte MSBb);
-    double convertNumToCM(unsigned short number);
+    short convertNumToCM(unsigned short number);
     double convertDMSToSec(unsigned short dms);
     void startSysex(void);
     void endSysex(void);  

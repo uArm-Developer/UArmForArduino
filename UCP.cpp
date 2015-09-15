@@ -286,22 +286,17 @@ void UCPClass::detach(byte command)
   }
 }
 
-double UCPClass::convertNumToCM(unsigned short num)
+short UCPClass::convertNumToCM(unsigned short num)
 {
   
-     double dis = num;
-     // LSBb&=~0x80;
-     // MSBb&=~0x80;
-     // dis=LSBb+(((short)MSBb)<<7);
+     short dis = num;
      if(dis<=8191)
      {
-         dis=dis*100/8191;
+         dis=dis;
      }
      else
      {
          dis-=8192;
-         dis=-dis;
-         dis=dis*100/8191;
      }
      return dis;
 } 
