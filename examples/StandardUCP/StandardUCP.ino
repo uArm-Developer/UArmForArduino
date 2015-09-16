@@ -44,7 +44,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
 {
 
 	switch (command) {
-  	case UARM_INIT:
+  	case AC_INIT:
   		uArm.init();
   		break;
     case ACTION_CONTROL:
