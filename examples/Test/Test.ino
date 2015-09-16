@@ -53,8 +53,8 @@ void loop() {
       // x = 13, y = -13, z = 3 
       
       if (readSerial == '1') {
-        // uArm.moveTo(13,-13,3);
-        uArm.moveTo(13.0,13.0,3.0);
+        uArm.moveTo(13,-13,3);
+        // uArm.moveTo(13.0,13.0,3.0);
         delay(1000);
        }
        

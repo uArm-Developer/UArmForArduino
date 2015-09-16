@@ -28,20 +28,20 @@
 #define DEBUG_MODE                  0x2F // Enable Debug mode
 #define REPORT_FIRMWARE             0x20 // report name and version of the firmware
 #define ACTION_CONTROL              0x21 // action control
+#define ACTION_CONTROL              0x21 // action control
 #define STRING_DATA                 0x22 // String Data
-#define UARM_INIT                   0x23 // UCP TEST
 #define PRODUCT_INFO_QUERY			0x24 // ask for product information
 #define PRODUCT_INFO_RESPONSE		0x25 // reply with product information
 
 #define UCP_TEST					0x10 // UCP TEST
 
 
-#define MAX_DATA_BYTES          64 // max number of data bytes in incoming messages
+#define MAX_DATA_BYTES              64 // max number of data bytes in incoming messages
 
 // Extend Coordinate System/POSITION
-#define AC_TIME						0x00 // Delay Time millsecond
+#define AC_INIT                     0x00 // INIT
 // Coordinate System 
-#define AC_COOR_REAL_XYZ			0x01 // XYZ AXIS Realtive XYZ
+#define AC_COOR_RELA_XYZ			0x01 // XYZ AXIS Realtive XYZ
 #define AC_COOR_ABS_XYZ				0x02 // XYZ AXIS Absolute XYZ
 #define AC_POSITION					0x03 // Position Arm Rotation, Arm Stretch, Arm Height, Arm Hand Rotation
 #define AC_COOR_REAL_X				0x04 // XYZ AXIS Absolute X
@@ -53,8 +53,8 @@
 // Position
 
 #define UCP_MAJOR_VERSION   		0 // for non-compatible changes
-#define UCP_MINOR_VERSION   		2 // for backwards compatible changes
-#define UCP_BUGFIX_VERSION  		3 // for bugfix releases
+#define UCP_MINOR_VERSION   		3 // for backwards compatible changes
+#define UCP_BUGFIX_VERSION  		4 // for bugfix releases
 
 #define UCP_SWITCH_ON               0x00
 #define UCP_SWITCH_OFF              0x01

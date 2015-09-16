@@ -297,6 +297,7 @@ short UCPClass::convertNumToCM(unsigned short num)
      else
      {
          dis-=8192;
+         dis=-dis;
      }
      return dis;
 } 
