@@ -70,6 +70,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
             }
             break;
           }
+
           case AC_COOR_ABS_XYZ:
           {
             short x = UCP.convertNumToCM(UCP.getValuesAsTwobitBytes(argv[1],argv[2]));
@@ -91,6 +92,16 @@ void sysexCallback(byte command, byte argc, byte *argv)
             }
             break;
           }
+
+          case AC_PUMP:
+          {
+            if (argv[1] == UCP_SWITCH_ON)
+              uArm.gripperCatch();
+            else
+              uArm.gripperRelease();
+            break;
+          }
+
         }
         break;
     case REPORT_FIRMWARE:
@@ -108,7 +119,6 @@ void sysexCallback(byte command, byte argc, byte *argv)
       break;    
     case UCP_TEST:
         Serial.print("UCP TEST");
-        uArm.moveTo(13,-13,3);
         break;
   	}
 }

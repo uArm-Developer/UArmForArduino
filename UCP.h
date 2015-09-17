@@ -17,6 +17,10 @@
 #include <inttypes.h>
 #include "Arduino.h"  // for digitalRead, digitalWrite, etc
 
+#define UCP_MAJOR_VERSION           0 // for non-compatible changes
+#define UCP_MINOR_VERSION           4 // for backwards compatible changes
+#define UCP_BUGFIX_VERSION          0 // for bugfix releases
+
 #define REPORT_VERSION          0xF9 // report protocol version
 #define SYSTEM_RESET            0xFF // reset from MIDI
 //
@@ -50,11 +54,11 @@
 #define AC_COOR_ABS_X				0x07 // XYZ AXIS Realtive X
 #define AC_COOR_ABS_Y				0x08 // XYZ AXIS Realtive Y
 #define AC_COOR_ABS_Z				0x09 // XYZ AXIS Realtive Z
+// Pump control
+#define AC_PUMP                     0x10 // Control PUMP ON /OFF
 // Position
 
-#define UCP_MAJOR_VERSION   		0 // for non-compatible changes
-#define UCP_MINOR_VERSION   		3 // for backwards compatible changes
-#define UCP_BUGFIX_VERSION  		4 // for bugfix releases
+
 
 #define UCP_SWITCH_ON               0x00
 #define UCP_SWITCH_OFF              0x01
