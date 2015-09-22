@@ -2,19 +2,15 @@
 * File Name          : UCP.cpp
 * Author             : Alex
 * Updated            : Alex
-* Version            : V0.1
+* Version            : V0.5
 * Created Date       : 24 Aug, 2015
 * Description        : uArm Communication Protocol
 * License            : GNU
 * Copyright(C) 2015 UFactory Team. All right reserved.
 *******************************************************************************/
 
-#include "UCP.h"
+#include "ucp.h"
 #include "HardwareSerial.h"
-
-
-
-
 
 extern "C" {
 #include <string.h>
@@ -25,6 +21,8 @@ extern "C" {
 //******************************************************************************
 //* Support Functions
 //******************************************************************************
+
+UCPClass ucp;
 
 void UCPClass::sendValueAsTwo7bitBytes(short value)
 {
@@ -157,10 +155,6 @@ void UCPClass::processSysexMessage(void)
 // output the protocol version message to the serial port
 void UCPClass::printVersion(void)
 {
-  // Serial.print(REPORT_VERSION);
-  // Serial.write(REPORT_VERSION);
-  // Serial.write((byte)UCP_MAJOR_VERSION);
-  // Serial.write((byte)UCP_MINOR_VERSION);
   UCPStream->write(REPORT_VERSION);
   UCPStream->write((byte)UCP_MAJOR_VERSION);
   UCPStream->write((byte)UCP_MINOR_VERSION);
@@ -192,13 +186,6 @@ void UCPClass::processInput(void)
       sysexBytesRead++;
     }
   } 
-  // else if ( (waitForData > 0) && (inputData < 128) ) {
-  //   waitForData--;
-  //   storedInputData[waitForData] = inputData;
-  //   if ( (waitForData == 0) && executeMultiByteCommand ) { // got the whole message
-  //     executeMultiByteCommand = 0;
-  //   }
-  // } 
   else {
     // remove channel info from command byte if less than 0xF0
     if (inputData < 0xF0) {
@@ -217,7 +204,7 @@ void UCPClass::processInput(void)
         systemReset();
         break;
       case REPORT_VERSION:
-        UCP.printVersion();
+        ucp.printVersion();
         break;
     }
   }
@@ -235,26 +222,9 @@ void UCPClass::systemReset(void)
   parsingSysex = false;
   sysexBytesRead = 0;
 
-  // if (currentSystemResetCallback)
-  //   (*currentSystemResetCallback)();
 }
 
-UCPClass UCP;
 
-
-// Internal Actions/////////////////////////////////////////////////////////////
-
-// generic callbacks
-// void FirmataClass::attach(byte command, callbackFunction newFunction)
-// {
-//   switch (command) {
-//     case ANALOG_MESSAGE: currentAnalogCallback = newFunction; break;
-//     case DIGITAL_MESSAGE: currentDigitalCallback = newFunction; break;
-//     case REPORT_ANALOG: currentReportAnalogCallback = newFunction; break;
-//     case REPORT_DIGITAL: currentReportDigitalCallback = newFunction; break;
-//     case SET_PIN_MODE: currentPinModeCallback = newFunction; break;
-//   }
-// }
 
 void UCPClass::attach(byte command, systemResetCallbackFunction newFunction)
 {
@@ -262,13 +232,6 @@ void UCPClass::attach(byte command, systemResetCallbackFunction newFunction)
     case SYSTEM_RESET: currentSystemResetCallback = newFunction; break;
   }
 }
-
-// void FirmataClass::attach(byte command, stringCallbackFunction newFunction)
-// {
-//   switch (command) {
-//     case STRING_DATA: currentStringCallback = newFunction; break;
-//   }
-// }
 
 void UCPClass::attach(byte command, sysexCallbackFunction newFunction)
 {
@@ -278,7 +241,6 @@ void UCPClass::attach(byte command, sysexCallbackFunction newFunction)
 void UCPClass::detach(byte command)
 {
   switch (command) {
-    // case SYSTEM_RESET: currentSystemResetCallback = NULL; break;
     // case STRING_DATA: currentStringCallback = NULL; break;
     case START_SYSEX: currentSysexCallback = NULL; break;
     default:

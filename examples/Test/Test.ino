@@ -24,7 +24,9 @@
 
 #include <EEPROM.h>
 #include <Wire.h>
-#include "uArm_Library_Metal.h"
+#include "uArm_library.h"
+#include "uArm_calibration.h"
+#include "uArm_action_control.h"
 #include <Servo.h>
 
 // define a uArm 
@@ -35,7 +37,7 @@ void setup() {
   
       Wire.begin();        // join i2c bus (address optional for master)
       Serial.begin(9600);  // start serial port at 9600 bps
-      uArm.init();
+      // uArm.init();
       
 }
 
@@ -53,7 +55,7 @@ void loop() {
       // x = 13, y = -13, z = 3 
       
       if (readSerial == '1') {
-        uArm.moveTo(13,-13,3);
+        actionControl.moveTo(13,-13,3);
         // uArm.moveTo(13.0,13.0,3.0);
         delay(1000);
        }
@@ -63,7 +65,7 @@ void loop() {
       // x = -13, y = -13, z = 3 
       
       if (readSerial == '2') {
-        uArm.moveTo(-13,-13,3);
+        actionControl.moveTo(-13,-13,3);
         delay(1000);
        }
 
@@ -72,7 +74,7 @@ void loop() {
       // (dot) dx = 4, dy = -3, dz = 2 in 5 seconds 
       
       if (readSerial == '3') {
-        uArm.moveTo(1,1,1,RELATIVE,2);
+        actionControl.moveTo(1,1,1,RELATIVE,2);
         delay(1000);
        }
        
@@ -81,7 +83,7 @@ void loop() {
       // (dot) dx = -4, dy = 3, dz = -2 in 5 seconds 
       
       if (readSerial == '4') {
-        uArm.moveTo(-4,3,-2,RELATIVE,5);
+        actionControl.moveTo(-4,3,-2,RELATIVE,5);
         delay(1000);
        }
        
@@ -90,7 +92,7 @@ void loop() {
       // width in 2 seconds for one arm ( 8s totally) 
       
       if (readSerial == '5') {
-        uArm.drawRec(10,5,2);
+        actionControl.drawRec(10,5,2);
         delay(1000);
        }
 
@@ -99,7 +101,7 @@ void loop() {
       // width (circle) for full 360 degree in 2 seconds 
       
       if (readSerial == '6') {
-        uArm.drawCur(6,6,360,2);
+        actionControl.drawCur(6,6,360,2);
         delay(1000);
        }
 
@@ -107,21 +109,21 @@ void loop() {
       // function below is atach all servos
       
       if (readSerial == 'a') {
-        uArm.attachAll();
+        uarm.attachAll();
       }
 
       //----------------------------------  function 8  ------------------------------------
       // function below is detach all servos
            
       if (readSerial == 'd') {
-        uArm.detachAll();
+        uarm.detachAll();
       }
       
       //----------------------------------  function 9  ------------------------------------
       // function below is for calibrate uArm
           
       if (readSerial == 'c') {
-        uArm.calibrations();
+        calib.calibrations();
       }
       
       //----------------------------------  function 10  ------------------------------------
@@ -129,11 +131,11 @@ void loop() {
          
       if (readSerial == 'g') {
         Serial.print("The current location is ");
-        Serial.print(uArm.getCalX());
+        Serial.print(actionControl.getCalX());
         Serial.print(" , ");
-        Serial.print(uArm.getCalY());
+        Serial.print(actionControl.getCalY());
         Serial.print(" , ");
-        Serial.print(uArm.getCalZ());
+        Serial.print(actionControl.getCalZ());
         Serial.println();
         delay(1000);
       }
@@ -142,11 +144,11 @@ void loop() {
       // function below is for record a 20 seconds trajactory for uArm
       // must put recordingMode in a loop
                  
-      if (readSerial == 'r') {
-        while(1){
-          uArm.recordingMode(10);
-        }
-      }
+      // if (readSerial == 'r') {
+      //   while(1){
+      //     uArm.recordingMode(10);
+      //   }
+      // }
       
   } // close read available
 }

@@ -140,7 +140,7 @@ private:
     // void strobeBlinkPin(int count, int onInterval, int offInterval);
 };
 
-extern UCPClass UCP;
+extern UCPClass ucp;
 
 /*==============================================================================
  * MACROS
