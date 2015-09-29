@@ -139,17 +139,6 @@ void loop() {
         Serial.println();
         delay(1000);
       }
-
-      if (readSerial == 'k') {
-        Serial.print("SERVO_ROT_NUM offset:");
-        Serial.println(uarm.readServoOffset(SERVO_ROT_NUM));
-        Serial.print("SERVO_LEFT_NUM offset:");
-        Serial.println(uarm.readServoOffset(SERVO_LEFT_NUM));
-        Serial.print("SERVO_RIGHT_NUM offset:");
-        Serial.println(uarm.readServoOffset(SERVO_RIGHT_NUM));
-        Serial.print("SERVO_HAND_ROT_NUM offset:");
-        Serial.println(uarm.readServoOffset(SERVO_HAND_ROT_NUM));                        
-      }
       
       //----------------------------------  function 11  ------------------------------------
       // function below is for record a 20 seconds trajactory for uArm

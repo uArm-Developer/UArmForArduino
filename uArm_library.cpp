@@ -37,15 +37,16 @@ void uArmClass::alert(byte times, byte runTime, byte stopTime)
 
 /* The code below is written by jerry song */
 
+
 void uArmClass::writeAngle(byte servo_rot_angle, byte servo_left_angle, byte servo_right_angle, byte servo_hand_rot_angle, byte trigger)
 {
   attachAll();
 
 
-  servoRot.write(round(servo_rot_angle));
-  servoL.write(round(servo_left_angle));
-  servoR.write(round(servo_right_angle));
-  servoHandRot.write((round(servo_hand_rot_angle)));
+  g_servo_rot.write(round(servo_rot_angle));
+  g_servo_left.write(round(servo_left_angle));
+  g_servo_right.write(round(servo_right_angle));
+  g_servo_hand_rot.write((round(servo_hand_rot_angle)));
 
 
 }
@@ -54,10 +55,10 @@ void uArmClass::writeAngle(byte servo_rot_angle, byte servo_left_angle, byte ser
 {
   attachAll();
 
-  servoRot.write(inputToReal(SERVO_ROT_NUM,round(servo_rot_angle)));
-  servoL.write(inputToReal(SERVO_LEFT_NUM,round(servo_left_angle)));
-  servoR.write(inputToReal(SERVO_RIGHT_NUM,round(servo_right_angle)));
-  servoHandRot.write(inputToReal(SERVO_HAND_ROT_NUM,round(servo_hand_rot_angle)));
+  g_servo_rot.write(inputToReal(SERVO_ROT_NUM,round(servo_rot_angle)));
+  g_servo_left.write(inputToReal(SERVO_LEFT_NUM,round(servo_left_angle)));
+  g_servo_right.write(inputToReal(SERVO_RIGHT_NUM,round(servo_right_angle)));
+  g_servo_hand_rot.write(inputToReal(SERVO_HAND_ROT_NUM,round(servo_hand_rot_angle)));
 
 
 }
@@ -66,19 +67,19 @@ void uArmClass::attachAll()
 {
   
 
-  servoRot.attach(11);
-  servoL.attach(13);
-  servoR.attach(12);
-  servoHandRot.attach(10);
+  g_servo_rot.attach(11);
+  g_servo_left.attach(13);
+  g_servo_right.attach(12);
+  g_servo_hand_rot.attach(10);
 }
 
 void uArmClass::detachAll()
 {
   
-  servoRot.detach();
-  servoL.detach();
-  servoR.detach();
-  servoHandRot.detach();
+  g_servo_rot.detach();
+  g_servo_left.detach();
+  g_servo_right.detach();
+  g_servo_hand_rot.detach();
 
 }
 

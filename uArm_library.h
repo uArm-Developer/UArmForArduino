@@ -15,8 +15,8 @@
 #include <Wire.h>
 #include <Servo.h>
 
-#ifndef uArm_Library_h
-#define uArm_Library_h
+#ifndef uArm_library_h
+#define uArm_library_h
 
 #define BUZZER                  				3
 #define CALIBRATION_FLAG						0xEE
@@ -43,6 +43,7 @@ public:
 	double readAngle(byte servo_num);
 	double readToAngle(double input_angle, byte servo_num, byte trigger);
 	void writeAngle(byte servo_rot_angle, byte servo_left_angle, byte servo_right_angle, byte servo_hand_rot_angle, byte trigger);
+	// void writeAngle(byte servo_rot_angle, byte servo_left_angle, byte servo_right_angle);
 	double readAngle(byte servo_num, byte trigger);
 
 	const byte kAddrOffset      		= 90;
@@ -55,11 +56,11 @@ private:
 	/*****************  Define variables  *****************/
     unsigned int addr;
 
-	Servo servoRot;
-	Servo servoL;
-	Servo servoR;
-	Servo servoHandRot;
-	Servo servoHand;
+	Servo g_servo_rot;
+	Servo g_servo_left;
+	Servo g_servo_right;
+	Servo g_servo_hand_rot;
+	Servo g_servo_hand;
 	
 	double g_servo_offset;
 

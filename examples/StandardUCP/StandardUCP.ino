@@ -88,6 +88,19 @@ void sysexCallback(byte command, byte argc, byte *argv)
             break;
           }
 
+          case AC_ANGLE_WITHOUT_OFFSET:
+          {
+            short servo_rot = constrain(ucp.getValuesAsTwobitBytes(argv[1],argv[2]),0,180);
+            short servo_left = constrain(ucp.getValuesAsTwobitBytes(argv[3],argv[4]),0,180);
+            short servo_right = constrain(ucp.getValuesAsTwobitBytes(argv[5],argv[6]),0,180);
+            Serial.println("");
+            Serial.println(servo_rot);
+            Serial.println(servo_left);
+            Serial.println(servo_right);
+            uarm.writeAngle(servo_rot,servo_left,servo_right,servo_rot);
+
+          }
+
           case AC_PUMP:
           {
             if (argv[1] == UCP_SWITCH_ON)

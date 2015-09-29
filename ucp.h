@@ -34,6 +34,7 @@
 #define ACTION_CONTROL              0x21 // action control
 #define ACTION_CONTROL              0x21 // action control
 #define STRING_DATA                 0x22 // String Data
+
 #define PRODUCT_INFO_QUERY			0x24 // ask for product information
 #define PRODUCT_INFO_RESPONSE		0x25 // reply with product information
 
@@ -54,6 +55,7 @@
 #define AC_COOR_ABS_X				0x07 // XYZ AXIS Realtive X
 #define AC_COOR_ABS_Y				0x08 // XYZ AXIS Realtive Y
 #define AC_COOR_ABS_Z				0x09 // XYZ AXIS Realtive Z
+#define AC_ANGLE_WITHOUT_OFFSET     0x11 // Angle without offset
 // Pump control
 #define AC_PUMP                     0x10 // Control PUMP ON /OFF
 // Position
