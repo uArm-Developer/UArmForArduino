@@ -11,12 +11,12 @@
 
 #include <EEPROM.h>
 #include <Wire.h>
-#include <UF_uArm_Metal_new.h>
+#include <uArm_library.h>
+#include <uArm_action_control.h>
 #include <Servo.h>
 
 // headers need to be loaded first
 
-UF_uArm uarm;  
 
 int valuel;
 int buttonState;
@@ -36,7 +36,7 @@ void setup() {
       
       Wire.begin();        // join i2c bus (address optional for master)
       Serial.begin(9600);  // start serial port at 9600 bps
-      uarm.init();
+//      uarm.init();
       
 }
 
@@ -53,7 +53,7 @@ void loop(){
     // first input a to the console to make sure uArm is located above the center of iphone box 
       if(readSerial == 'a')
     {
-       uarm.moveTo(centerOfBox_x, centerOfBox_y, centerOfBox_z_case);
+       actionControl.moveTo(centerOfBox_x, centerOfBox_y, centerOfBox_z_case);
     }
 
     // then you can input b to execute main functions
@@ -95,7 +95,7 @@ void loop(){
         // destination position x = -10, y = -11, z = 18;
         // rotation angle = 45  means the object need to be rotate 45 degree due to the rotation of base servo  
 
-      uarm.moveTo(centerOfBox_x, centerOfBox_y, centerOfBox_z_case);     // finally, move back to initial position
+      actionControl.moveTo(centerOfBox_x, centerOfBox_y, centerOfBox_z_case);     // finally, move back to initial position
       digitalWrite(6,LOW);      // double check to disable the pump
       digitalWrite(5,LOW);
    }
@@ -111,13 +111,13 @@ void mainMove(double iniX, double iniY, double iniZ, double desX, double desY, d
   // desX, desY, desZ are the desitination of uArm
   // rotDeg is the rotation degree of end-effector to rotate the object
 {
-  uarm.moveTo(iniX,iniY,iniZ);          // move the initial position
+  actionControl.moveTo(iniX,iniY,iniZ);          // move the initial position
   absorbFcn(1,0, iniX, iniY , iniZ);    // move end-effector downwards until stopper hit something, 1 means begin to absorb 
-  uarm.moveTo(0,0,10,1,6);              // move upwards for 10 cm in 6 seconds - slow upwards (relative = 1, means only move in the z axis)
-  uarm.moveTo(desX,desY,desZ,0,2);      // move the destination position
+  actionControl.moveTo(0,0,10,1,6);              // move upwards for 10 cm in 6 seconds - slow upwards (relative = 1, means only move in the z axis)
+  actionControl.moveTo(desX,desY,desZ,0,2);      // move the destination position
   absorbFcn(2,rotDeg,desX,desY,desZ);   // move end-effector downwards until stopper hit something, 0 means disable the pump
-  uarm.moveTo(0,0,5,1,4,rotDeg);        // move the upwards in 4 seconds - slow upwards
-  uarm.moveTo(desX,desY,desZ);          // move to destination
+  actionControl.moveTo(0,0,5,1,4,rotDeg);        // move the upwards in 4 seconds - slow upwards
+  actionControl.moveTo(desX,desY,desZ);          // move to destination
 }
 
 
@@ -130,7 +130,7 @@ void absorbFcn(int trigger, int rotDeg, double currentX, double currentY, double
       buttonState = digitalRead(stopperPin);      // if stopper hit anything, the reading would be LOW
       if(buttonState == HIGH)                     // while reading is HIGH, keep move downwards for 2 cm
       {
-        uarm.moveTo(currentX,currentY,currentZ,0,0.5,rotDeg);
+        actionControl.moveTo(currentX,currentY,currentZ,0,0.5,rotDeg);
         currentZ = currentZ - 2;    // every time movedowards for 0.2 cm
         delay(50);
       }
