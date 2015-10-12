@@ -73,7 +73,7 @@ public:
 	const byte kServoRightReadPin    	= 1;
 	const byte kServoHandRotReadPin     = 3;
 
-// Action control
+// Action control start
 
 	    void moveTo(double x, double y,double z);
 	    void moveTo(double x, double y,double z,int relative, double time);
@@ -132,7 +132,7 @@ protected:
 
 		
 		boolean g_gripper_reset;
-
+// action control end
 private:
 	/*****************  Define variables  *****************/
     unsigned int addr;
