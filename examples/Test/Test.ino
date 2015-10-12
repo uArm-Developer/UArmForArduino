@@ -26,7 +26,6 @@
 #include <Wire.h>
 #include "uArm_library.h"
 #include "uArm_calibration.h"
-#include "uArm_action_control.h"
 #include <Servo.h>
 
 // define a uArm 
@@ -55,7 +54,7 @@ void loop() {
       // x = 13, y = -13, z = 3 
       
       if (readSerial == '1') {
-        actionControl.moveTo(13,-13,3);
+        uarm.moveTo(13,-13,3);
         // uArm.moveTo(13.0,13.0,3.0);
         delay(1000);
        }
@@ -65,7 +64,7 @@ void loop() {
       // x = -13, y = -13, z = 3 
       
       if (readSerial == '2') {
-        actionControl.moveTo(-13,-13,3);
+        uarm.moveTo(-13,-13,3);
         delay(1000);
        }
 
@@ -74,7 +73,7 @@ void loop() {
       // (dot) dx = 4, dy = -3, dz = 2 in 5 seconds 
       
       if (readSerial == '3') {
-        actionControl.moveTo(1,1,1,RELATIVE,2);
+        uarm.moveTo(1,1,1,RELATIVE,2);
         delay(1000);
        }
        
@@ -83,7 +82,7 @@ void loop() {
       // (dot) dx = -4, dy = 3, dz = -2 in 5 seconds 
       
       if (readSerial == '4') {
-        actionControl.moveTo(-4,3,-2,RELATIVE,5);
+        uarm.moveTo(-4,3,-2,RELATIVE,5);
         delay(1000);
        }
        
@@ -92,7 +91,7 @@ void loop() {
       // width in 2 seconds for one arm ( 8s totally) 
       
       if (readSerial == '5') {
-        actionControl.drawRec(10,5,2);
+        uarm.drawRec(10,5,2);
         delay(1000);
        }
 
@@ -101,7 +100,7 @@ void loop() {
       // width (circle) for full 360 degree in 2 seconds 
       
       if (readSerial == '6') {
-        actionControl.drawCur(6,6,360,2);
+        uarm.drawCur(6,6,360,2);
         delay(1000);
        }
 
@@ -131,11 +130,11 @@ void loop() {
          
       if (readSerial == 'g') {
         Serial.print("The current location is ");
-        Serial.print(actionControl.getCalX());
+        Serial.print(uarm.getCalX());
         Serial.print(" , ");
-        Serial.print(actionControl.getCalY());
+        Serial.print(uarm.getCalY());
         Serial.print(" , ");
-        Serial.print(actionControl.getCalZ());
+        Serial.print(uarm.getCalZ());
         Serial.println();
         delay(1000);
       }

@@ -8,17 +8,38 @@
 * Copyright(C) 2015 uArm Team. All right reserved.
 *******************************************************************************************/
 
-#include <Servo.h>
-#include <Wire.h>
+/*
+ * Table of Content
+
+ * Function 1 - 4 :    move to a certain point (f)
+ * Fucntion 5 - 6 :    move a Rectangle or a curve (function 5-6)
+ * Function 7 - 8 :    attach or detach all servos (function 7-8)
+ * Function 9     :    uArm calibration
+ * Function 10    :    read current coordinate x,y,z
+ * Function 11    :    recording mode 
+
+*/
+
+// headers should must include these four headers
+
 #include <EEPROM.h>
+#include <Wire.h>
+#include "uArm_library.h"
 #include "uArm_calibration.h"
-#include "uArm_Library.h"
+#include <Servo.h>
+
+// define a uArm 
+//uArmLibrary uArm;  
+int value;        // value is the data recevied 
 
 void setup() {
   
       Wire.begin();        // join i2c bus (address optional for master)
-      Serial.begin(9600);  // start serial port at 9600 bps      
+      Serial.begin(9600);  // start serial port at 9600 bps
+      // uArm.init();
+      
 }
+
 
 void loop() {
 
@@ -28,13 +49,11 @@ void loop() {
       char readSerial = Serial.read();
       Serial.println(readSerial);
       
+         
       if (readSerial == 'c') {
         calib.calibrations();
       }
-      if (readSerial == 'r') {
-        Serial.println(uarm.readServoOffset(SERVO_ROT_NUM));
-        Serial.println(uarm.readServoOffset(SERVO_LEFT_NUM));
-        Serial.println(uarm.readServoOffset(SERVO_RIGHT_NUM));
-      }
+      
+  
   } // close read available
 }

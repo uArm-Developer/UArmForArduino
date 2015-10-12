@@ -15,8 +15,9 @@
 
 // Firmata-UCP
 #include <EEPROM.h>
+#include "uarm_library.h"
 #include "ucp.h"
-#include "uarm_action_control.h"
+
 
 
 void setup()
@@ -51,7 +52,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
             short y = ucp.convertNumToCM(ucp.getValuesAsTwobitBytes(argv[3],argv[4]));
             short z = ucp.convertNumToCM(ucp.getValuesAsTwobitBytes(argv[5],argv[6]));
             short t = ucp.convertDMSToSec(ucp.getValuesAsTwobitBytes(argv[7],argv[8]));
-            actionControl.moveTo(x,y,z,RELATIVE,t);
+            uarm.moveTo(x,y,z,RELATIVE,t);
            if(ucp.debugMode)
             {
               // Serial.print("X is: ");
@@ -72,7 +73,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
             short y = ucp.convertNumToCM(ucp.getValuesAsTwobitBytes(argv[3],argv[4]));
             short z = ucp.convertNumToCM(ucp.getValuesAsTwobitBytes(argv[5],argv[6]));
             short t = ucp.convertDMSToSec(ucp.getValuesAsTwobitBytes(argv[7],argv[8]));
-            actionControl.moveTo(x,y,z,ABSOLUTE,t); //   
+            uarm.moveTo(x,y,z,ABSOLUTE,t); //   
             if(ucp.debugMode)
             {
                // ucp.sendString("Debug Mode Test");
@@ -104,9 +105,9 @@ void sysexCallback(byte command, byte argc, byte *argv)
           case AC_PUMP:
           {
             if (argv[1] == UCP_SWITCH_ON)
-              actionControl.gripperCatch();
+              uarm.gripperCatch();
             else
-              actionControl.gripperRelease();
+              uarm.gripperRelease();
             break;
           }
         }
