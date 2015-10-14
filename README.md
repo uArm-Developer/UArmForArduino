@@ -1,4 +1,4 @@
-﻿# uArm Library UCP
+﻿# uArm Library
 
 **Compatible**
 
@@ -7,7 +7,7 @@
  - uArm Metal
 ![uArm Metal][2]
 
-Specification Please read Documentation Center UCP/API
+Specification Please read Documentation Center /API
 [Documentation Center][3]
 
 
