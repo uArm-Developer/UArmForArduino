@@ -31,7 +31,7 @@ void CalibrationClass::calibrationServo(byte servo_num)
 	double l_angle_analog;
 	double arr_real[16];
 	double arr_input[16];
-	int l_address = uarm.kAddrOffset + (servo_num - 1) * 6;
+	int l_address = uarm.kAddrServo + (servo_num - 1) * 6;
 	Serial.print("l_address: ");
 	Serial.println(l_address);	
 	Serial.print("servo ");
@@ -93,7 +93,10 @@ void CalibrationClass::calibrationServo(byte servo_num)
 	arr_real[0] = kServoRangeIni;
 
 	LinearRegression lr(arr_input, arr_real, 16);
-
+	Serial.print("lr.getA():");
+	Serial.println(lr.getA());
+	Serial.print("lr.getB():");
+	Serial.println(lr.getB());
 	uarm.saveDataToRom(lr.getA(),l_address);
 	uarm.saveDataToRom(lr.getB(),l_address+3);
 
