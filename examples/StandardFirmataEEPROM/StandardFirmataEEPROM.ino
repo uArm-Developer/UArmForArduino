@@ -25,7 +25,7 @@
 
 #include <Servo.h>
 #include <Wire.h>
-#include <Firmata.h>
+#include <FirmataEEPROM.h>
 #include <EEPROM.h>
 
 
