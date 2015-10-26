@@ -25,7 +25,6 @@
 #include <EEPROM.h>
 #include <Wire.h>
 #include "uArm_library.h"
-#include "uArm_calibration.h"
 #include <Servo.h>
 
 // define a uArm 
@@ -36,8 +35,6 @@ void setup() {
   
       Wire.begin();        // join i2c bus (address optional for master)
       Serial.begin(9600);  // start serial port at 9600 bps
-      // uArm.init();
-      
 }
 
 
@@ -55,7 +52,6 @@ void loop() {
       
       if (readSerial == '1') {
         uarm.moveTo(13,-13,3);
-        // uArm.moveTo(13.0,13.0,3.0);
         delay(1000);
        }
        
@@ -121,9 +117,9 @@ void loop() {
       //----------------------------------  function 9  ------------------------------------
       // function below is for calibrate uArm
           
-      if (readSerial == 'c') {
-        calib.calibrations();
-      }
+      // if (readSerial == 'c') {
+      //   calib.calibrations();
+      // }
       
       //----------------------------------  function 10  ------------------------------------
       // function below is for print current x,y,z absolute location 
