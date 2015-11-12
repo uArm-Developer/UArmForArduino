@@ -17,6 +17,7 @@ uArmClass uarm;
 int angleR;
 int angleL;
 int angleBottom;
+int l_movementTrigger = 0;
 
 uArmClass::uArmClass()
 {
@@ -40,25 +41,31 @@ void uArmClass::alert(byte times, byte runTime, byte stopTime)
 
 void uArmClass::writeAngle(byte servo_rot_angle, byte servo_left_angle, byte servo_right_angle, byte servo_hand_rot_angle, byte trigger)
 {
-  attachAll();
-
+  if(l_movementTrigger==0)
+  {
+    attachAll();
+  }
 
   g_servo_rot.write(round(servo_rot_angle));
   g_servo_left.write(round(servo_left_angle));
   g_servo_right.write(round(servo_right_angle));
   g_servo_hand_rot.write((round(servo_hand_rot_angle)));
-
+  l_movementTrigger = 0;
 
 }
 
 void uArmClass::writeAngle(byte servo_rot_angle, byte servo_left_angle, byte servo_right_angle, byte servo_hand_rot_angle)
 {
-  attachAll();
+  if(l_movementTrigger==0)
+  {
+    attachAll();
+  }
 
   g_servo_rot.write(inputToReal(SERVO_ROT_NUM,round(servo_rot_angle)));
   g_servo_left.write(inputToReal(SERVO_LEFT_NUM,round(servo_left_angle)));
   g_servo_right.write(inputToReal(SERVO_RIGHT_NUM,round(servo_right_angle)));
   g_servo_hand_rot.write(inputToReal(SERVO_HAND_ROT_NUM,round(servo_hand_rot_angle)));
+  l_movementTrigger = 0;
 
 
 }
@@ -445,6 +452,7 @@ void uArmClass::moveTo(double x, double y, double z)
   {
     calAngles(x_arr[i],y_arr[i],z_arr[i]);
 
+    l_movementTrigger = 1;
     uarm.writeAngle(g_theta_1, g_theta_2, g_theta_3,0);
 
     delay(40);
@@ -504,6 +512,7 @@ void uArmClass::moveTo(double x, double y, double z, int relative, double time_s
   for (byte i = 0; i < 50; i++)
   {
     calAngles(x_arr[i],y_arr[i],z_arr[i]);
+    l_movementTrigger = 1;
     uarm.writeAngle(g_theta_1, g_theta_2, g_theta_3,0);
 
     delay(time_spend*1000/50);
@@ -565,6 +574,7 @@ void uArmClass::moveTo(double x, double y, double z, int relative, double time_s
   for (byte i = 0; i < 50; i++)
   {
     calAngles(x_arr[i],y_arr[i],z_arr[i]);
+    l_movementTrigger = 1;
     uarm.writeAngle(g_theta_1, g_theta_2, g_theta_3, servo_4_angle);
 
     delay(time_spend*1000/50);
@@ -602,7 +612,7 @@ void uArmClass::drawCur(double length_1, double length_2, int angle, double time
     l_yp = length_2 * sin(g_interpol_val_arr[i]);
 
     calAngles( l_xp + g_current_x - length_1 , l_yp+ g_current_y , g_current_z);
-
+    l_movementTrigger = 1;
     uarm.writeAngle(g_theta_1, g_theta_2, g_theta_3,0);
 
     delay(time_spend*1000/50);
