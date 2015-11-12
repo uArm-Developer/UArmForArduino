@@ -45,6 +45,9 @@
 #define RELATIVE 1
 #define ABSOLUTE 0
 
+#define TopOffset -1.5
+#define BottomOffset 1.5
+
 
 class uArmClass 
 {

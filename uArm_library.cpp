@@ -245,13 +245,23 @@ double uArmClass::readAngle(byte servo_num, byte trigger)
 
 void uArmClass::calAngles(double x, double y, double z)
 {
+
+   if (z > (MATH_L1 + MATH_L3 + TopOffset))
+    {
+        z = MATH_L1 + MATH_L3 + TopOffset;
+    }
+
+    if (z < (MATH_L1 - MATH_L4 + BottomOffset))
+    {
+        z = MATH_L1 - MATH_L4 + BottomOffset;
+    }
+
+
   g_y_in = (-y-MATH_L2)/MATH_L3;
   g_z_in = (z - MATH_L1) / MATH_L3;
   g_right_all = (1 - g_y_in*g_y_in - g_z_in*g_z_in - MATH_L43*MATH_L43) / (2 * MATH_L43);
   g_sqrt_z_y = sqrt(g_z_in*g_z_in + g_y_in*g_y_in);
   
-  if(z > (MATH_L1+MATH_L3))
-    {z = 25;}
 
   if (x == 0)
   {
@@ -267,8 +277,13 @@ void uArmClass::calAngles(double x, double y, double z)
     g_phi = atan(-g_y_in / g_z_in)*MATH_TRANS;
     }
 
+    if (g_phi > 0) g_phi = g_phi - 180;
+
     g_theta_3 = asin(g_right_all / g_sqrt_z_y)*MATH_TRANS - g_phi;
-    g_theta_3 = 180 - abs(g_theta_3);
+    if(g_theta_3<0)
+      {
+        g_theta_3 = 0;
+      }
 
     // Calculate value of theta 2
     
@@ -300,6 +315,7 @@ void uArmClass::calAngles(double x, double y, double z)
       
     else{ g_phi = atan(-g_x_in / g_z_in)*MATH_TRANS; }
       
+    if (g_phi > 0) {g_phi = g_phi - 180;}  
     
     g_sqrt_z_x = sqrt(g_z_in*g_z_in + g_x_in*g_x_in);
 
@@ -307,8 +323,8 @@ void uArmClass::calAngles(double x, double y, double z)
     g_theta_3 = asin(g_right_all_2 / g_sqrt_z_x)*MATH_TRANS;
     g_theta_3 = g_theta_3 - g_phi;
 
-    if (abs(g_theta_3) > 90) {
-      g_theta_3 = 180 - abs(g_theta_3);
+    if (g_theta_3 <0 ) {
+      g_theta_3 = 0;
     }
 
 
