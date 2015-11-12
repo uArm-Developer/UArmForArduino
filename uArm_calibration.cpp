@@ -187,7 +187,7 @@ void CalibrationClass::saveOffsetValue(double value, byte servo_num)
 		MSBs = 0;
 
 	value *= 10;
-	MSBs = (byte) value;
+	MSBs = (int) value;
 
 	EEPROM.write( uarm.kAddrOffset + (servo_num - 1)*2, abs(LSBs));
 	EEPROM.write( uarm.kAddrOffset + (servo_num - 1)*2 +1, abs(MSBs));
