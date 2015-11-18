@@ -463,6 +463,7 @@ void uArmClass::moveTo(double x, double y, double z)
 
 void uArmClass::moveTo(double x, double y, double z, int relative, double time_spend)
 {
+  uarm.attachAll();
 
   double x_arr[50];
   double y_arr[50];
@@ -522,12 +523,14 @@ void uArmClass::moveTo(double x, double y, double z, int relative, double time_s
 }
 
 
-void uArmClass::moveTo(double x, double y, double z, int relative, double time_spend, double servo_4_angle)
+void uArmClass::moveTo(double x, double y, double z, int relative, double time_spend, int servo_4_relative, double servo_4_angle)
 {
-
+  uarm.attachAll();
+  
   double x_arr[50];
   double y_arr[50];
   double z_arr[50];
+  
 
   calXYZ();
   g_current_x = g_cal_x;
@@ -537,6 +540,11 @@ void uArmClass::moveTo(double x, double y, double z, int relative, double time_s
   if ((relative !=0)&&(relative != 1))
   { 
     relative = 0;
+  }
+
+  if ((servo_4_relative !=0)&&(servo_4_relative != 1))
+  { 
+    servo_4_relative = 0;
   }
 
   if (time_spend <0)
@@ -575,12 +583,14 @@ void uArmClass::moveTo(double x, double y, double z, int relative, double time_s
   {
     calAngles(x_arr[i],y_arr[i],z_arr[i]);
     l_movementTrigger = 1;
-    uarm.writeAngle(g_theta_1, g_theta_2, g_theta_3, servo_4_angle);
+    uarm.writeAngle(g_theta_1, g_theta_2, g_theta_3, g_theta_1*servo_4_relative+servo_4_angle);
 
     delay(time_spend*1000/50);
   }
 
 }
+
+
 
 void uArmClass::drawRec(double length_1, double length_2, double time_spend_per_length)
 {
