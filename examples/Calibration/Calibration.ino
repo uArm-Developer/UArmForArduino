@@ -1,10 +1,10 @@
 /******************************************************************************************
 * File Name          : Calibration.ino
-* Author             : Jerry Song
+* Author             : Joey Song
 * Version            : V1.0
 * Date               : 26 Aug, 2014
-* Modified Date      : 26 Aug, 2015
-* Description        : This documents is for quick start with uArm Metal version
+* Modified Date      : 19 Nov, 2015
+* Description        : This documents is for calibration with uArm Metal version
 * Copyright(C) 2015 uArm Team. All right reserved.
 *******************************************************************************************/
 
@@ -49,11 +49,32 @@ void loop() {
       char readSerial = Serial.read();
       Serial.println(readSerial);
       
-         
+      // Input c to start calibrate automatically
       if (readSerial == 'c') {
         calib.calibrations();
+        delay(1000);
+        uarm.moveTo(0,-15,6);
       }
-      
+
+      //----------------------------------  Test Function  ------------------------------------
+      if (readSerial == '1') {
+        uarm.moveTo(13,-13,6);
+        delay(1000);
+       }
+       
+     
+      if (readSerial == '2') {
+        uarm.moveTo(-13,-13,6);
+        delay(1000);
+       }
+
+      // Do not need to use setOffset() function if you have already use calibrations();
+      if (readSerial == 's') {
+        calib.setOffset();
+        delay(1000);
+        uarm.moveTo(0,-15,6);
+        delay(200);
+       }
   
   } // close read available
 }

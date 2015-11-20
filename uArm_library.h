@@ -82,6 +82,7 @@ public:
 	    void moveTo(double x, double y,double z,int relative, double time);
 	    void moveTo(double x, double y,double z,int relative, double time_sepnd, double servo_4_angle);
 	    void moveTo(double x, double y, double z, int relative, double time_spend, int servo_4_relative, double servo_4_angle);
+	    void moveToAtOnce(double x, double y, double z, int relative, double servo_4_angle);
 
 	    void drawCur(double length_1,double length_2,int angle, double time_spend);
 	    void drawRec(double length_1,double length_2,double time_spend_per_length);

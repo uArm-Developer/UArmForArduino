@@ -28,6 +28,8 @@ public:
 		void calibrations();
 		void calibrationServo(byte servo_num);
 		void saveOffsetValue(double value, byte servo_num);
+		void cleanEEPROM();
+		void cleanOFFSETS();
 };
 
 extern CalibrationClass calib;

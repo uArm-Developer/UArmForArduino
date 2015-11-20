@@ -1,9 +1,9 @@
 /******************************************************************************************
 * File Name          : Test.ino
-* Author             : Jerry Song
+* Author             : Joey Song
 * Version            : V1.0
 * Date               : 26 Aug, 2014
-* Modified Date      : 26 Aug, 2015
+* Modified Date      : 19 Nov, 2015
 * Description        : This documents is for quick start with uArm Metal version
 * Copyright(C) 2015 uArm Team. All right reserved.
 *******************************************************************************************/

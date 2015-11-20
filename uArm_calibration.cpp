@@ -105,6 +105,8 @@ void CalibrationClass::calibrationServo(byte servo_num)
 
 void CalibrationClass::calibrations(){
 	
+	cleanEEPROM();
+
 	for (int k = 1; k < 5; k++){
 
 		calibrationServo(k);
@@ -118,13 +120,25 @@ void CalibrationClass::calibrations(){
 }
 
 
+void CalibrationClass::cleanEEPROM(){
+	for(int p = 0; p<EEPROM.length();p++){
+		EEPROM.write(p,0);
+	}
+}
+
+void CalibrationClass::cleanOFFSETS(){
+	for(int q = uarm.kAddrOffset; q<uarm.kAddrOffset+8;q++){
+		EEPROM.write(q,0);
+	}
+}
+
 void CalibrationClass::setOffset()
 {
 	int setLoop = 1;
 
 	uarm.detachAll();
 
-	Serial.println("Put uarm in calibration posture (servo 1 to 3: 135, 50, 90 degree respectively), then input 1");
+	Serial.println("Put uarm in calibration posture (servo 1 to 3: 45, 130, 20 degree respectively), then input 1");
 	while (setLoop){
 
 		if (Serial.available()>0){
@@ -133,9 +147,9 @@ void CalibrationClass::setOffset()
 
 			if (inputChar=='1')
 			{
-				double offsetRot = uarm.readAngle(1,1) - 135;
-				double offsetL = uarm.readAngle(2,1) - 50;
-				double offsetR = uarm.readAngle(3,1) - 90;
+				double offsetRot = uarm.readAngle(1,1) - 45;
+				double offsetL = uarm.readAngle(2,1) - 130;
+				double offsetR = uarm.readAngle(3,1) - 20;
 
                 Serial.print("Offsets for servo 1 to 3 are ");
                 Serial.println(offsetRot);

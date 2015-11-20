@@ -523,6 +523,32 @@ void uArmClass::moveTo(double x, double y, double z, int relative, double time_s
 }
 
 
+void uArmClass::moveToAtOnce(double x, double y, double z, int relative, double servo_4_angle)
+{
+  uarm.attachAll();
+  
+  double x_arr[50];
+  double y_arr[50];
+  double z_arr[50];
+  
+
+  calXYZ();
+  g_current_x = g_cal_x;
+  g_current_y = g_cal_y;
+  g_current_z = g_cal_z;
+
+  if ((relative !=0)&&(relative != 1))
+  { 
+    relative = 0;
+  }
+
+  calAngles(g_current_x*relative+x,g_current_y*relative+y,g_current_z*relative+z);
+  l_movementTrigger = 1;
+  uarm.writeAngle(g_theta_1, g_theta_2, g_theta_3, servo_4_angle);
+
+
+}
+
 void uArmClass::moveTo(double x, double y, double z, int relative, double time_spend, int servo_4_relative, double servo_4_angle)
 {
   uarm.attachAll();

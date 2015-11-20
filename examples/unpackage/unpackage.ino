@@ -1,6 +1,6 @@
 /****************************************************************************************************
 * File Name          : unpackage
-* Author             : Jerry Song
+* Author             : Joey Song
 * Version            : V1.0
 * Date               : 29 Aug, 2015
 * Modified Date      : 29 Aug, 2015
