@@ -198,7 +198,7 @@ void CalibrationClass::saveOffsetValue(double value, byte servo_num)
 	if (value >0)
 		LSBs = 1;
 	else
-		MSBs = 0;
+		LSBs = 0;
 
 	value *= 10;
 	MSBs = (int) value;
