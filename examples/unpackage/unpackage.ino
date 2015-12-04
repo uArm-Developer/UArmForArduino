@@ -36,6 +36,7 @@ void setup() {
       Wire.begin();        // join i2c bus (address optional for master)
       Serial.begin(9600);  // start serial port at 9600 bps
 //      uarm.init();
+      pinMode(stopperPin,INPUT);
       
 }
 
