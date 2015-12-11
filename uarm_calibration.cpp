@@ -11,8 +11,8 @@
 * Copyright(C) 2014 UFactory Team. All right reserved.
 *******************************************************************************/
 
-#include "uArm_Library.h"
-#include "uArm_calibration.h"
+#include "uarm_library.h"
+#include "uarm_calibration.h"
 #include "linreg.h"
 
 CalibrationClass calib;

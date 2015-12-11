@@ -24,7 +24,7 @@
 
 #include <EEPROM.h>
 #include <Wire.h>
-#include "uArm_library.h"
+#include "uarm_library.h"
 #include <Servo.h>
 
 // define a uArm 

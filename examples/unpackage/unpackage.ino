@@ -11,7 +11,7 @@
 
 #include <EEPROM.h>
 #include <Wire.h>
-#include <uArm_library.h>
+#include <uarm_library.h>
 #include <Servo.h>
 
 // headers need to be loaded first

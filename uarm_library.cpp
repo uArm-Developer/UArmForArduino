@@ -11,7 +11,7 @@
 * Copyright(C) 2014 UFactory Team. All right reserved.
 *******************************************************************************/
 
-#include "uArm_Library.h"
+#include "uarm_library.h"
 
 uArmClass uarm;
 int angleR;

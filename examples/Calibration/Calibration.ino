@@ -24,8 +24,8 @@
 
 #include <EEPROM.h>
 #include <Wire.h>
-#include "uArm_library.h"
-#include "uArm_calibration.h"
+#include "uarm_library.h"
+#include "uarm_calibration.h"
 #include <Servo.h>
 
 // define a uArm 
