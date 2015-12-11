@@ -145,6 +145,14 @@ void loop() {
         Serial.print("SERVO_HAND_ROT_NUM offset:");
         Serial.println(uarm.readServoOffset(SERVO_HAND_ROT_NUM));                        
       }
+
+      if (readSerial == 'o') {
+        uarm.pumpOn();
+      }
+
+      if (readSerial == 'f') {
+        uarm.pumpOff();
+      }
       
       //----------------------------------  function 11  ------------------------------------
       // function below is for record a 20 seconds trajactory for uArm

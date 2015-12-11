@@ -103,6 +103,8 @@ public:
 	    void gripperCatch();
 	    void gripperRelease();
 		void interpolation(double init_val, double final_val);	
+		void pumpOn();
+		void pumpOff();
 protected:
 		double getInterPolValueArray(int num) const {return g_interpol_val_arr[10];}
 		double calYonly(double theta_1, double theta_2, double theta_3);

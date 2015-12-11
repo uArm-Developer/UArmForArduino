@@ -690,3 +690,21 @@ void uArmClass::gripperRelease()
   }
 }
 /* Action Control */
+void uArmClass::pumpOn()
+{
+
+   pinMode(PUMP_EN, OUTPUT);
+   pinMode(VALVE_EN, OUTPUT);
+   digitalWrite(VALVE_EN, LOW);
+   digitalWrite(PUMP_EN, HIGH);
+}
+
+void uArmClass::pumpOff()
+{
+   pinMode(PUMP_EN, OUTPUT);
+   pinMode(VALVE_EN, OUTPUT);
+   digitalWrite(VALVE_EN, HIGH);
+   digitalWrite(PUMP_EN, LOW);
+   delay(20);
+   digitalWrite(VALVE_EN,LOW);
+}
