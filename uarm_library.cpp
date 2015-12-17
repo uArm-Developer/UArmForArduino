@@ -72,12 +72,15 @@ void uArmClass::writeAngle(byte servo_rot_angle, byte servo_left_angle, byte ser
   if(servo_3_angle_execute > 110) servo_2_angle_execute = 110;
 
 
+  if(servo_2_angle_execute + servo_3_angle_execute > 150) 
+	{servo_3_angle_execute = 150 - servo_2_angle_execute;}
   
   g_servo_rot.write(servo_1_angle_execute);
-  g_servo_left.write();
-  g_servo_right.write();
+  g_servo_left.write(servo_2_angle_execute);
+  g_servo_right.write(servo_3_angle_execute);
   g_servo_hand_rot.write(servo_4_angle_execute);
   l_movementTrigger = 0;
+
 
 
 
