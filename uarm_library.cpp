@@ -63,8 +63,8 @@ void uArmClass::writeAngle(byte servo_rot_angle, byte servo_left_angle, byte ser
 
   int servo_1_angle_execute = inputToReal(SERVO_ROT_NUM,round(servo_rot_angle));
   int servo_2_angle_execute = inputToReal(SERVO_LEFT_NUM,round(servo_left_angle));
-  int servo_3_angle_execute = inputToReal(SERVO_RIGHT_NUM,round(servo_right_angle))
-  int servo_4_angle_execute = inputToReal(SERVO_HAND_ROT_NUM,round(servo_hand_rot_angle))
+  int servo_3_angle_execute = inputToReal(SERVO_RIGHT_NUM,round(servo_right_angle));
+  int servo_4_angle_execute = inputToReal(SERVO_HAND_ROT_NUM,round(servo_hand_rot_angle));
 	
   if(servo_2_angle_execute < 10) servo_2_angle_execute = 10;
   if(servo_2_angle_execute > 120) servo_2_angle_execute = 120;
