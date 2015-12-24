@@ -18,6 +18,7 @@ int angleR;
 int angleL;
 int angleBottom;
 int l_movementTrigger = 0;
+double g_interpol_val_arr[50];
 
 uArmClass::uArmClass()
 {
@@ -65,7 +66,7 @@ void uArmClass::writeAngle(byte servo_rot_angle, byte servo_left_angle, byte ser
   int servo_2_angle_execute = inputToReal(SERVO_LEFT_NUM,round(servo_left_angle));
   int servo_3_angle_execute = inputToReal(SERVO_RIGHT_NUM,round(servo_right_angle));
   int servo_4_angle_execute = inputToReal(SERVO_HAND_ROT_NUM,round(servo_hand_rot_angle));
-	
+  
   if(servo_2_angle_execute < 10) servo_2_angle_execute = 10;
   if(servo_2_angle_execute > 120) servo_2_angle_execute = 120;
   if(servo_3_angle_execute < 10) servo_2_angle_execute = 10;
@@ -73,7 +74,7 @@ void uArmClass::writeAngle(byte servo_rot_angle, byte servo_left_angle, byte ser
 
 
   if(servo_2_angle_execute + servo_3_angle_execute > 150) 
-	{servo_3_angle_execute = 150 - servo_2_angle_execute;}
+  {servo_3_angle_execute = 150 - servo_2_angle_execute;}
   
   g_servo_rot.write(servo_1_angle_execute);
   g_servo_left.write(servo_2_angle_execute);
@@ -118,9 +119,9 @@ double uArmClass::readServoOffset(byte servo_num)
 
   if ((servo_num == 1)||(servo_num == 2)||(servo_num == 3))
   {
-    g_servo_offset = (EEPROM.read(kAddrOffset + (servo_num-1)*2 +1))/10.00;
+    g_servo_offset = (EEPROM.read(LINEAR_START_ADDRESS + (servo_num-1)*2 +1))/10.00;
 
-    if (EEPROM.read(kAddrOffset + (servo_num-1)*2 ) == 0)
+    if (EEPROM.read(LINEAR_START_ADDRESS + (servo_num-1)*2 ) == 0)
       {g_servo_offset = - g_servo_offset;}
 
     return g_servo_offset;
@@ -177,7 +178,7 @@ void uArmClass::saveDataToRom(double data, int address)
     
 double uArmClass::readToAngle(double input_analog, byte servo_num, byte trigger)
 {
-  int address = 60+(servo_num-1)*6;
+  int address = OFFSET_START_ADDRESS +(servo_num-1)*6;
 
   for (int i = 0; i<6;i++){
       
@@ -210,19 +211,19 @@ double uArmClass::readAngle(byte servo_num)
   {
     case SERVO_ROT_NUM:
       
-      return readToAngle(analogRead(kServoRotReadPin),SERVO_ROT_NUM,0);
+      return readToAngle(analogRead(SERVO_ROT_ANALOG_PIN),SERVO_ROT_NUM,0);
       break;
 
     case SERVO_LEFT_NUM:
-      return readToAngle(analogRead(kServoLeftReadPin),SERVO_LEFT_NUM,0);
+      return readToAngle(analogRead(SERVO_LEFT_ANALOG_PIN),SERVO_LEFT_NUM,0);
       break;
 
     case SERVO_RIGHT_NUM:
-      return readToAngle(analogRead(kServoRightReadPin),SERVO_RIGHT_NUM,0);
+      return readToAngle(analogRead(SERVO_RIGHT_ANALOG_PIN),SERVO_RIGHT_NUM,0);
       break;
 
     case SERVO_HAND_ROT_NUM:
-      return readToAngle(analogRead(kServoHandRotReadPin),SERVO_HAND_ROT_NUM,0);
+      return readToAngle(analogRead(SERVO_HAND_ROT_ANALOG_PIN),SERVO_HAND_ROT_NUM,0);
       break;
 
     default:
@@ -240,19 +241,19 @@ double uArmClass::readAngle(byte servo_num, byte trigger)
   switch (servo_num)
   {
     case SERVO_ROT_NUM:
-      return readToAngle(analogRead(kServoRotReadPin),SERVO_ROT_NUM,trigger);
+      return readToAngle(analogRead(SERVO_ROT_ANALOG_PIN),SERVO_ROT_NUM,trigger);
       break;
 
     case SERVO_LEFT_NUM:
-      return readToAngle(analogRead(kServoLeftReadPin),SERVO_LEFT_NUM,trigger);
+      return readToAngle(analogRead(SERVO_LEFT_ANALOG_PIN),SERVO_LEFT_NUM,trigger);
       break;
 
     case SERVO_RIGHT_NUM:
-      return readToAngle(analogRead(kServoRightReadPin),SERVO_RIGHT_NUM,trigger);
+      return readToAngle(analogRead(SERVO_RIGHT_ANALOG_PIN),SERVO_RIGHT_NUM,trigger);
       break;
 
     case SERVO_HAND_ROT_NUM:
-      return readToAngle(analogRead(kServoHandRotReadPin),SERVO_HAND_ROT_NUM,trigger);
+      return readToAngle(analogRead(SERVO_HAND_ROT_ANALOG_PIN),SERVO_HAND_ROT_NUM,trigger);
       break;
 
     default:
@@ -279,11 +280,19 @@ void uArmClass::calAngles(double x, double y, double z)
         z = MATH_L1 - MATH_L4 + BottomOffset;
     }
 
-
-  g_y_in = (-y-MATH_L2)/MATH_L3;
-  g_z_in = (z - MATH_L1) / MATH_L3;
-  g_right_all = (1 - g_y_in*g_y_in - g_z_in*g_z_in - MATH_L43*MATH_L43) / (2 * MATH_L43);
-  g_sqrt_z_y = sqrt(g_z_in*g_z_in + g_y_in*g_y_in);
+  double x_in = 0.0;
+  double y_in = 0.0;
+  double z_in = 0.0;
+  double right_all = 0.0;
+  double right_all_2 = 0.0;
+  double sqrt_z_x = 0.0;
+  double sqrt_z_y = 0.0;
+  double phi = 0.0;
+  
+  y_in = (-y-MATH_L2)/MATH_L3;
+  z_in = (z - MATH_L1) / MATH_L3;
+  right_all = (1 - y_in*y_in - z_in*z_in - MATH_L43*MATH_L43) / (2 * MATH_L43);
+  sqrt_z_y = sqrt(z_in*z_in + y_in*y_in);
   
 
   if (x == 0)
@@ -292,17 +301,17 @@ void uArmClass::calAngles(double x, double y, double z)
     g_theta_1 = 90;
 
     // Calculate value of theta 3
-    if (g_z_in == 0) {
-      g_phi = 90;
+    if (z_in == 0) {
+      phi = 90;
     }
 
     else {
-    g_phi = atan(-g_y_in / g_z_in)*MATH_TRANS;
+    phi = atan(-y_in / z_in)*MATH_TRANS;
     }
 
-    if (g_phi > 0) g_phi = g_phi - 180;
+    if (phi > 0) phi = phi - 180;
 
-    g_theta_3 = asin(g_right_all / g_sqrt_z_y)*MATH_TRANS - g_phi;
+    g_theta_3 = asin(right_all / sqrt_z_y)*MATH_TRANS - phi;
     if(g_theta_3<0)
       {
         g_theta_3 = 0;
@@ -332,19 +341,19 @@ void uArmClass::calAngles(double x, double y, double z)
     
     // Calculate value of theta 3
 
-    g_x_in = (-x / cos(g_theta_1 / MATH_TRANS) - MATH_L2) / MATH_L3;
+    x_in = (-x / cos(g_theta_1 / MATH_TRANS) - MATH_L2) / MATH_L3;
 
-    if (g_z_in == 0){ g_phi = 90; }
+    if (z_in == 0){ phi = 90; }
       
-    else{ g_phi = atan(-g_x_in / g_z_in)*MATH_TRANS; }
+    else{ phi = atan(-x_in / z_in)*MATH_TRANS; }
       
-    if (g_phi > 0) {g_phi = g_phi - 180;}  
+    if (phi > 0) {phi = phi - 180;}  
     
-    g_sqrt_z_x = sqrt(g_z_in*g_z_in + g_x_in*g_x_in);
+    sqrt_z_x = sqrt(z_in*z_in + x_in*x_in);
 
-    g_right_all_2 = -1 * (g_z_in*g_z_in + g_x_in*g_x_in + MATH_L43*MATH_L43 - 1) / (2 * MATH_L43);
-    g_theta_3 = asin(g_right_all_2 / g_sqrt_z_x)*MATH_TRANS;
-    g_theta_3 = g_theta_3 - g_phi;
+    right_all_2 = -1 * (z_in*z_in + x_in*x_in + MATH_L43*MATH_L43 - 1) / (2 * MATH_L43);
+    g_theta_3 = asin(right_all_2 / sqrt_z_x)*MATH_TRANS;
+    g_theta_3 = g_theta_3 - phi;
 
     if (g_theta_3 <0 ) {
       g_theta_3 = 0;
@@ -353,7 +362,7 @@ void uArmClass::calAngles(double x, double y, double z)
 
     // Calculate value of theta 2
 
-    g_theta_2 = asin(g_z_in + MATH_L43*sin(abs(g_theta_3 / MATH_TRANS)))*MATH_TRANS;
+    g_theta_2 = asin(z_in + MATH_L43*sin(abs(g_theta_3 / MATH_TRANS)))*MATH_TRANS;
 
   }
   
@@ -409,12 +418,12 @@ void uArmClass::interpolation(double init_val, double final_val)
 void uArmClass::calXYZ(double theta_1, double theta_2, double theta_3)
 {
   
-  g_l3_1 = MATH_L3 * cos(theta_2 / MATH_TRANS);
-  g_l4_1 = MATH_L4*cos(theta_3 / MATH_TRANS);
-  g_l5 = (MATH_L2 + MATH_L3*cos(theta_2 / MATH_TRANS) + MATH_L4*cos(theta_3 / MATH_TRANS));
+  // g_l3_1 = MATH_L3 * cos(theta_2 / MATH_TRANS);
+  // g_l4_1 = MATH_L4*cos(theta_3 / MATH_TRANS);
+  double l5 = (MATH_L2 + MATH_L3*cos(theta_2 / MATH_TRANS) + MATH_L4*cos(theta_3 / MATH_TRANS));
 
-  g_cal_x = -cos(abs(theta_1 / MATH_TRANS))*g_l5;
-  g_cal_y = -sin(abs(theta_1 / MATH_TRANS))*g_l5;
+  g_cal_x = -cos(abs(theta_1 / MATH_TRANS))*l5;
+  g_cal_y = -sin(abs(theta_1 / MATH_TRANS))*l5;
   g_cal_z = MATH_L1 + MATH_L3*sin(abs(theta_2 / MATH_TRANS)) - MATH_L4*sin(abs(theta_3 / MATH_TRANS));
 
 }
@@ -486,9 +495,9 @@ void uArmClass::moveTo(double x, double y, double z, int relative, double time_s
   double z_arr[50];
 
   calXYZ();
-  g_current_x = g_cal_x;
-  g_current_y = g_cal_y;
-  g_current_z = g_cal_z;
+  double current_x = g_cal_x;
+  double current_y = g_cal_y;
+  double current_z = g_cal_z;
   
   if ((relative !=0)&&(relative != 1))
   { 
@@ -502,7 +511,7 @@ void uArmClass::moveTo(double x, double y, double z, int relative, double time_s
     
   // }
 
-  interpolation(g_current_x, g_current_x*relative+x);
+  interpolation(current_x, current_x*relative+x);
 
   for (byte i = 0; i < 50; i++){
 
@@ -510,7 +519,7 @@ void uArmClass::moveTo(double x, double y, double z, int relative, double time_s
     
   }
 
-  interpolation(g_current_y, g_current_y*relative+y);
+  interpolation(current_y, current_y*relative+y);
   
   for (byte i = 0; i < 50; i++){
 
@@ -518,7 +527,7 @@ void uArmClass::moveTo(double x, double y, double z, int relative, double time_s
     
   }
 
-  interpolation(g_current_z, g_current_z*relative+z); 
+  interpolation(current_z, current_z*relative+z); 
   
   for (byte i = 0; i < 50; i++){
 
@@ -549,16 +558,16 @@ void uArmClass::moveToAtOnce(double x, double y, double z, int relative, double 
   
 
   calXYZ();
-  g_current_x = g_cal_x;
-  g_current_y = g_cal_y;
-  g_current_z = g_cal_z;
+  double current_x = g_cal_x;
+  double current_y = g_cal_y;
+  double current_z = g_cal_z;
 
   if ((relative !=0)&&(relative != 1))
   { 
     relative = 0;
   }
 
-  calAngles(g_current_x*relative+x,g_current_y*relative+y,g_current_z*relative+z);
+  calAngles(current_x*relative+x,current_y*relative+y,current_z*relative+z);
   l_movementTrigger = 1;
   uarm.writeAngle(g_theta_1, g_theta_2, g_theta_3, servo_4_angle);
 
@@ -575,9 +584,9 @@ void uArmClass::moveTo(double x, double y, double z, int relative, double time_s
   
 
   calXYZ();
-  g_current_x = g_cal_x;
-  g_current_y = g_cal_y;
-  g_current_z = g_cal_z;
+  double current_x = g_cal_x;
+  double current_y = g_cal_y;
+  double current_z = g_cal_z;
 
   if ((relative !=0)&&(relative != 1))
   { 
@@ -594,7 +603,7 @@ void uArmClass::moveTo(double x, double y, double z, int relative, double time_s
     time_spend = abs(time_spend);
   }
 
-  interpolation(g_current_x, g_current_x*relative+x);
+  interpolation(current_x, current_x*relative+x);
 
   for (byte i = 0; i < 50; i++){
 
@@ -602,7 +611,7 @@ void uArmClass::moveTo(double x, double y, double z, int relative, double time_s
     
   }
 
-  interpolation(g_current_y, g_current_y*relative+y);
+  interpolation(current_y, current_y*relative+y);
   
   for (byte i = 0; i < 50; i++){
 
@@ -610,10 +619,10 @@ void uArmClass::moveTo(double x, double y, double z, int relative, double time_s
     
   }
 
-  if ( g_current_z*relative+z>25)
-    { interpolation(g_current_z, 25); }
+  if ( current_z*relative+z>25)
+    { interpolation(current_z, 25); }
   else
-    { interpolation(g_current_z, g_current_z*relative+z); }
+    { interpolation(current_z, current_z*relative+z); }
   
   for (byte i = 0; i < 50; i++){
 
@@ -651,9 +660,9 @@ void uArmClass::drawCur(double length_1, double length_2, int angle, double time
   double l_yp;
   
   calXYZ();
-  g_current_x = g_cal_x;
-  g_current_y = g_cal_y;
-  g_current_z = g_cal_z;
+  double current_x = g_cal_x;
+  double current_y = g_cal_y;
+  double current_z = g_cal_z;
 
   interpolation(0, angle/MATH_TRANS); 
 
@@ -663,7 +672,7 @@ void uArmClass::drawCur(double length_1, double length_2, int angle, double time
     l_xp = length_1 * cos(g_interpol_val_arr[i]);
     l_yp = length_2 * sin(g_interpol_val_arr[i]);
 
-    calAngles( l_xp + g_current_x - length_1 , l_yp+ g_current_y , g_current_z);
+    calAngles( l_xp + current_x - length_1 , l_yp+ current_y , current_z);
     l_movementTrigger = 1;
     uarm.writeAngle(g_theta_1, g_theta_2, g_theta_3,0);
 
@@ -677,11 +686,11 @@ double uArmClass::calYonly(double theta_1, double theta_2, double theta_3)
 
 {
 
-    g_l3_1_2 = MATH_L3 * cos(theta_2 / MATH_TRANS);
-    g_l4_1_2 = MATH_L4*cos(theta_3 / MATH_TRANS);
-    g_l5_2 = (MATH_L2 + MATH_L3*cos(theta_2 / MATH_TRANS) + MATH_L4*cos(theta_3 / MATH_TRANS));
+    //g_l3_1_2 = MATH_L3 * cos(theta_2 / MATH_TRANS);
+    //g_l4_1_2 = MATH_L4*cos(theta_3 / MATH_TRANS);
+    double l5_2 = (MATH_L2 + MATH_L3*cos(theta_2 / MATH_TRANS) + MATH_L4*cos(theta_3 / MATH_TRANS));
 
-    return -sin(abs(theta_1 / MATH_TRANS))*g_l5_2;
+    return -sin(abs(theta_1 / MATH_TRANS))*l5_2;
 
 }
 

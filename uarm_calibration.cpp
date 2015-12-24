@@ -31,7 +31,7 @@ void CalibrationClass::calibrationServo(byte servo_num)
 	double l_angle_analog;
 	double arr_real[16];
 	double arr_input[16];
-	int l_address = uarm.kAddrServo + (servo_num - 1) * 6;
+	int l_address = OFFSET_START_ADDRESS + (servo_num - 1) * 6;
 	Serial.print("l_address: ");
 	Serial.println(l_address);	
 	Serial.print("servo ");
@@ -127,7 +127,7 @@ void CalibrationClass::cleanEEPROM(){
 }
 
 void CalibrationClass::cleanOFFSETS(){
-	for(int q = uarm.kAddrOffset; q<uarm.kAddrOffset+8;q++){
+	for(int q = LINEAR_START_ADDRESS; q<LINEAR_START_ADDRESS+8;q++){
 		EEPROM.write(q,0);
 	}
 }
@@ -203,7 +203,7 @@ void CalibrationClass::saveOffsetValue(double value, byte servo_num)
 	value *= 10;
 	MSBs = (int) value;
 
-	EEPROM.write( uarm.kAddrOffset + (servo_num - 1)*2, abs(LSBs));
-	EEPROM.write( uarm.kAddrOffset + (servo_num - 1)*2 +1, abs(MSBs));
+	EEPROM.write( LINEAR_START_ADDRESS + (servo_num - 1)*2, abs(LSBs));
+	EEPROM.write( LINEAR_START_ADDRESS + (servo_num - 1)*2 +1, abs(MSBs));
 
 }

@@ -48,6 +48,14 @@
 #define TopOffset -1.5
 #define BottomOffset 1.5
 
+#define LINEAR_START_ADDRESS 90
+#define OFFSET_START_ADDRESS 60
+
+#define SERVO_ROT_ANALOG_PIN 2
+#define SERVO_LEFT_ANALOG_PIN 0
+#define SERVO_RIGHT_ANALOG_PIN 1
+#define SERVO_HAND_ROT_ANALOG_PIN 3
+
 
 class uArmClass 
 {
@@ -69,12 +77,12 @@ public:
 	// void writeAngle(byte servo_rot_angle, byte servo_left_angle, byte servo_right_angle);
 	double readAngle(byte servo_num, byte trigger);
 
-	const byte kAddrOffset      		= 90;
-	const byte kAddrServo      			= 60;
-	const byte kServoRotReadPin     	= 2;
-	const byte kServoLeftReadPin    	= 0;
-	const byte kServoRightReadPin    	= 1;
-	const byte kServoHandRotReadPin     = 3;
+	// const byte kAddrOffset      		= 90;
+	// const byte kAddrServo      			= 60;
+	// const byte kServoRotReadPin     	= 2;
+	// const byte kServoLeftReadPin    	= 0;
+	// const byte kServoRightReadPin    	= 1;
+	// const byte kServoHandRotReadPin     = 3;
 
 // Action control start
 
@@ -106,37 +114,37 @@ public:
 		void pumpOn();
 		void pumpOff();
 protected:
-		double getInterPolValueArray(int num) const {return g_interpol_val_arr[10];}
+		// double getInterPolValueArray(int num) const {return g_interpol_val_arr[10];}
 		double calYonly(double theta_1, double theta_2, double theta_3);
 
-		double g_x_in;
-		double g_y_in;
-		double g_z_in;
-		double g_right_all;
-		double g_sqrt_z_y;
+		// double g_x_in;
+		// double g_y_in;
+		// double g_z_in;
+		// double g_right_all;
+		// double g_sqrt_z_y;
 		double g_theta_1;
 		double g_theta_2;
 		double g_theta_3;
-		double g_phi;
-		double g_right_all_2;
-		double g_sqrt_z_x;
+		// double g_phi;
+		// double g_right_all_2;
+		// double g_sqrt_z_x;
 		double g_cal_x;
 		double g_cal_y;
 		double g_cal_z;
 
-		double g_l3_1_2;
-		double g_l4_1_2;
-		double g_l5_2;
+		// double g_l3_1_2;
+		// double g_l4_1_2;
+		// double g_l5_2;
 
-		double g_current_x;
-		double g_current_y;
-		double g_current_z;
+		// double g_current_x;
+		// double g_current_y;
+		// double g_current_z;
 
-		double g_interpol_val_arr[100];
+		
 
-		double g_l3_1;
-		double g_l4_1;
-		double g_l5;
+		// double g_l3_1;
+		// double g_l4_1;
+		// double g_l5;
 
 		
 		boolean g_gripper_reset;
