@@ -69,8 +69,8 @@ void uArmClass::writeAngle(byte servo_rot_angle, byte servo_left_angle, byte ser
   
   if(servo_2_angle_execute < 10) servo_2_angle_execute = 10;
   if(servo_2_angle_execute > 120) servo_2_angle_execute = 120;
-  if(servo_3_angle_execute < 10) servo_2_angle_execute = 10;
-  if(servo_3_angle_execute > 110) servo_2_angle_execute = 110;
+  if(servo_3_angle_execute < 10) servo_3_angle_execute = 10;
+  if(servo_3_angle_execute > 110) servo_3_angle_execute = 110;
 
 
   if(servo_2_angle_execute + servo_3_angle_execute > 150) 
