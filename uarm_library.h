@@ -69,7 +69,7 @@ public:
     void saveDataToRom(double data, int addr);
     void attachAll();
     void detachAll();
-	void writeAngle(byte servo_rot_angle, byte servo_left_angle, byte servo_right_angle, byte servo_hand_rot_angle);
+	void writeAngle(double servo_rot_angle, double servo_left_angle, double servo_right_angle, double servo_hand_rot_angle);
 	byte inputToReal(byte servo_num , byte input_angle);
 	double readAngle(byte servo_num);
 	double readToAngle(double input_angle, byte servo_num, byte trigger);
