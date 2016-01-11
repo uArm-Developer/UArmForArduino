@@ -55,35 +55,32 @@ void uArmClass::writeAngle(byte servo_rot_angle, byte servo_left_angle, byte ser
 
 }
 
-void uArmClass::writeAngle(byte servo_rot_angle, byte servo_left_angle, byte servo_right_angle, byte servo_hand_rot_angle)
+void uArmClass::writeAngle(double servo_rot_angle, double servo_left_angle, double servo_right_angle, double servo_hand_rot_angle)
 {
   if(l_movementTrigger==0)
   {
     attachAll();
   }
-
-  int servo_1_angle_execute = inputToReal(SERVO_ROT_NUM,round(servo_rot_angle));
-  int servo_2_angle_execute = inputToReal(SERVO_LEFT_NUM,round(servo_left_angle));
-  int servo_3_angle_execute = inputToReal(SERVO_RIGHT_NUM,round(servo_right_angle));
-  int servo_4_angle_execute = inputToReal(SERVO_HAND_ROT_NUM,round(servo_hand_rot_angle));
   
-  if(servo_2_angle_execute < 10) servo_2_angle_execute = 10;
-  if(servo_2_angle_execute > 120) servo_2_angle_execute = 120;
-  if(servo_3_angle_execute < 10) servo_3_angle_execute = 10;
-  if(servo_3_angle_execute > 110) servo_3_angle_execute = 110;
+  if(servo_left_angle < 10) servo_left_angle = 10;
+  if(servo_left_angle > 120) servo_left_angle = 120;
+  if(servo_right_angle < 10) servo_right_angle = 10;
+  if(servo_right_angle > 110) servo_right_angle = 110;
 
+  if(servo_left_angle + servo_right_angle > 150) 
+  {servo_right_angle = 150 - servo_left_angle;}
 
-  if(servo_2_angle_execute + servo_3_angle_execute > 150) 
-  {servo_3_angle_execute = 150 - servo_2_angle_execute;}
+  int servo_rot_angle_execute = inputToReal(SERVO_ROT_NUM,servo_rot_angle);
+  int servo_left_angle_execute = inputToReal(SERVO_LEFT_NUM,servo_left_angle);
+  int servo_right_angle_execute = inputToReal(SERVO_RIGHT_NUM,servo_right_angle);
+  int servo_hand_rot_angle_execute = inputToReal(SERVO_HAND_ROT_NUM,servo_hand_rot_angle);
   
-  g_servo_rot.write(servo_1_angle_execute);
-  g_servo_left.write(servo_2_angle_execute);
-  g_servo_right.write(servo_3_angle_execute);
-  g_servo_hand_rot.write(servo_4_angle_execute);
+  g_servo_rot.write(servo_rot_angle_execute);
+  g_servo_left.write(servo_left_angle_execute);
+  g_servo_right.write(servo_right_angle_execute);
+  g_servo_hand_rot.write(servo_hand_rot_angle_execute);
+
   l_movementTrigger = 0;
-
-
-
 
 }
 
@@ -108,9 +105,9 @@ void uArmClass::detachAll()
 }
 
 
-byte uArmClass::inputToReal(byte servo_num, byte input_angle)
+byte uArmClass::inputToReal(byte servo_num, double input_angle)
 {
-  return (byte)constrain((input_angle + readServoOffset(servo_num)),0,180);
+  return (byte)round(constrain((input_angle + readServoOffset(servo_num)),0,180));
 }
 
 double uArmClass::readServoOffset(byte servo_num)
