@@ -451,6 +451,8 @@ void uArmClass::moveTo(double x, double y, double z)
   l_current_x = g_cal_x;
   l_current_y = g_cal_y;
   l_current_z = g_cal_z;
+  double current_hand = readAngle(SERVO_HAND_ROT_NUM);
+  if (current_hand < 0) current_hand = 0;
 
   interpolation(l_current_x, x);
   for (byte i = 0; i < 50; i++){
@@ -475,7 +477,7 @@ void uArmClass::moveTo(double x, double y, double z)
     calAngles(x_arr[i],y_arr[i],z_arr[i]);
 
     l_movementTrigger = 1;
-    uarm.writeAngle(g_theta_1, g_theta_2, g_theta_3,0);
+    uarm.writeAngle(g_theta_1, g_theta_2, g_theta_3,current_hand);
 
     delay(40);
 
@@ -495,6 +497,8 @@ void uArmClass::moveTo(double x, double y, double z, int relative, double time_s
   double current_x = g_cal_x;
   double current_y = g_cal_y;
   double current_z = g_cal_z;
+  double current_hand = readAngle(SERVO_HAND_ROT_NUM);
+  if (current_hand < 0) current_hand = 0;
   
   if ((relative !=0)&&(relative != 1))
   { 
@@ -536,7 +540,7 @@ void uArmClass::moveTo(double x, double y, double z, int relative, double time_s
   {
     calAngles(x_arr[i],y_arr[i],z_arr[i]);
     l_movementTrigger = 1;
-    uarm.writeAngle(g_theta_1, g_theta_2, g_theta_3,0);
+    uarm.writeAngle(g_theta_1, g_theta_2, g_theta_3,current_hand);
 
     delay(time_spend*1000/50);
 
@@ -574,16 +578,18 @@ void uArmClass::moveToAtOnce(double x, double y, double z, int relative, double 
 void uArmClass::moveTo(double x, double y, double z, int relative, double time_spend, int servo_4_relative, double servo_4_angle)
 {
   uarm.attachAll();
-  
+
   double x_arr[50];
   double y_arr[50];
   double z_arr[50];
-  
+  double h_arr[50];
 
   calXYZ();
   double current_x = g_cal_x;
   double current_y = g_cal_y;
   double current_z = g_cal_z;
+  double current_hand = readAngle(SERVO_HAND_ROT_NUM);
+  if (current_hand < 0) current_hand = 0;
 
   if ((relative !=0)&&(relative != 1))
   { 
@@ -626,12 +632,20 @@ void uArmClass::moveTo(double x, double y, double z, int relative, double time_s
     z_arr[i] = g_interpol_val_arr[i];
     
   }
+
+  interpolation(current_hand, current_hand*servo_4_relative+servo_4_angle);
+  
+  for (byte i = 0; i < 50; i++){
+
+    h_arr[i] = g_interpol_val_arr[i];
+    
+  }
     
   for (byte i = 0; i < 50; i++)
   {
     calAngles(x_arr[i],y_arr[i],z_arr[i]);
     l_movementTrigger = 1;
-    uarm.writeAngle(g_theta_1, g_theta_2, g_theta_3, g_theta_1*servo_4_relative+servo_4_angle);
+    uarm.writeAngle(g_theta_1, g_theta_2, g_theta_3, h_arr[i]);
 
     delay(time_spend*1000/50);
   }
