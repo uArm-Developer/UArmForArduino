@@ -111,7 +111,7 @@ public:
 
 	    void gripperCatch();
 	    void gripperRelease();
-		void interpolation(double init_val, double final_val);	
+		void interpolation(double init_val, double final_val, double (&interpol_val_array)[50]);
 		void pumpOn();
 		void pumpOff();
 protected:

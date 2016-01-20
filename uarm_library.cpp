@@ -18,7 +18,7 @@ int angleR;
 int angleL;
 int angleBottom;
 int l_movementTrigger = 0;
-double g_interpol_val_arr[50];
+//double g_interpol_val_arr[50];
 
 uArmClass::uArmClass()
 {
@@ -386,7 +386,7 @@ void uArmClass::calAngles(double x, double y, double z)
 
 }
 
-void uArmClass::interpolation(double init_val, double final_val)
+void uArmClass::interpolation(double init_val, double final_val, double (&interpol_val_array)[50])
 {
   // by using the formula theta_t = l_a_0 + l_a_1 * t + l_a_2 * t^2 + l_a_3 * t^3
   // theta(0) = init_val; theta(t_f) = final_val
@@ -408,7 +408,7 @@ void uArmClass::interpolation(double init_val, double final_val)
   for (byte i = 0; i < 50; i=i+1)
   {
     l_t_step = (l_time_total / 50.0) *i;
-    g_interpol_val_arr[i] = l_a_0 + l_a_1 * (l_t_step) + l_a_2 * (l_t_step *l_t_step ) + l_a_3 * (l_t_step *l_t_step *l_t_step);  
+    interpol_val_array[i] = l_a_0 + l_a_1 * (l_t_step) + l_a_2 * (l_t_step *l_t_step ) + l_a_3 * (l_t_step *l_t_step *l_t_step);  
   }
 }
 
@@ -442,6 +442,7 @@ void uArmClass::moveTo(double x, double y, double z)
   double l_current_x;
   double l_current_y;
   double l_current_z;
+  double l_current_hand;
 
   double x_arr[50];
   double y_arr[50];
@@ -451,33 +452,21 @@ void uArmClass::moveTo(double x, double y, double z)
   l_current_x = g_cal_x;
   l_current_y = g_cal_y;
   l_current_z = g_cal_z;
-  double current_hand = readAngle(SERVO_HAND_ROT_NUM);
-  if (current_hand < 0) current_hand = 0;
+  l_current_hand = readAngle(SERVO_HAND_ROT_NUM);
+  if (l_current_hand < 0) l_current_hand = 0;
 
-  interpolation(l_current_x, x);
-  for (byte i = 0; i < 50; i++){
-    x_arr[i] = g_interpol_val_arr[i];
-    
-  }
+  interpolation(l_current_x, x, x_arr);
 
-  interpolation(l_current_y, y);
-  for (byte i = 0; i < 50; i++){
-    y_arr[i] = g_interpol_val_arr[i];
-    
-  }
+  interpolation(l_current_y, y, y_arr);
 
-  interpolation(l_current_z, z); 
-  for (byte i = 0; i < 50; i++){
-    z_arr[i] = g_interpol_val_arr[i];
-    
-  }
+  interpolation(l_current_z, z, z_arr); 
     
   for (byte i = 0; i < 50; i++)
   {
     calAngles(x_arr[i],y_arr[i],z_arr[i]);
 
     l_movementTrigger = 1;
-    uarm.writeAngle(g_theta_1, g_theta_2, g_theta_3,current_hand);
+    uarm.writeAngle(g_theta_1, g_theta_2, g_theta_3, l_current_hand);
 
     delay(40);
 
@@ -499,7 +488,7 @@ void uArmClass::moveTo(double x, double y, double z, int relative, double time_s
   double current_z = g_cal_z;
   double current_hand = readAngle(SERVO_HAND_ROT_NUM);
   if (current_hand < 0) current_hand = 0;
-  
+
   if ((relative !=0)&&(relative != 1))
   { 
     relative = 0;
@@ -512,35 +501,17 @@ void uArmClass::moveTo(double x, double y, double z, int relative, double time_s
     
   // }
 
-  interpolation(current_x, current_x*relative+x);
+  interpolation(current_x, current_x*relative+x, x_arr);
 
-  for (byte i = 0; i < 50; i++){
+  interpolation(current_y, current_y*relative+y, y_arr);
 
-    x_arr[i] = g_interpol_val_arr[i];
-    
-  }
+  interpolation(current_z, current_z*relative+z, z_arr); 
 
-  interpolation(current_y, current_y*relative+y);
-  
-  for (byte i = 0; i < 50; i++){
-
-    y_arr[i] = g_interpol_val_arr[i];
-    
-  }
-
-  interpolation(current_z, current_z*relative+z); 
-  
-  for (byte i = 0; i < 50; i++){
-
-    z_arr[i] = g_interpol_val_arr[i];
-    
-  }
-    
   for (byte i = 0; i < 50; i++)
   {
     calAngles(x_arr[i],y_arr[i],z_arr[i]);
     l_movementTrigger = 1;
-    uarm.writeAngle(g_theta_1, g_theta_2, g_theta_3,current_hand);
+    uarm.writeAngle(g_theta_1, g_theta_2, g_theta_3, current_hand);
 
     delay(time_spend*1000/50);
 
@@ -606,40 +577,16 @@ void uArmClass::moveTo(double x, double y, double z, int relative, double time_s
     time_spend = abs(time_spend);
   }
 
-  interpolation(current_x, current_x*relative+x);
+  interpolation(current_x, current_x*relative+x, x_arr);
 
-  for (byte i = 0; i < 50; i++){
-
-    x_arr[i] = g_interpol_val_arr[i];
-    
-  }
-
-  interpolation(current_y, current_y*relative+y);
-  
-  for (byte i = 0; i < 50; i++){
-
-    y_arr[i] = g_interpol_val_arr[i];
-    
-  }
+  interpolation(current_y, current_y*relative+y, y_arr);
 
   if ( current_z*relative+z>25)
-    { interpolation(current_z, 25); }
+    { interpolation(current_z, 25, z_arr); }
   else
-    { interpolation(current_z, current_z*relative+z); }
-  
-  for (byte i = 0; i < 50; i++){
+    { interpolation(current_z, current_z*relative+z, z_arr); }
 
-    z_arr[i] = g_interpol_val_arr[i];
-    
-  }
-
-  interpolation(current_hand, current_hand*servo_4_relative+servo_4_angle);
-  
-  for (byte i = 0; i < 50; i++){
-
-    h_arr[i] = g_interpol_val_arr[i];
-    
-  }
+  interpolation(current_hand, current_hand*servo_4_relative+servo_4_angle, h_arr);
     
   for (byte i = 0; i < 50; i++)
   {
@@ -674,14 +621,14 @@ void uArmClass::drawCur(double length_1, double length_2, int angle, double time
   double current_x = g_cal_x;
   double current_y = g_cal_y;
   double current_z = g_cal_z;
-
-  interpolation(0, angle/MATH_TRANS); 
-
+  double interp_arr[50];
   
+  interpolation(0, angle/MATH_TRANS, interp_arr); 
+
   for (byte i = 0; i < 50; i++){
 
-    l_xp = length_1 * cos(g_interpol_val_arr[i]);
-    l_yp = length_2 * sin(g_interpol_val_arr[i]);
+    l_xp = length_1 * cos(interp_arr[i]);
+    l_yp = length_2 * sin(interp_arr[i]);
 
     calAngles( l_xp + current_x - length_1 , l_yp+ current_y , current_z);
     l_movementTrigger = 1;
