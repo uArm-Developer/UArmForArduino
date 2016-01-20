@@ -18,7 +18,6 @@ int angleR;
 int angleL;
 int angleBottom;
 int l_movementTrigger = 0;
-//double g_interpol_val_arr[50];
 
 uArmClass::uArmClass()
 {
@@ -386,7 +385,7 @@ void uArmClass::calAngles(double x, double y, double z)
 
 }
 
-void uArmClass::interpolation(double init_val, double final_val, double (&interpol_val_array)[50])
+void uArmClass::interpolation(double init_val, double final_val, double (&interpol_val_array)[INTERP_INTVL])
 {
   // by using the formula theta_t = l_a_0 + l_a_1 * t + l_a_2 * t^2 + l_a_3 * t^3
   // theta(0) = init_val; theta(t_f) = final_val
@@ -405,9 +404,9 @@ void uArmClass::interpolation(double init_val, double final_val, double (&interp
   l_a_2 = (3 * (final_val - init_val)) / (l_time_total*l_time_total);
   l_a_3 = (-2 * (final_val - init_val)) / (l_time_total*l_time_total*l_time_total);
 
-  for (byte i = 0; i < 50; i=i+1)
+  for (byte i = 0; i < INTERP_INTVL; i=i+1)
   {
-    l_t_step = (l_time_total / 50.0) *i;
+    l_t_step = (l_time_total / (float)INTERP_INTVL) *i;
     interpol_val_array[i] = l_a_0 + l_a_1 * (l_t_step) + l_a_2 * (l_t_step *l_t_step ) + l_a_3 * (l_t_step *l_t_step *l_t_step);  
   }
 }
@@ -444,9 +443,9 @@ void uArmClass::moveTo(double x, double y, double z)
   double l_current_z;
   double l_current_hand;
 
-  double x_arr[50];
-  double y_arr[50];
-  double z_arr[50];
+  double x_arr[INTERP_INTVL];
+  double y_arr[INTERP_INTVL];
+  double z_arr[INTERP_INTVL];
 
   calXYZ();
   l_current_x = g_cal_x;
@@ -461,7 +460,7 @@ void uArmClass::moveTo(double x, double y, double z)
 
   interpolation(l_current_z, z, z_arr); 
     
-  for (byte i = 0; i < 50; i++)
+  for (byte i = 0; i < INTERP_INTVL; i++)
   {
     calAngles(x_arr[i],y_arr[i],z_arr[i]);
 
@@ -478,9 +477,9 @@ void uArmClass::moveTo(double x, double y, double z, int relative, double time_s
 {
   uarm.attachAll();
 
-  double x_arr[50];
-  double y_arr[50];
-  double z_arr[50];
+  double x_arr[INTERP_INTVL];
+  double y_arr[INTERP_INTVL];
+  double z_arr[INTERP_INTVL];
 
   calXYZ();
   double current_x = g_cal_x;
@@ -507,13 +506,13 @@ void uArmClass::moveTo(double x, double y, double z, int relative, double time_s
 
   interpolation(current_z, current_z*relative+z, z_arr); 
 
-  for (byte i = 0; i < 50; i++)
+  for (byte i = 0; i < INTERP_INTVL; i++)
   {
     calAngles(x_arr[i],y_arr[i],z_arr[i]);
     l_movementTrigger = 1;
     uarm.writeAngle(g_theta_1, g_theta_2, g_theta_3, current_hand);
 
-    delay(time_spend*1000/50);
+    delay(time_spend*1000/INTERP_INTVL);
 
   }
 
@@ -524,9 +523,9 @@ void uArmClass::moveToAtOnce(double x, double y, double z, int relative, double 
 {
   uarm.attachAll();
   
-  double x_arr[50];
-  double y_arr[50];
-  double z_arr[50];
+  double x_arr[INTERP_INTVL];
+  double y_arr[INTERP_INTVL];
+  double z_arr[INTERP_INTVL];
   
 
   calXYZ();
@@ -550,10 +549,10 @@ void uArmClass::moveTo(double x, double y, double z, int relative, double time_s
 {
   uarm.attachAll();
 
-  double x_arr[50];
-  double y_arr[50];
-  double z_arr[50];
-  double h_arr[50];
+  double x_arr[INTERP_INTVL];
+  double y_arr[INTERP_INTVL];
+  double z_arr[INTERP_INTVL];
+  double h_arr[INTERP_INTVL];
 
   calXYZ();
   double current_x = g_cal_x;
@@ -588,13 +587,13 @@ void uArmClass::moveTo(double x, double y, double z, int relative, double time_s
 
   interpolation(current_hand, current_hand*servo_4_relative+servo_4_angle, h_arr);
     
-  for (byte i = 0; i < 50; i++)
+  for (byte i = 0; i < INTERP_INTVL; i++)
   {
     calAngles(x_arr[i],y_arr[i],z_arr[i]);
     l_movementTrigger = 1;
     uarm.writeAngle(g_theta_1, g_theta_2, g_theta_3, h_arr[i]);
 
-    delay(time_spend*1000/50);
+    delay(time_spend*1000/INTERP_INTVL);
   }
 
 }
@@ -621,11 +620,11 @@ void uArmClass::drawCur(double length_1, double length_2, int angle, double time
   double current_x = g_cal_x;
   double current_y = g_cal_y;
   double current_z = g_cal_z;
-  double interp_arr[50];
+  double interp_arr[INTERP_INTVL];
   
   interpolation(0, angle/MATH_TRANS, interp_arr); 
 
-  for (byte i = 0; i < 50; i++){
+  for (byte i = 0; i < INTERP_INTVL; i++){
 
     l_xp = length_1 * cos(interp_arr[i]);
     l_yp = length_2 * sin(interp_arr[i]);
@@ -634,7 +633,7 @@ void uArmClass::drawCur(double length_1, double length_2, int angle, double time
     l_movementTrigger = 1;
     uarm.writeAngle(g_theta_1, g_theta_2, g_theta_3,0);
 
-    delay(time_spend*1000/50);
+    delay(time_spend*1000/INTERP_INTVL);
   
   }
 

@@ -45,6 +45,8 @@
 #define RELATIVE 1
 #define ABSOLUTE 0
 
+#define INTERP_INTVL     50
+
 #define TopOffset -1.5
 #define BottomOffset 1.5
 
@@ -111,7 +113,7 @@ public:
 
 	    void gripperCatch();
 	    void gripperRelease();
-		void interpolation(double init_val, double final_val, double (&interpol_val_array)[50]);
+		void interpolation(double init_val, double final_val, double (&interpol_val_array)[INTERP_INTVL]);
 		void pumpOn();
 		void pumpOff();
 protected:
