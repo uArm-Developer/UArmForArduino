@@ -45,6 +45,8 @@
 #define RELATIVE 1
 #define ABSOLUTE 0
 
+#define INTERP_INTVL     50
+
 #define TopOffset -1.5
 #define BottomOffset 1.5
 
@@ -102,6 +104,7 @@ public:
 	    double getCalX() {calXYZ(); return g_cal_x;}
 	    double getCalY() {calXYZ(); return g_cal_y;}
 	    double getCalZ() {calXYZ(); return g_cal_z;}
+      void getCalXYZ(double& x, double& y, double &z) {calXYZ(); x = g_cal_x; y = g_cal_y; z = g_cal_z;}
 
 	    void calAngles(double x, double y, double z);
 
@@ -110,7 +113,7 @@ public:
 
 	    void gripperCatch();
 	    void gripperRelease();
-		void interpolation(double init_val, double final_val);	
+		void interpolation(double init_val, double final_val, double (&interpol_val_array)[INTERP_INTVL]);
 		void pumpOn();
 		void pumpOff();
 protected:
