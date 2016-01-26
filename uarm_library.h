@@ -105,8 +105,10 @@ public:
 	    double getCalY() {calXYZ(); return g_cal_y;}
 	    double getCalZ() {calXYZ(); return g_cal_z;}
       void getCalXYZ(double& x, double& y, double &z) {calXYZ(); x = g_cal_x; y = g_cal_y; z = g_cal_z;}
+      void getCalXYZ(double theta_1, double theta_2, double theta_3, double& x, double& y, double &z) {calXYZ(theta_1, theta_2, theta_3); x = g_cal_x; y = g_cal_y; z = g_cal_z;}
 
 	    void calAngles(double x, double y, double z);
+      void getCalAngles(double x, double y, double z, double& theta_1, double& theta_2, double& theta_3) {calAngles(x, y, z); theta_1 = g_theta_1; theta_2 = g_theta_2; theta_3 = g_theta_3;}
 
 	    void calXYZ(double theta_1, double theta_2, double theta_3);
 	    void calXYZ();
