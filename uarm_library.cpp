@@ -687,6 +687,6 @@ void uArmClass::pumpOff()
    pinMode(VALVE_EN, OUTPUT);
    digitalWrite(VALVE_EN, HIGH);
    digitalWrite(PUMP_EN, LOW);
-   delay(20);
+   delay(50);
    digitalWrite(VALVE_EN,LOW);
 }
