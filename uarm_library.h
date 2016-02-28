@@ -102,13 +102,6 @@ public:
 	// void writeAngle(byte servo_rot_angle, byte servo_left_angle, byte servo_right_angle);
 	double readAngle(byte servo_num, byte trigger);
 
-	// const byte kAddrOffset      		= 90;
-	// const byte kAddrServo      			= 60;
-	// const byte kServoRotReadPin     	= 2;
-	// const byte kServoLeftReadPin    	= 0;
-	// const byte kServoRightReadPin    	= 1;
-	// const byte kServoHandRotReadPin     = 3;
-
 // Action control start
       void moveToOpts(double x, double y, double z, double hand_angle, byte relative_flags, double time, byte path_type, byte ease_type);
 	    void moveTo(double x, double y,double z) {moveToOpts(x, y, z, 0, F_HAND_RELATIVE, 2.0, PATH_LINEAR, INTERP_EASE_INOUT_CUBIC); }
@@ -117,70 +110,47 @@ public:
 	    void moveTo(double x, double y, double z, int relative, double time, int servo_4_relative, double servo_4_angle) { moveToOpts(x, y, z, servo_4_angle, (relative ? F_POSN_RELATIVE : 0) | (servo_4_relative ? F_HAND_RELATIVE : 0), time, PATH_LINEAR, INTERP_EASE_INOUT_CUBIC); }
 	    void moveToAtOnce(double x, double y, double z, int relative, double servo_4_angle) { moveToOpts(x, y, z, servo_4_angle, relative ? F_POSN_RELATIVE : 0, 0.0, PATH_LINEAR, INTERP_LINEAR); }
 
-	    void drawCur(double length_1,double length_2,int angle, double time_spend);
-	    void drawRec(double length_1,double length_2,double time_spend_per_length);
+	void drawCur(double length_1,double length_2,int angle, double time_spend);
+	void drawRec(double length_1,double length_2,double time_spend_per_length);
 
-	    double getTheta1() const {return g_theta_1;}
-	    double getTheta2() const {return g_theta_2;}
-	    double getTheta3() const {return g_theta_3;}
+	double getTheta1() const {return g_theta_1;}
+	double getTheta2() const {return g_theta_2;}
+	double getTheta3() const {return g_theta_3;}
 
-	    double getCalX() {calXYZ(); return g_cal_x;}
-	    double getCalY() {calXYZ(); return g_cal_y;}
-	    double getCalZ() {calXYZ(); return g_cal_z;}
-      void getCalXYZ(double& x, double& y, double &z) {calXYZ(); x = g_cal_x; y = g_cal_y; z = g_cal_z;}
-      void getCalXYZ(double theta_1, double theta_2, double theta_3, double& x, double& y, double &z) {calXYZ(theta_1, theta_2, theta_3); x = g_cal_x; y = g_cal_y; z = g_cal_z;}
+	double getCalX() {return g_cal_x;}
+	double getCalY() {return g_cal_y;}
+	double getCalZ() {return g_cal_z;}
+	void getCalXYZ(double& x, double& y, double &z) {calXYZ(); x = g_cal_x; y = g_cal_y; z = g_cal_z;}
+	void getCalXYZ(double theta_1, double theta_2, double theta_3, double& x, double& y, double &z) {calXYZ(theta_1, theta_2, theta_3); x = g_cal_x; y = g_cal_y; z = g_cal_z;}
 
-	    void calAngles(double x, double y, double z);
-      void getCalAngles(double x, double y, double z, double& theta_1, double& theta_2, double& theta_3) {calAngles(x, y, z); theta_1 = g_theta_1; theta_2 = g_theta_2; theta_3 = g_theta_3;}
+	void calAngles(double x, double y, double z);
+	void getCalAngles(double x, double y, double z, double& theta_1, double& theta_2, double& theta_3) {calAngles(x, y, z); theta_1 = g_theta_1; theta_2 = g_theta_2; theta_3 = g_theta_3;}
 
-	    void calXYZ(double theta_1, double theta_2, double theta_3);
-	    void calXYZ();
+	void calXYZ(double theta_1, double theta_2, double theta_3);
+	void calXYZ();
 
-	    void gripperCatch();
-	    void gripperRelease();
-		void interpolation(double init_val, double final_val, double (&interpol_val_array)[INTERP_INTVLS]);
-    void interpolate(double start_val, double end_val, double (&interp_vals)[INTERP_INTVLS], byte ease_type);
-		void pumpOn();
-		void pumpOff();
+  void gripperCatch();
+  void gripperRelease();
+  void interpolate(double start_val, double end_val, double (&interp_vals)[INTERP_INTVLS], byte ease_type);
+  void pumpOn();
+  void pumpOff();
 protected:
-    double cur_rot;
-    double cur_left;
-    double cur_right;
-    double cur_hand;
-		// double getInterPolValueArray(int num) const {return g_interpol_val_arr[10];}
-		double calYonly(double theta_1, double theta_2, double theta_3);
+  double cur_rot;
+  double cur_left;
+  double cur_right;
+  double cur_hand;
+  // double getInterPolValueArray(int num) const {return g_interpol_val_arr[10];}
+  double calYonly(double theta_1, double theta_2, double theta_3);
 
-		// double g_x_in;
-		// double g_y_in;
-		// double g_z_in;
-		// double g_right_all;
-		// double g_sqrt_z_y;
-		double g_theta_1;
-		double g_theta_2;
-		double g_theta_3;
-		// double g_phi;
-		// double g_right_all_2;
-		// double g_sqrt_z_x;
-		double g_cal_x;
-		double g_cal_y;
-		double g_cal_z;
+	double g_theta_1;
+	double g_theta_2;
+	double g_theta_3;
 
-		// double g_l3_1_2;
-		// double g_l4_1_2;
-		// double g_l5_2;
-
-		// double g_current_x;
-		// double g_current_y;
-		// double g_current_z;
-
+	double g_cal_x;
+	double g_cal_y;
+	double g_cal_z;
 		
-
-		// double g_l3_1;
-		// double g_l4_1;
-		// double g_l5;
-
-		
-		boolean g_gripper_reset;
+	boolean g_gripper_reset;
 // action control end
 private:
 	/*****************  Define variables  *****************/

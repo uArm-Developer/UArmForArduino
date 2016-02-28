@@ -22,6 +22,7 @@ void loop() {
     uarm.detachAll();
     // assign robot coordinate to x,y,z.
     // unit is in centimeter
+    uarm.calXYZ();
     x = uarm.getCalX();  // assign robot x - axis coordinate to value x
     y = uarm.getCalY();
     z = uarm.getCalZ();

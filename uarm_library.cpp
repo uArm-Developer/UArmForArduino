@@ -357,9 +357,9 @@ void uArmClass::calXYZ(double theta_1, double theta_2, double theta_3)
 void uArmClass::calXYZ()
 {
   calXYZ(
-  uarm.readToAngle(analogRead(2),1,0),
-  uarm.readToAngle(analogRead(0),2,0),
-  uarm.readToAngle(analogRead(1),3,0));
+  uarm.readToAngle(analogRead(SERVO_ROT_ANALOG_PIN),SERVO_ROT_NUM,ABSOLUTE),
+  uarm.readToAngle(analogRead(SERVO_LEFT_ANALOG_PIN),SERVO_LEFT_NUM,ABSOLUTE),
+  uarm.readToAngle(analogRead(SERVO_RIGHT_ANALOG_PIN),SERVO_RIGHT_NUM,ABSOLUTE));
 }
 
 void uArmClass::interpolate(double start_val, double end_val, double (&interp_vals)[INTERP_INTVLS], byte ease_type) {
