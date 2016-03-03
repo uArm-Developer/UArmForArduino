@@ -19,21 +19,26 @@
 #ifndef uArm_library_h
 #define uArm_library_h
 
-#define BUZZER                  				3
-#define CALIBRATION_FLAG						0xEE
+#define CALIBRATION_FLAG     0xEE
 
-#define SERVO_ROT_NUM							1
-#define SERVO_LEFT_NUM							2
-#define SERVO_RIGHT_NUM							3
-#define SERVO_HAND_ROT_NUM						4
+#define SERVO_ROT_NUM           1
+#define SERVO_LEFT_NUM          2
+#define SERVO_RIGHT_NUM         3
+#define SERVO_HAND_ROT_NUM      4
 
 
 // Action control
-#define SERVO_HAND              9     
-#define HAND_ANGLE_OPEN         25
-#define HAND_ANGLE_CLOSE        70
-#define PUMP_EN                 6     
-#define VALVE_EN                5     
+#define SERVO_HAND              9
+#define HAND_ANGLE_OPEN        25
+#define HAND_ANGLE_CLOSE       70
+
+#define PUMP_EN                 6    // HIGH = Valve OPEN
+#define VALVE_EN                5    // HIGH = Pump ON
+#define STOPPER                 2    // LOW = Pressed
+#define BUZZER                  3    // HIGH = ON
+#define BTN_D4                  4    // LOW = Pressed
+#define BTN_D7                  7    // LOW = Pressed
+
 #define MATH_PI	3.141592653589793238463
 #define MATH_TRANS  57.2958
 #define MATH_L1	(10.645+0.6)
@@ -44,8 +49,6 @@
 
 #define RELATIVE 1
 #define ABSOLUTE 0
-
-#define INTERP_INTVL     50
 
 #define TopOffset -1.5
 #define BottomOffset 1.5
@@ -58,12 +61,32 @@
 #define SERVO_RIGHT_ANALOG_PIN 1
 #define SERVO_HAND_ROT_ANALOG_PIN 3
 
+// movement path types
+#define PATH_LINEAR     0   // path based on linear interpolation
+#define PATH_ANGLES     1   // path based on interpolation of servo angles
+
+// movement absolute/relative flags
+#define F_ABSOLUTE      0
+#define F_POSN_RELATIVE 1
+#define F_HAND_RELATIVE 2   // standard relative, current + hand parameter
+#define F_HAND_ROT_REL  4   // hand keeps orientation relative to rotation servo (+/- hand parameter)
+// #define F_NEXT_OPT   8   // these are flags, next option is next available bit
+
+// interpolation intervals
+#define INTERP_INTVLS 50
+
+// interpolation types
+#define INTERP_EASE_INOUT_CUBIC 0  // original cubic ease in/out
+#define INTERP_LINEAR           1
+#define INTERP_EASE_INOUT       2  // quadratic easing methods
+#define INTERP_EASE_IN          3
+#define INTERP_EASE_OUT         4
+
 
 class uArmClass 
 {
 public:
 	uArmClass();
-	
 
 	double readServoOffset(byte servo_num);
     void detachServo(byte servo_num);
@@ -80,12 +103,12 @@ public:
 	double readAngle(byte servo_num, byte trigger);
 
 // Action control start
-
-	void moveTo(double x, double y,double z);
-	void moveTo(double x, double y,double z,int relative, double time);
-	void moveTo(double x, double y,double z,int relative, double time_sepnd, double servo_4_angle);
-	void moveTo(double x, double y, double z, int relative, double time_spend, int servo_4_relative, double servo_4_angle);
-	void moveToAtOnce(double x, double y, double z, int relative, double servo_4_angle);
+      void moveToOpts(double x, double y, double z, double hand_angle, byte relative_flags, double time, byte path_type, byte ease_type);
+	    void moveTo(double x, double y,double z) {moveToOpts(x, y, z, 0, F_HAND_RELATIVE, 2.0, PATH_LINEAR, INTERP_EASE_INOUT_CUBIC); }
+	    void moveTo(double x, double y,double z,int relative, double time) { moveToOpts(x, y, z, 0, F_HAND_RELATIVE | (relative ? F_POSN_RELATIVE : 0), time, PATH_LINEAR, INTERP_EASE_INOUT_CUBIC); }
+	    void moveTo(double x, double y,double z,int relative, double time, double servo_4_angle) { moveToOpts(x, y, z, servo_4_angle, relative ? F_POSN_RELATIVE : 0, time, PATH_LINEAR, INTERP_EASE_INOUT_CUBIC); }
+	    void moveTo(double x, double y, double z, int relative, double time, int servo_4_relative, double servo_4_angle) { moveToOpts(x, y, z, servo_4_angle, (relative ? F_POSN_RELATIVE : 0) | (servo_4_relative ? F_HAND_RELATIVE : 0), time, PATH_LINEAR, INTERP_EASE_INOUT_CUBIC); }
+	    void moveToAtOnce(double x, double y, double z, int relative, double servo_4_angle) { moveToOpts(x, y, z, servo_4_angle, relative ? F_POSN_RELATIVE : 0, 0.0, PATH_LINEAR, INTERP_LINEAR); }
 
 	void drawCur(double length_1,double length_2,int angle, double time_spend);
 	void drawRec(double length_1,double length_2,double time_spend_per_length);
@@ -106,14 +129,18 @@ public:
 	void calXYZ(double theta_1, double theta_2, double theta_3);
 	void calXYZ();
 
-	void gripperCatch();
-	void gripperRelease();
-	void interpolation(double init_val, double final_val, double (&interpol_val_array)[INTERP_INTVL]);
-	void pumpOn();
-	void pumpOff();
+  void gripperCatch();
+  void gripperRelease();
+  void interpolate(double start_val, double end_val, double (&interp_vals)[INTERP_INTVLS], byte ease_type);
+  void pumpOn();
+  void pumpOff();
 protected:
-	// double getInterPolValueArray(int num) const {return g_interpol_val_arr[10];}
-	double calYonly(double theta_1, double theta_2, double theta_3);
+  double cur_rot;
+  double cur_left;
+  double cur_right;
+  double cur_hand;
+  // double getInterPolValueArray(int num) const {return g_interpol_val_arr[10];}
+  double calYonly(double theta_1, double theta_2, double theta_3);
 
 	double g_theta_1;
 	double g_theta_2;
