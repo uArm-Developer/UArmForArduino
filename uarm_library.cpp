@@ -1,7 +1,7 @@
 /******************************************************************************
 * File Name          : uArm_library.cpp
 * Author             : Joey Song  
-* Updated            : Joey Song 
+* Updated            : Joey Song, Alex Tan, Dava Corboy
 * Email              : joey@ufactory.cc
 * Version            : V1.2 
 * Date               : 12 Dec, 2014
