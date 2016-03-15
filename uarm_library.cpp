@@ -57,10 +57,9 @@ void uArmClass::writeAngle(double servo_rot_angle, double servo_left_angle, doub
   if(servo_right_angle < 10) servo_right_angle = 10;
   if(servo_right_angle > 110) servo_right_angle = 110;
 
-  if(servo_left_angle + servo_right_angle > 150) 
+  if(servo_left_angle + servo_right_angle > 160) 
   {
     servo_right_angle = 150 - servo_left_angle;
-    Serial.println(F("ERROR!"));
     return;
   }
 
