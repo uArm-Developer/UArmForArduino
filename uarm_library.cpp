@@ -59,7 +59,7 @@ void uArmClass::writeAngle(double servo_rot_angle, double servo_left_angle, doub
 
   if(servo_left_angle + servo_right_angle > 160) 
   {
-    servo_right_angle = 150 - servo_left_angle;
+    servo_right_angle = 160 - servo_left_angle;
     return;
   }
 
