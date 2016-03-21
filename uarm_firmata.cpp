@@ -192,8 +192,10 @@ boolean UArmFirmata::handleSysex(byte command, byte argc, byte *argv)
 
     if (uarmCommand == WRITE_STRETCH)
     {
-      double length = argv[1] + (argv[2] << 7) + float(argv[3])/100;
-      double height = argv[4] + (argv[5] << 7) + float(argv[6])/100;
+      double length = argv[2] + (argv[3] << 7) + float(argv[4])/100;
+      length = argv[1] == 0? -length:length;
+      double height = argv[6] + (argv[7] << 7) + float(argv[8])/100;
+      height = argv[5] == 0? -height:height;
       uarm.writeStretch(length,height);
       return true;
     }

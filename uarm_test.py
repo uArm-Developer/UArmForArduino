@@ -264,8 +264,8 @@ def writeStretch():
 	height = float(sys.argv[3])
 
 	msg = bytearray([0xF0, ENCODER_DATA, 0x1E])
-	msg.extend(getValueAsThree7bitBytes(length))
-	msg.extend(getValueAsThree7bitBytes(height))
+	msg.extend(getValueAsFour7bitBytes(length))
+	msg.extend(getValueAsFour7bitBytes(height))
 	msg.append(0xF7)
 
 	print binascii.hexlify(bytearray(msg))
