@@ -6,6 +6,7 @@
 #include <ConfigurableFirmata.h>
 #include <FirmataFeature.h>
 
+#define UARM						(0XAA)
 
 #define READ_ANGLE                  (0X10)
 #define WRITE_ANGLE                 (0X11)
