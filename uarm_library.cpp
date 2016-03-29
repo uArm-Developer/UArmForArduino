@@ -257,7 +257,9 @@ void uArmClass::calAngles(double x, double y, double z)
   right_all = (1 - y_in*y_in - z_in*z_in - MATH_L43*MATH_L43) / (2 * MATH_L43);
   sqrt_z_y = sqrt(z_in*z_in + y_in*y_in);
 
-  if (x == 0)
+  // get rid of divide by zero errors.
+  // Because x is a double we need to check a range
+  if (x <= 0.005 && x >= -0.005)
   {
     // Calculate value of theta 1
     g_theta_1 = 90;
