@@ -17,9 +17,7 @@
 // headers need to be loaded first
 
 
-int valuel;
 int buttonState;
-int stopperPin = 2;                 // stopper is mounted under servo 4
 
 int left_pos = 3;                   // left side of the center, move 3 cm left 
 int right_pos = -3;                 // right side of the center, move 3 cm right 
@@ -36,7 +34,7 @@ void setup() {
       Wire.begin();        // join i2c bus (address optional for master)
       Serial.begin(9600);  // start serial port at 9600 bps
 //      uarm.init();
-      pinMode(stopperPin,INPUT);
+      pinMode(STOPPER,INPUT_PULLUP);
       
 }
 
@@ -127,7 +125,7 @@ void absorbFcn(int trigger, int rotDeg, double currentX, double currentY, double
   buttonState = 1;                                // buttonState is the stopper state.
   while ( buttonState)
     {
-      buttonState = digitalRead(stopperPin);      // if stopper hit anything, the reading would be LOW
+      buttonState = digitalRead(STOPPER);      // if stopper hit anything, the reading would be LOW
       if(buttonState == HIGH)                     // while reading is HIGH, keep move downwards for 2 cm
       {
         uarm.moveTo(currentX,currentY,currentZ,0,0.5,rotDeg);
@@ -141,13 +139,13 @@ void absorbFcn(int trigger, int rotDeg, double currentX, double currentY, double
   
   switch (trigger){
     case 1:                       //absorb
-        digitalWrite(6,HIGH);     // begin to absorb
-        digitalWrite(5,LOW);
+        digitalWrite(PUMP_EN,HIGH);     // begin to absorb
+        digitalWrite(VALVE_EN,LOW);
         delay(500);               // wait 500 ms to make sure object is absorbed
       break;
     case 2:                       //release
-        digitalWrite(6,LOW);      // begin to release quickly
-        digitalWrite(5,HIGH);     
+        digitalWrite(PUMP_EN,LOW);      // begin to release quickly
+        digitalWrite(VALVE_EN,HIGH);     
       break;
     default:
       break;
