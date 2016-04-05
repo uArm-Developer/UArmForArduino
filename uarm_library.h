@@ -26,6 +26,19 @@
 #define SERVO_RIGHT_NUM         3
 #define SERVO_HAND_ROT_NUM      4
 
+// Old Control method Stretch / Height
+
+#define ARM_STRETCH_MIN			0
+#define ARM_STRETCH_MAX			195
+#define ARM_HEIGHT_MIN			-150
+#define ARM_HEIGHT_MAX			160
+#define ARM_A 					148
+#define ARM_B 					160
+#define ARM_2AB					47360
+#define ARM_A2 					21904
+#define ARM_B2 					25600
+#define ARM_A2B2 				47504
+
 
 // Action control
 #define SERVO_HAND              9
@@ -103,15 +116,17 @@ public:
 	// void writeAngle(byte servo_rot_angle, byte servo_left_angle, byte servo_right_angle);
 	double readAngle(byte servo_num, byte trigger);
 
-// Action control start
-      void moveToOpts(double x, double y, double z, double hand_angle, byte relative_flags, double time, byte path_type, byte ease_type);
-	    void moveTo(double x, double y,double z) {moveToOpts(x, y, z, 0, F_HAND_RELATIVE, 2.0, PATH_LINEAR, INTERP_EASE_INOUT_CUBIC); }
-	    void moveTo(double x, double y,double z,int relative, double time) { moveToOpts(x, y, z, 0, F_HAND_RELATIVE | (relative ? F_POSN_RELATIVE : 0), time, PATH_LINEAR, INTERP_EASE_INOUT_CUBIC); }
-	    void moveTo(double x, double y,double z,int relative, double time, double servo_4_angle) { moveToOpts(x, y, z, servo_4_angle, relative ? F_POSN_RELATIVE : 0, time, PATH_LINEAR, INTERP_EASE_INOUT_CUBIC); }
-	    void moveTo(double x, double y, double z, int relative, double time, int servo_4_relative, double servo_4_angle) { moveToOpts(x, y, z, servo_4_angle, (relative ? F_POSN_RELATIVE : 0) | (servo_4_relative ? F_HAND_RELATIVE : 0), time, PATH_LINEAR, INTERP_EASE_INOUT_CUBIC); }
-	    void moveToAtOnce(double x, double y, double z, int relative, double servo_4_angle) { moveToOpts(x, y, z, servo_4_angle, relative ? F_POSN_RELATIVE : 0, 0.0, PATH_LINEAR, INTERP_LINEAR); }
 
-	void writeStretch(double x,double y);
+// Action control start
+    void moveToOpts(double x, double y, double z, double hand_angle, byte relative_flags, double time, byte path_type, byte ease_type);
+    void moveTo(double x, double y,double z) {moveToOpts(x, y, z, 0, F_HAND_RELATIVE, 2.0, PATH_LINEAR, INTERP_EASE_INOUT_CUBIC); }
+    void moveTo(double x, double y,double z,int relative, double time) { moveToOpts(x, y, z, 0, F_HAND_RELATIVE | (relative ? F_POSN_RELATIVE : 0), time, PATH_LINEAR, INTERP_EASE_INOUT_CUBIC); }
+    void moveTo(double x, double y,double z,int relative, double time, double servo_4_angle) { moveToOpts(x, y, z, servo_4_angle, relative ? F_POSN_RELATIVE : 0, time, PATH_LINEAR, INTERP_EASE_INOUT_CUBIC); }
+    void moveTo(double x, double y, double z, int relative, double time, int servo_4_relative, double servo_4_angle) { moveToOpts(x, y, z, servo_4_angle, (relative ? F_POSN_RELATIVE : 0) | (servo_4_relative ? F_HAND_RELATIVE : 0), time, PATH_LINEAR, INTERP_EASE_INOUT_CUBIC); }
+    void moveToAtOnce(double x, double y, double z, int relative, double servo_4_angle) { moveToOpts(x, y, z, servo_4_angle, relative ? F_POSN_RELATIVE : 0, 0.0, PATH_LINEAR, INTERP_LINEAR); }
+
+	// void moveTo(double y,double z);
+	void writeStretch(double armStretch, double armHeight);
 	void calStretch(double theta_2, double theta_3, double & l_lenght_get, double & l_height_get);
 
 	void drawCur(double length_1,double length_2,int angle, double time_spend);
@@ -133,18 +148,34 @@ public:
 	void calXYZ(double theta_1, double theta_2, double theta_3);
 	void calXYZ();
 
-  void gripperCatch();
-  void gripperRelease();
-  void interpolate(double start_val, double end_val, double (&interp_vals)[INTERP_INTVLS], byte ease_type);
-  void pumpOn();
-  void pumpOff();
+	void gripperCatch();
+	void gripperRelease();
+	void interpolate(double start_val, double end_val, double (&interp_vals)[INTERP_INTVLS], byte ease_type);
+	void pumpOn();
+	void pumpOff();
+
+	Servo g_servo_rot;
+	Servo g_servo_left;
+	Servo g_servo_right;
+	Servo g_servo_hand_rot;
+	Servo g_servo_hand;
+
+	double g_offset_servo_rot;
+	double g_offset_servo_left;
+	double g_offset_servo_right;
+	double g_offset_servo_hand_rot;
+
+	// for old method control offset
+	int g_offset_old_servo_left;
+	int g_offset_old_servo_right;
+
 protected:
-  double cur_rot;
-  double cur_left;
-  double cur_right;
-  double cur_hand;
-  // double getInterPolValueArray(int num) const {return g_interpol_val_arr[10];}
-  double calYonly(double theta_1, double theta_2, double theta_3);
+	double cur_rot;
+	double cur_left;
+	double cur_right;
+	double cur_hand;
+	// double getInterPolValueArray(int num) const {return g_interpol_val_arr[10];}
+	double calYonly(double theta_1, double theta_2, double theta_3);
 
 	double g_theta_1;
 	double g_theta_2;
@@ -155,19 +186,12 @@ protected:
 	double g_cal_z;
 		
 	boolean g_gripper_reset;
+
 // action control end
 private:
 	/*****************  Define variables  *****************/
     unsigned int addr;
-
-	Servo g_servo_rot;
-	Servo g_servo_left;
-	Servo g_servo_right;
-	Servo g_servo_hand_rot;
-	Servo g_servo_hand;
-	
-	double g_servo_offset;
-
+	double readEEPROMServoOffset(byte servo_num);
 };
 
 extern uArmClass uarm;

@@ -17,7 +17,16 @@ uArmClass uarm;
 
 uArmClass::uArmClass()
 {
-  g_servo_offset = 0.0;
+  g_offset_servo_rot = readEEPROMServoOffset(SERVO_ROT_NUM);
+  g_offset_servo_left = readEEPROMServoOffset(SERVO_LEFT_NUM);
+  g_offset_servo_right = readEEPROMServoOffset(SERVO_RIGHT_NUM);
+  g_offset_servo_hand_rot = 0;
+  g_offset_old_servo_left = EEPROM.read(2);
+  if(EEPROM.read(1) == 1)
+    g_offset_old_servo_left = -g_offset_old_servo_left;
+  g_offset_old_servo_right = EEPROM.read(4);
+  if(EEPROM.read(3) == 1)
+    g_offset_old_servo_right = -g_offset_old_servo_right;
 }
 
 void uArmClass::alert(byte times, byte runTime, byte stopTime)
@@ -30,6 +39,7 @@ void uArmClass::alert(byte times, byte runTime, byte stopTime)
     digitalWrite(BUZZER, LOW);
   }
 }
+
 
 /* The code below is written by jerry song */
 
@@ -55,7 +65,6 @@ void uArmClass::writeServoAngle(byte servo_number, double servo_angle, boolean w
   attachAll();
   servo_angle = writeWithoffset ? round(inputToReal(servo_number,servo_angle)): round(servo_angle);
   servo_angle = constrain(servo_angle,0,180);
-
   switch(servo_number)
   {
     case SERVO_ROT_NUM:       g_servo_rot.write(servo_angle);
@@ -132,20 +141,20 @@ byte uArmClass::inputToReal(byte servo_num, double input_angle)
 
 double uArmClass::readServoOffset(byte servo_num)
 {
-  if ((servo_num == 1)||(servo_num == 2)||(servo_num == 3))
-  {
-    g_servo_offset = (EEPROM.read(LINEAR_START_ADDRESS + (servo_num-1)*2 +1))/10.00;
+    switch(servo_num){
+      case SERVO_ROT_NUM: return g_offset_servo_rot;
+      case SERVO_LEFT_NUM: return g_offset_servo_left;
+      case SERVO_RIGHT_NUM: return g_offset_servo_right;
+      case SERVO_HAND_ROT_NUM: return g_offset_servo_hand_rot;
+      default : return 0;
+    }
+}
 
-    if (EEPROM.read(LINEAR_START_ADDRESS + (servo_num-1)*2 ) == 0)
-      {g_servo_offset = - g_servo_offset;}
-
-    return g_servo_offset;
-  } 
-  else if (servo_num == 4)
-    return 0;
-  else {
-      Serial.println(F("Incorrect"));
-  }
+double uArmClass::readEEPROMServoOffset(byte servo_num){
+  double offset = (EEPROM.read(LINEAR_START_ADDRESS + (servo_num-1)*2 +1))/10.00;
+  if (EEPROM.read(LINEAR_START_ADDRESS + (servo_num-1)*2 ) == 0)
+      offset = - offset;
+  return offset;
 }
 
 void uArmClass::saveDataToRom(double data, int address)
@@ -344,49 +353,68 @@ void uArmClass::calAngles(double x, double y, double z)
     {g_theta_3 = uarm.readAngle(3);}
 }
 
-void uArmClass::writeStretch(double length,double height)
-{
-  double origin_l = length;
-  double origin_h = height;
 
-  double cal_length = length;
-  double cal_height = height;
+/* moveTo Only y & z */
+// void uArmClass::moveTo(double y,double z)
+// {
+//   double origin_l = length;
+//   double origin_h = height;
 
-  length = length - MATH_L2;
-  height = height - MATH_L1;
-  double l_a = length/MATH_L3;
-  double l_b = height/MATH_L3;
-  double l_c = MATH_L43;
-  double l_d = (1-l_a*l_a-l_b*l_b-l_c*l_c)/(2*l_c);
-  double l_e = l_d/(sqrt(l_a*l_a+l_b*l_b));
+//   double cal_length = length;
+//   double cal_height = height;
 
-  double l_phi = atan(l_a/l_b);
+//   length = length - MATH_L2;
+//   height = height - MATH_L1;
+//   double l_a = length/MATH_L3;
+//   double l_b = height/MATH_L3;
+//   double l_c = MATH_L43;
+//   double l_d = (1-l_a*l_a-l_b*l_b-l_c*l_c)/(2*l_c);
+//   double l_e = l_d/(sqrt(l_a*l_a+l_b*l_b));
 
-  // cal local theta_3
-  double l_theta_3 = asin(l_e)+l_phi;  // cal theta_2
+//   double l_phi = atan(l_a/l_b);
+
+//   // cal local theta_3
+//   double l_theta_3 = asin(l_e)+l_phi;  // cal theta_2
   
-  l_theta_3 = (l_theta_3 < -MATH_PI/2 ||l_theta_3 == -MATH_PI/2) ? l_theta_3+MATH_PI:l_theta_3; // set the range correctly
-  l_theta_3 = round(l_theta_3 * MATH_TRANS) == -90 ? MATH_PI/2 : l_theta_3;  // set special case
+//   l_theta_3 = (l_theta_3 < -MATH_PI/2 ||l_theta_3 == -MATH_PI/2) ? l_theta_3+MATH_PI:l_theta_3; // set the range correctly
+//   l_theta_3 = round(l_theta_3 * MATH_TRANS) == -90 ? MATH_PI/2 : l_theta_3;  // set special case
 
-  // cal local theta_2
-  double l_theta_2 = asin(l_b+sin(l_theta_3)*l_c);
+//   // cal local theta_2
+//   double l_theta_2 = asin(l_b+sin(l_theta_3)*l_c);
 
-  calStretch(l_theta_2,l_theta_3,cal_length,cal_height);
+//   calStretch(l_theta_2,l_theta_3,cal_length,cal_height);
 
-  l_theta_2 = l_theta_2*MATH_TRANS;
-  l_theta_3 = l_theta_3*MATH_TRANS;
+//   l_theta_2 = l_theta_2*MATH_TRANS;
+//   l_theta_3 = l_theta_3*MATH_TRANS;
 
-  if((abs(cal_length-length)>0.1)||(abs(cal_height-height)>0.1)||isnan(l_theta_2)||isinf(l_theta_2)||isnan(l_theta_3)||isinf(l_theta_3))
-  {
-    l_theta_2 = readAngle(SERVO_LEFT_NUM);
-    l_theta_3 = readAngle(SERVO_RIGHT_NUM);
-  }
+//   if((abs(cal_length-length)>0.1)||(abs(cal_height-height)>0.1)||isnan(l_theta_2)||isinf(l_theta_2)||isnan(l_theta_3)||isinf(l_theta_3))
+//   {
+//     l_theta_2 = readAngle(SERVO_LEFT_NUM);
+//     l_theta_3 = readAngle(SERVO_RIGHT_NUM);
+//   }
 
-  l_theta_3= ((l_theta_3)<0) ? readAngle(SERVO_RIGHT_NUM):l_theta_3;
+//   l_theta_3= ((l_theta_3)<0) ? readAngle(SERVO_RIGHT_NUM):l_theta_3;
 
-  writeServoAngle(SERVO_LEFT_NUM,l_theta_2,1);
-  writeServoAngle(SERVO_RIGHT_NUM,l_theta_3,1);
+//   writeServoAngle(SERVO_LEFT_NUM,l_theta_2,1);
+//   writeServoAngle(SERVO_RIGHT_NUM,l_theta_3,1);
 
+// }
+
+void uArmClass::writeStretch(double armStretch, double armHeight){
+  int offsetL = g_offset_old_servo_left;
+  int offsetR = g_offset_old_servo_right;
+  armStretch = constrain(armStretch, ARM_STRETCH_MIN, ARM_STRETCH_MAX) + 68;
+  armHeight  = constrain(armHeight, ARM_HEIGHT_MIN, ARM_HEIGHT_MAX);
+  double xx = armStretch*armStretch + armHeight*armHeight;
+  double xxx = ARM_B2 - ARM_A2 + xx;
+  double angleB = acos((armStretch*xxx+armHeight*sqrt(4.0*ARM_B2*xx-xxx*xxx))/(xx*2.0*ARM_B))* RAD_TO_DEG;
+  double yyy = ARM_A2-ARM_B2+xx;
+  double angleA =acos((armStretch*yyy-armHeight*sqrt(4.0*ARM_A2*xx-yyy*yyy))/(xx*2.0*ARM_A))* RAD_TO_DEG;
+  int angleR =(int)(angleB + offsetR - 4);//int angleR =angleB + 40 + offsetR;
+  int angleL =(int)(angleA + offsetL + 16);//int angleL =25 + angleA + offsetL; 
+  angleL = constrain(angleL, 5 + offsetL, 145 + offsetL);
+  writeServoAngle(SERVO_LEFT_NUM, angleL,1);
+  writeServoAngle(SERVO_RIGHT_NUM,angleR,1);
 }
 
 

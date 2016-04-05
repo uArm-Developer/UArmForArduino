@@ -14,6 +14,7 @@ servo_hand_rot_num = 4
 START_SYSEX = 0xF0
 ENCODER_DATA = 0xAA
 END_SYSEX = 0xF7
+WRITE_ANGLE = 0x11
 
 def readAngle():
 	print 'once'
@@ -187,8 +188,8 @@ def servoAttach(val):
 
 
 def writeServoAngle():
-	servo_angle = float(sys.argv[2])
-	servo_number = int(sys.argv[3])
+	servo_angle = float(sys.argv[3])
+	servo_number = int(sys.argv[2])
 	writeWithoffset = int(sys.argv[4])
 	msg = bytearray([0xF0, ENCODER_DATA, 0x11])
 	msg.extend(getValueAsOne7bitBytes(servo_number))
@@ -274,11 +275,10 @@ def writeStretch():
 	time.sleep(2)
 
 
-
-
 if __name__ == "__main__":
 	time.sleep(5)
-	writeStretch()
+	# writeStretch()
+	writeServoAngle()
 	
 
 
