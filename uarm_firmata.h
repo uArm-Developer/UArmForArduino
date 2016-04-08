@@ -21,6 +21,7 @@
 #define SERVO_STATUS                (0X1C)
 #define PUMP_STATUS                 (0X1D)
 #define WRITE_STRETCH               (0X1E)
+#define WRITE_LEFT_RIGHT_ANGLE      (0X1F)
 
 #include "EEPROM.h"
 #include "uarm_library.h"

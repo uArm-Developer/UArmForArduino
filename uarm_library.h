@@ -26,6 +26,16 @@
 #define SERVO_RIGHT_NUM         3
 #define SERVO_HAND_ROT_NUM      4
 
+#define SERVO_ROT_PIN 			11
+#define SERVO_LEFT_PIN          13
+#define SERVO_RIGHT_PIN         12
+#define SERVO_HAND_PIN 			10
+
+#define SERVO_ROT_ANALOG_PIN 2
+#define SERVO_LEFT_ANALOG_PIN 0
+#define SERVO_RIGHT_ANALOG_PIN 1
+#define SERVO_HAND_ROT_ANALOG_PIN 3
+
 // Old Control method Stretch / Height
 
 #define ARM_STRETCH_MIN			0
@@ -69,10 +79,7 @@
 #define LINEAR_START_ADDRESS 90
 #define OFFSET_START_ADDRESS 60
 
-#define SERVO_ROT_ANALOG_PIN 2
-#define SERVO_LEFT_ANALOG_PIN 0
-#define SERVO_RIGHT_ANALOG_PIN 1
-#define SERVO_HAND_ROT_ANALOG_PIN 3
+
 
 // movement path types
 #define PATH_LINEAR     0   // path based on linear interpolation
@@ -105,10 +112,11 @@ public:
     void detachServo(byte servo_num);
 	void alert(byte times, byte runTime, byte stopTime);
     void saveDataToRom(double data, int addr);
-    void attachAll();
+
     void detachAll();
 	void writeAngle(double servo_rot_angle, double servo_left_angle, double servo_right_angle, double servo_hand_rot_angle);
 	void writeServoAngle(byte servoNumber, double servoAngle,  boolean writeWithoffset);
+	void writeLeftRightServoAngle(double servo_left_angle, double servo_right_angle, boolean writeWithoffset);
 	byte inputToReal(byte servo_num , double input_angle);
 	double readAngle(byte servo_num);
 	double readToAngle(double input_angle, byte servo_num, byte trigger);
@@ -128,9 +136,6 @@ public:
 	// void moveTo(double y,double z);
 	void writeStretch(double armStretch, double armHeight);
 	void calStretch(double theta_2, double theta_3, double & l_lenght_get, double & l_height_get);
-
-	void drawCur(double length_1,double length_2,int angle, double time_spend);
-	void drawRec(double length_1,double length_2,double time_spend_per_length);
 
 	double getTheta1() const {return g_theta_1;}
 	double getTheta2() const {return g_theta_2;}
@@ -153,6 +158,7 @@ public:
 	void interpolate(double start_val, double end_val, double (&interp_vals)[INTERP_INTVLS], byte ease_type);
 	void pumpOn();
 	void pumpOff();
+	void init();
 
 	Servo g_servo_rot;
 	Servo g_servo_left;
@@ -170,6 +176,8 @@ public:
 	int g_offset_old_servo_right;
 
 protected:
+    void attachAll();
+    void attachServo(byte servo_num);
 	double cur_rot;
 	double cur_left;
 	double cur_right;

@@ -29,6 +29,11 @@ uArmClass::uArmClass()
     g_offset_old_servo_right = -g_offset_old_servo_right;
 }
 
+void uArmClass::init()
+{
+  moveTo(0, 15, 15);
+}
+
 void uArmClass::alert(byte times, byte runTime, byte stopTime)
 {
   for(int ct=0; ct < times; ct++)
@@ -62,21 +67,43 @@ void uArmClass::writeAngle(byte servo_rot_angle, byte servo_left_angle, byte ser
 
 void uArmClass::writeServoAngle(byte servo_number, double servo_angle, boolean writeWithoffset)
 {
-  attachAll();
+  attachServo(servo_number);
   servo_angle = writeWithoffset ? round(inputToReal(servo_number,servo_angle)): round(servo_angle);
   servo_angle = constrain(servo_angle,0,180);
   switch(servo_number)
   {
     case SERVO_ROT_NUM:       g_servo_rot.write(servo_angle);
                               break;
-    case SERVO_LEFT_NUM:      g_servo_left.write(servo_angle);
-                              break;
-    case SERVO_RIGHT_NUM:     g_servo_right.write(servo_angle);
-                              break;
+    // case SERVO_LEFT_NUM:      
+                              // g_servo_left.write(servo_angle);
+                              // break;
+    // case SERVO_RIGHT_NUM:     g_servo_right.write(servo_angle);
+                              // break;
     case SERVO_HAND_ROT_NUM:  g_servo_hand_rot.write(servo_angle);
                               break;                        
     default:                  break;
   }
+}
+
+void uArmClass::writeLeftRightServoAngle(double servo_left_angle, double servo_right_angle, boolean writeWithoffset)
+{
+  servo_left_angle = constrain(servo_left_angle,0,140);
+  servo_right_angle = constrain(servo_right_angle,0,120);
+  servo_left_angle = writeWithoffset ? round(inputToReal(SERVO_LEFT_NUM,servo_left_angle)): round(servo_left_angle);
+  servo_right_angle = writeWithoffset ? round(inputToReal(SERVO_RIGHT_NUM,servo_right_angle)): round(servo_right_angle);
+  // Serial.println(servo_left_angle);
+  // Serial.println(servo_right_angle);
+  if(servo_left_angle + servo_right_angle > 160) 
+  {
+    servo_right_angle = 160 - servo_left_angle;
+    alert(1, 10, 0);
+    // delay(10);
+    return;
+  }
+    attachServo(SERVO_LEFT_NUM);
+    attachServo(SERVO_RIGHT_NUM);    
+    g_servo_left.write(servo_left_angle);
+    g_servo_right.write(servo_right_angle);
 }
 
 void uArmClass::writeAngle(double servo_rot_angle, double servo_left_angle, double servo_right_angle, double servo_hand_rot_angle)
@@ -108,21 +135,39 @@ void uArmClass::writeAngle(double servo_rot_angle, double servo_left_angle, doub
 
 void uArmClass::attachAll()
 {
-  if (!g_servo_rot.attached()) {
-    g_servo_rot.attach(11);
-    cur_rot = readAngle(SERVO_ROT_NUM);
-  }
-  if (!g_servo_left.attached()) {
-    g_servo_left.attach(13);
-    cur_left = readAngle(SERVO_LEFT_NUM);
-  }
-  if (!g_servo_right.attached()) {
-    g_servo_right.attach(12);
-    cur_right = readAngle(SERVO_RIGHT_NUM);
-  }
-  if (!g_servo_hand_rot.attached()) {
-    g_servo_hand_rot.attach(10);
-    cur_hand = readAngle(SERVO_HAND_ROT_NUM);
+  attachServo(SERVO_ROT_NUM);
+  attachServo(SERVO_LEFT_NUM);
+  attachServo(SERVO_RIGHT_NUM);
+  attachServo(SERVO_HAND_ROT_NUM);
+}
+
+void uArmClass::attachServo(byte servo_number)
+{
+  switch(servo_number){
+    case SERVO_ROT_NUM: 
+    if(!g_servo_rot.attached()) {
+      g_servo_rot.attach(SERVO_ROT_PIN);
+      cur_rot = readAngle(SERVO_ROT_NUM);
+    }
+    break;
+    case SERVO_LEFT_NUM:
+    if (!g_servo_left.attached()) {
+      g_servo_left.attach(SERVO_LEFT_PIN);
+      cur_left = readAngle(SERVO_LEFT_NUM);
+    }
+    break;
+    case SERVO_RIGHT_NUM:
+    if (!g_servo_right.attached()) {
+      g_servo_right.attach(SERVO_RIGHT_PIN);
+      cur_right = readAngle(SERVO_RIGHT_NUM);
+    } 
+    break;
+    case SERVO_HAND_ROT_NUM:
+    if (!g_servo_hand_rot.attached()) {
+      g_servo_hand_rot.attach(SERVO_HAND_PIN);
+      cur_hand = readAngle(SERVO_HAND_ROT_NUM);
+    }
+    break;    
   }
 }
 
@@ -413,8 +458,9 @@ void uArmClass::writeStretch(double armStretch, double armHeight){
   int angleR =(int)(angleB + offsetR - 4);//int angleR =angleB + 40 + offsetR;
   int angleL =(int)(angleA + offsetL + 16);//int angleL =25 + angleA + offsetL; 
   angleL = constrain(angleL, 5 + offsetL, 145 + offsetL);
-  writeServoAngle(SERVO_LEFT_NUM, angleL,1);
-  writeServoAngle(SERVO_RIGHT_NUM,angleR,1);
+  // writeServoAngle(SERVO_LEFT_NUM, angleL,1);
+  // writeServoAngle(SERVO_RIGHT_NUM,angleR,1);
+  writeLeftRightServoAngle(angleL,angleR,1);
 }
 
 
@@ -553,42 +599,6 @@ void uArmClass::moveToOpts(double x, double y, double z, double hand_angle, byte
 
   // set final target position at end of interpolation or "atOnce"
   writeAngle(tgt_rot, tgt_left, tgt_right, hand_angle);
-}
-
-void uArmClass::drawRec(double length_1, double length_2, double time_spend_per_length)
-{
-  moveTo(length_1,0,0,1,time_spend_per_length);
-  moveTo(0,length_2,0,1,time_spend_per_length);
-  moveTo(-length_1,0,0,1,time_spend_per_length);
-  moveTo(0,-length_2,0,1,time_spend_per_length);
-}
-
-void uArmClass::drawCur(double length_1, double length_2, int angle, double time_spend)
-{
-  uarm.attachAll();
-  double l_xp;
-  double l_yp;
-
-  calXYZ();
-  double current_x = g_cal_x;
-  double current_y = g_cal_y;
-  double current_z = g_cal_z;
-  double interp_arr[INTERP_INTVLS];
-
-  interpolate(0, angle/MATH_TRANS, interp_arr, INTERP_EASE_INOUT_CUBIC); 
-
-  for (byte i = 0; i < INTERP_INTVLS; i++){
-
-    l_xp = length_1 * cos(interp_arr[i]);
-    l_yp = length_2 * sin(interp_arr[i]);
-
-    calAngles( l_xp + current_x - length_1 , l_yp+ current_y , current_z);
-    uarm.writeAngle(g_theta_1, g_theta_2, g_theta_3,0);
-
-    delay(time_spend*1000/INTERP_INTVLS);
-  
-  }
-
 }
 
 double uArmClass::calYonly(double theta_1, double theta_2, double theta_3)

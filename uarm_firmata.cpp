@@ -178,7 +178,7 @@ boolean UArmFirmata::handleSysex(byte command, byte argc, byte *argv)
     if (uarmCommand == SERVO_STATUS)
     {
       byte writeWithOffset= argv[1];
-      writeWithOffset == 1 ? uarm.attachAll():uarm.detachAll();
+      uarm.detachAll();
       return true;
     }
 
@@ -199,6 +199,15 @@ boolean UArmFirmata::handleSysex(byte command, byte argc, byte *argv)
       uarm.writeStretch(length,height);
       return true;
     }
+
+    if (uarmCommand == WRITE_LEFT_RIGHT_ANGLE)
+    {
+      double left = argv[1] + (argv[2] << 7) + float(argv[3])/100;
+      double right = argv[4] + (argv[5] << 7) + float(argv[6])/100;
+      boolean withOffset = argv[7];
+      uarm.writeLeftRightServoAngle(left,right, withOffset);
+      return true;
+    }    
 
   }
   return false;
