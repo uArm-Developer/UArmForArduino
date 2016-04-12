@@ -3,7 +3,7 @@
 * Author             : Joey Song  
 * Updated            : Joey Song, Alex Tan, Dave Corboy
 * Email              : joey@ufactory.cc
-* Version            : V1.2 
+* Version            : V1.3.1 
 * Date               : 12 Dec, 2014
 * Modified Date      : 17 Dec, 2015
 * Description        : 
@@ -87,15 +87,15 @@ void uArmClass::writeServoAngle(byte servo_number, double servo_angle, boolean w
 
 void uArmClass::writeLeftRightServoAngle(double servo_left_angle, double servo_right_angle, boolean writeWithoffset)
 {
-  servo_left_angle = constrain(servo_left_angle,0,140);
+  servo_left_angle = constrain(servo_left_angle,0,120);
   servo_right_angle = constrain(servo_right_angle,0,120);
   servo_left_angle = writeWithoffset ? round(inputToReal(SERVO_LEFT_NUM,servo_left_angle)): round(servo_left_angle);
   servo_right_angle = writeWithoffset ? round(inputToReal(SERVO_RIGHT_NUM,servo_right_angle)): round(servo_right_angle);
   // Serial.println(servo_left_angle);
   // Serial.println(servo_right_angle);
-  if(servo_left_angle + servo_right_angle > 160) 
+  if(servo_left_angle + servo_right_angle > 180) 
   {
-    servo_right_angle = 160 - servo_left_angle;
+    // servo_right_angle = 160 - servo_left_angle;
     alert(1, 10, 0);
     // delay(10);
     return;
