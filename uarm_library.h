@@ -21,8 +21,8 @@
 #define uArm_library_h
 
 #define UARM_MAJOR_VERSION		 1
-#define UARM_MINOR_VERSION		 3
-#define UARM_BUGFIX				 1
+#define UARM_MINOR_VERSION		 4
+#define UARM_BUGFIX				 0
 
 #define CALIBRATION_FLAG     0xEE
 

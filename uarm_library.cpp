@@ -74,11 +74,11 @@ void uArmClass::writeServoAngle(byte servo_number, double servo_angle, boolean w
   {
     case SERVO_ROT_NUM:       g_servo_rot.write(servo_angle);
                               break;
-    // case SERVO_LEFT_NUM:      
-                              // g_servo_left.write(servo_angle);
-                              // break;
-    // case SERVO_RIGHT_NUM:     g_servo_right.write(servo_angle);
-                              // break;
+    case SERVO_LEFT_NUM:      
+                              g_servo_left.write(servo_angle);
+                              break;
+    case SERVO_RIGHT_NUM:     g_servo_right.write(servo_angle);
+                              break;
     case SERVO_HAND_ROT_NUM:  g_servo_hand_rot.write(servo_angle);
                               break;                        
     default:                  break;
