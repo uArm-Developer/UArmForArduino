@@ -1,10 +1,11 @@
 /******************************************************************************
-* File Name          : uArm_Library_Metal.h
-* Author             : Joey Song
-* Updated            : Joey Song
-* Version            : V0.0.1 (BATE)
-* Created Date       : 12 Dec, 2014
-* Modified Date      : 17 Dec, 2015
+* File Name          : uArm_library.h
+* Author             : Joey Song  
+* Updated            : Joey Song, Alex Tan, Dave Corboy
+* Email              : joey@ufactory.cc
+* Version            : V1.3.1 
+* Date               : 12 Dec, 2014
+* Modified Date      : 11 Apr, 2016
 * Description        : 
 * License            : 
 * Copyright(C) 2014 UFactory Team. All right reserved.
@@ -18,6 +19,10 @@
 
 #ifndef uArm_library_h
 #define uArm_library_h
+
+#define UARM_MAJOR_VERSION		 1
+#define UARM_MINOR_VERSION		 3
+#define UARM_BUGFIX				 1
 
 #define CALIBRATION_FLAG     0xEE
 

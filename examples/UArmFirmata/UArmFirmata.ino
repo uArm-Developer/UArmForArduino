@@ -42,7 +42,7 @@ void setup()
 {
   // TODO - pass the version of this firmware rather than the Firmata protocol
   // version. Making that change now however may break compatibility.
-  Firmata.setFirmwareVersion(FIRMATA_MAJOR_VERSION, FIRMATA_MINOR_VERSION);
+  Firmata.setFirmwareVersion(UARM_MAJOR_VERSION, UARM_MINOR_VERSION);
   firmataExt.addFeature(reporting);
   firmataExt.addFeature(uarmCom);
   /* systemResetCallback is declared here (in ConfigurableFirmata.ino) */
