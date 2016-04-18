@@ -17,11 +17,12 @@
 #define READ_ANALOG                 (0X16)
 #define WRITE_ANALOG                (0X17)
 #define READ_EEPROM                 (0X1A)
-#define WRITE_EEPROM                (0X1B)  
+#define WRITE_EEPROM                (0X1B)
 #define SERVO_STATUS                (0X1C)
 #define PUMP_STATUS                 (0X1D)
 #define WRITE_STRETCH               (0X1E)
 #define WRITE_LEFT_RIGHT_ANGLE      (0X1F)
+#define GRIPPER_STATUS              (0X20)
 
 #include "EEPROM.h"
 #include "uarm_library.h"

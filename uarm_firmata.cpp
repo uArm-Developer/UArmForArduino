@@ -27,10 +27,10 @@ boolean UArmFirmata::handleSysex(byte command, byte argc, byte *argv)
       {
           Firmata.write(START_SYSEX);
           Firmata.write(UARM);
-          
+
           float angle = uarm.readAngle(servo_num,servo_offset);
           sendFloatAsThree7bitBytes(angle);
-          
+
           Firmata.write(END_SYSEX);
       }
       return true;
@@ -55,13 +55,13 @@ boolean UArmFirmata::handleSysex(byte command, byte argc, byte *argv)
           Firmata.write(START_SYSEX);
           Firmata.write(UARM);
           uarm.calXYZ();
-          float x = uarm.getCalX(); 
+          float x = uarm.getCalX();
           float y = uarm.getCalY();
           float z = uarm.getCalZ();
           sendFloatAsFour7bitBytes(x);
           sendFloatAsFour7bitBytes(y);
           sendFloatAsFour7bitBytes(z);
-   
+
           Firmata.write(END_SYSEX);
       }
       return true;
@@ -88,7 +88,7 @@ boolean UArmFirmata::handleSysex(byte command, byte argc, byte *argv)
       uarm.moveToOpts(x,y,z,hand_angle,relative_flags,time_spend,path_type,ease_type);
       delay(10);
     }
-   
+
     // CMD 14 Read Digital
     if (uarmCommand == READ_DIGITAL)
     {
@@ -102,7 +102,7 @@ boolean UArmFirmata::handleSysex(byte command, byte argc, byte *argv)
           pin_mode == 1 ? pinMode(pin_num, INPUT_PULLUP):pinMode(pin_num, INPUT);
 
           sendFloatAsOne7bitBytes(digitalRead(pin_num));
-          
+
           Firmata.write(END_SYSEX);
       }
       return true;
@@ -119,7 +119,7 @@ boolean UArmFirmata::handleSysex(byte command, byte argc, byte *argv)
 
       return true;
     }
-    
+
     // CMD 16 Read Analog
     if (uarmCommand == READ_ANALOG)
     {
@@ -130,7 +130,7 @@ boolean UArmFirmata::handleSysex(byte command, byte argc, byte *argv)
           Firmata.write(UARM);
 
           sendFloatAsTwo7bitBytes(analogRead(pin_num));
-          
+
           Firmata.write(END_SYSEX);
       }
       return true;
@@ -155,10 +155,10 @@ boolean UArmFirmata::handleSysex(byte command, byte argc, byte *argv)
       {
           Firmata.write(START_SYSEX);
           Firmata.write(UARM);
-          
+
           byte eeprom_val = EEPROM.read(eeprom_add);
           sendFloatAsTwo7bitBytes(eeprom_val);
-          
+
           Firmata.write(END_SYSEX);
       }
       return true;
@@ -170,7 +170,7 @@ boolean UArmFirmata::handleSysex(byte command, byte argc, byte *argv)
       byte eeprom_add = argv[1] + (argv[2] << 7);
       byte eeprom_val = argv[3] + (argv[4] << 7);
       EEPROM.write(eeprom_add,eeprom_val);
-       
+
       return true;
     }
 
@@ -187,6 +187,13 @@ boolean UArmFirmata::handleSysex(byte command, byte argc, byte *argv)
     {
       byte pump_status = argv[1];
       pump_status == 1 ? uarm.pumpOn():uarm.pumpOff();
+      return true;
+    }
+    // CMD 20 GRIPPER Status
+    if (uarmCommand == GRIPPER_STATUS)
+    {
+      byte gripper_status = argv[1];
+      gripper_status == 1 ? uarm.gripperCatch():uarm.gripperRelease();
       return true;
     }
 
@@ -207,7 +214,7 @@ boolean UArmFirmata::handleSysex(byte command, byte argc, byte *argv)
       boolean withOffset = argv[7];
       uarm.writeLeftRightServoAngle(left,right, withOffset);
       return true;
-    }    
+    }
 
   }
   return false;
@@ -216,12 +223,12 @@ boolean UArmFirmata::handleSysex(byte command, byte argc, byte *argv)
 
 void UArmFirmata::reset()
 {
-  
+
 }
 
 void UArmFirmata::report()
 {
- 
+
 }
 
 
@@ -232,7 +239,7 @@ boolean UArmFirmata::handlePinMode(byte pin, int mode)
 
 void UArmFirmata::handleCapability(byte pin)
 {
- 
+
 }
 
 void UArmFirmata::sendFloatAsFour7bitBytes(float val){

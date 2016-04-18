@@ -1,13 +1,13 @@
 /******************************************************************************
 * File Name          : uArm_library.cpp
-* Author             : Joey Song  
+* Author             : Joey Song
 * Updated            : Joey Song, Alex Tan, Dave Corboy
 * Email              : joey@ufactory.cc
-* Version            : V1.3.1 
+* Version            : V1.3.1
 * Date               : 12 Dec, 2014
 * Modified Date      : 11 Apr, 2016
-* Description        : 
-* License            : 
+* Description        :
+* License            :
 * Copyright(C) 2014 UFactory Team. All right reserved.
 *******************************************************************************/
 
@@ -27,6 +27,8 @@ uArmClass::uArmClass()
   g_offset_old_servo_right = EEPROM.read(4);
   if(EEPROM.read(3) == 1)
     g_offset_old_servo_right = -g_offset_old_servo_right;
+
+  g_gripper_reset= false;
 }
 
 void uArmClass::init()
@@ -74,13 +76,13 @@ void uArmClass::writeServoAngle(byte servo_number, double servo_angle, boolean w
   {
     case SERVO_ROT_NUM:       g_servo_rot.write(servo_angle);
                               break;
-    case SERVO_LEFT_NUM:      
+    case SERVO_LEFT_NUM:
                               g_servo_left.write(servo_angle);
                               break;
     case SERVO_RIGHT_NUM:     g_servo_right.write(servo_angle);
                               break;
     case SERVO_HAND_ROT_NUM:  g_servo_hand_rot.write(servo_angle);
-                              break;                        
+                              break;
     default:                  break;
   }
 }
@@ -93,7 +95,7 @@ void uArmClass::writeLeftRightServoAngle(double servo_left_angle, double servo_r
   servo_right_angle = writeWithoffset ? round(inputToReal(SERVO_RIGHT_NUM,servo_right_angle)): round(servo_right_angle);
   // Serial.println(servo_left_angle);
   // Serial.println(servo_right_angle);
-  if(servo_left_angle + servo_right_angle > 180) 
+  if(servo_left_angle + servo_right_angle > 180)
   {
     // servo_right_angle = 160 - servo_left_angle;
     alert(1, 10, 0);
@@ -101,7 +103,7 @@ void uArmClass::writeLeftRightServoAngle(double servo_left_angle, double servo_r
     return;
   }
     attachServo(SERVO_LEFT_NUM);
-    attachServo(SERVO_RIGHT_NUM);    
+    attachServo(SERVO_RIGHT_NUM);
     g_servo_left.write(servo_left_angle);
     g_servo_right.write(servo_right_angle);
 }
@@ -109,13 +111,13 @@ void uArmClass::writeLeftRightServoAngle(double servo_left_angle, double servo_r
 void uArmClass::writeAngle(double servo_rot_angle, double servo_left_angle, double servo_right_angle, double servo_hand_rot_angle)
 {
   attachAll();
-  
+
   if(servo_left_angle < 10) servo_left_angle = 10;
   if(servo_left_angle > 120) servo_left_angle = 120;
   if(servo_right_angle < 10) servo_right_angle = 10;
   if(servo_right_angle > 110) servo_right_angle = 110;
 
-  if(servo_left_angle + servo_right_angle > 160) 
+  if(servo_left_angle + servo_right_angle > 160)
   {
     servo_right_angle = 160 - servo_left_angle;
     return;
@@ -124,7 +126,7 @@ void uArmClass::writeAngle(double servo_rot_angle, double servo_left_angle, doub
   writeServoAngle(SERVO_LEFT_NUM,servo_left_angle,true);
   writeServoAngle(SERVO_RIGHT_NUM,servo_right_angle,true);
   writeServoAngle(SERVO_HAND_ROT_NUM,servo_hand_rot_angle,true);
-  
+
 
   // refresh logical servo angle cache
   cur_rot = servo_rot_angle;
@@ -144,7 +146,7 @@ void uArmClass::attachAll()
 void uArmClass::attachServo(byte servo_number)
 {
   switch(servo_number){
-    case SERVO_ROT_NUM: 
+    case SERVO_ROT_NUM:
     if(!g_servo_rot.attached()) {
       g_servo_rot.attach(SERVO_ROT_PIN);
       cur_rot = readAngle(SERVO_ROT_NUM);
@@ -160,14 +162,14 @@ void uArmClass::attachServo(byte servo_number)
     if (!g_servo_right.attached()) {
       g_servo_right.attach(SERVO_RIGHT_PIN);
       cur_right = readAngle(SERVO_RIGHT_NUM);
-    } 
+    }
     break;
     case SERVO_HAND_ROT_NUM:
     if (!g_servo_hand_rot.attached()) {
       g_servo_hand_rot.attach(SERVO_HAND_PIN);
       cur_hand = readAngle(SERVO_HAND_ROT_NUM);
     }
-    break;    
+    break;
   }
 }
 
@@ -217,11 +219,11 @@ void uArmClass::saveDataToRom(double data, int address)
     dataWhole = (int) (data*10);
   }
 
-  if (dataWhole > 0){ 
+  if (dataWhole > 0){
     Byte0 = 1;
   }
-  else{ 
-    Byte0 =0; 
+  else{
+    Byte0 =0;
   }
 
   dataWhole = abs(dataWhole);
@@ -352,7 +354,7 @@ void uArmClass::calAngles(double x, double y, double z)
     }
     if (y == 0) {
       if (x > 0) g_theta_1 = 180;
-      else g_theta_1 = 0;       
+      else g_theta_1 = 0;
     }
 
     // Calculate value of theta 3
@@ -363,7 +365,7 @@ void uArmClass::calAngles(double x, double y, double z)
 
     else{ phi = atan(-x_in / z_in)*MATH_TRANS; }
 
-    if (phi > 0) {phi = phi - 180;}  
+    if (phi > 0) {phi = phi - 180;}
 
     sqrt_z_x = sqrt(z_in*z_in + x_in*x_in);
 
@@ -387,7 +389,7 @@ void uArmClass::calAngles(double x, double y, double z)
     if ((calYonly(g_theta_1,g_theta_2, g_theta_3)>y+0.1)||(calYonly(g_theta_1,g_theta_2, g_theta_3)<y-0.1))
     {
       g_theta_2 = 180 - g_theta_2;
-    }  
+    }
   }
 
   if(isnan(g_theta_1)||isinf(g_theta_1))
@@ -420,7 +422,7 @@ void uArmClass::calAngles(double x, double y, double z)
 
 //   // cal local theta_3
 //   double l_theta_3 = asin(l_e)+l_phi;  // cal theta_2
-  
+
 //   l_theta_3 = (l_theta_3 < -MATH_PI/2 ||l_theta_3 == -MATH_PI/2) ? l_theta_3+MATH_PI:l_theta_3; // set the range correctly
 //   l_theta_3 = round(l_theta_3 * MATH_TRANS) == -90 ? MATH_PI/2 : l_theta_3;  // set special case
 
@@ -456,7 +458,7 @@ void uArmClass::writeStretch(double armStretch, double armHeight){
   double yyy = ARM_A2-ARM_B2+xx;
   double angleA =acos((armStretch*yyy-armHeight*sqrt(4.0*ARM_A2*xx-yyy*yyy))/(xx*2.0*ARM_A))* RAD_TO_DEG;
   int angleR =(int)(angleB + offsetR - 4);//int angleR =angleB + 40 + offsetR;
-  int angleL =(int)(angleA + offsetL + 16);//int angleL =25 + angleA + offsetL; 
+  int angleL =(int)(angleA + offsetL + 16);//int angleL =25 + angleA + offsetL;
   angleL = constrain(angleL, 5 + offsetL, 145 + offsetL);
   // writeServoAngle(SERVO_LEFT_NUM, angleL,1);
   // writeServoAngle(SERVO_RIGHT_NUM,angleR,1);
@@ -556,7 +558,7 @@ void uArmClass::moveToOpts(double x, double y, double z, double hand_angle, byte
   } else if (relative_flags & F_HAND_ROT_REL) {
     hand_angle = hand_angle + cur_hand + (tgt_rot - cur_rot);   // rotates relative to base servo, 0 value keeps an object aligned through movement
   }
-  
+
   if (time > 0) {
     if (path_type == PATH_ANGLES) {
       // we will calculate angle value targets
@@ -612,10 +614,8 @@ double uArmClass::calYonly(double theta_1, double theta_2, double theta_3)
 
 void uArmClass::gripperCatch()
 {
-  g_servo_hand.attach(SERVO_HAND);
-  g_servo_hand.write(HAND_ANGLE_CLOSE);
-  digitalWrite(VALVE_EN, LOW); // valve disable
-  digitalWrite(PUMP_EN, HIGH); // pump enable
+  pinMode(GRIPPER, OUTPUT);
+  digitalWrite(GRIPPER, LOW); // gripper enable
   g_gripper_reset = true;
 }
 
@@ -623,10 +623,8 @@ void uArmClass::gripperRelease()
 {
   if(g_gripper_reset)
   {
-    g_servo_hand.attach(SERVO_HAND);
-    g_servo_hand.write(HAND_ANGLE_OPEN);
-    digitalWrite(VALVE_EN, HIGH); // valve enable, decompression
-    digitalWrite(PUMP_EN, LOW);   // pump disable
+    pinMode(GRIPPER, OUTPUT);
+    digitalWrite(GRIPPER, HIGH); // gripper enable
     g_gripper_reset= false;
   }
 }

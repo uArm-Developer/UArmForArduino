@@ -1,13 +1,13 @@
 /******************************************************************************
 * File Name          : uArm_library.h
-* Author             : Joey Song  
+* Author             : Joey Song
 * Updated            : Joey Song, Alex Tan, Dave Corboy
 * Email              : joey@ufactory.cc
-* Version            : V1.3.1 
+* Version            : V1.3.1
 * Date               : 12 Dec, 2014
 * Modified Date      : 11 Apr, 2016
-* Description        : 
-* License            : 
+* Description        :
+* License            :
 * Copyright(C) 2014 UFactory Team. All right reserved.
 *******************************************************************************/
 
@@ -22,7 +22,7 @@
 
 #define UARM_MAJOR_VERSION		 1
 #define UARM_MINOR_VERSION		 4
-#define UARM_BUGFIX				 0
+#define UARM_BUGFIX				 1
 
 #define CALIBRATION_FLAG     0xEE
 
@@ -30,6 +30,7 @@
 #define SERVO_LEFT_NUM          2
 #define SERVO_RIGHT_NUM         3
 #define SERVO_HAND_ROT_NUM      4
+
 
 #define SERVO_ROT_PIN 			11
 #define SERVO_LEFT_PIN          13
@@ -56,7 +57,7 @@
 
 
 // Action control
-#define SERVO_HAND              9
+// #define SERVO_HAND              9
 #define HAND_ANGLE_OPEN        25
 #define HAND_ANGLE_CLOSE       70
 
@@ -66,6 +67,7 @@
 #define BUZZER                  3    // HIGH = ON
 #define BTN_D4                  4    // LOW = Pressed
 #define BTN_D7                  7    // LOW = Pressed
+#define GRIPPER                 9    // LOW = Catch
 
 #define MATH_PI	3.141592653589793238463
 #define MATH_TRANS  57.2958
@@ -108,7 +110,7 @@
 #define INTERP_EASE_OUT         4
 
 
-class uArmClass 
+class uArmClass
 {
 public:
 	uArmClass();
@@ -169,7 +171,6 @@ public:
 	Servo g_servo_left;
 	Servo g_servo_right;
 	Servo g_servo_hand_rot;
-	Servo g_servo_hand;
 
 	double g_offset_servo_rot;
 	double g_offset_servo_left;
@@ -197,7 +198,7 @@ protected:
 	double g_cal_x;
 	double g_cal_y;
 	double g_cal_z;
-		
+
 	boolean g_gripper_reset;
 
 // action control end
@@ -210,4 +211,3 @@ private:
 extern uArmClass uarm;
 
 #endif
-
