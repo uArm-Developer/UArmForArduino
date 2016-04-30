@@ -1,13 +1,30 @@
-## [1.4.1] - 2016-04-18
+## [1.5.2] - 2016-04-29
 
 ### Changes
 
-- Support Gripper (PIN:9) Method DigitalWrite(), LOW - Catch, HIGH - Release
+- Add Example, MoveTest, GetXYZ, Recording Mode
 
-- Delete Calibration part (Move To python GUI tool)
 
-- ToDo: remove LEFT & RIGHT ANGLE from WriteServoAngle (For Safety)
+## [1.5.2] - 2016-04-29
 
+### Changes
+
+- Cancel v.1.5.0 read offset from EEPROM.
+
+
+## [1.5.0] - 2016-04-14
+
+### Changes
+
+- Initialize servo offset & linear offset from EEPROM to global values, prevent read EEPROM every time
+
+- Use [EEPROM.get()][a4e46a5d] & [EEPROM.put()][275bf48d] to read & write value in EEPROM instead of saveDataToRom()
+
+  [a4e46a5d]: https://www.arduino.cc/en/Reference/EEPROMGet "EEPROM.get()"
+  [275bf48d]: https://www.arduino.cc/en/Reference/EEPROMPut "EEPROM.put()"
+
+- rename function readToAngle to analogToAngle
+- Change Offset address in EEPROM
 
 ## [1.4.0] - 2016-04-12
 
