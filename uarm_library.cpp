@@ -20,18 +20,11 @@ uArmClass::uArmClass()
 
 }
 
-void uArmClass::readServoOffset(){
-        // Serial.println(g_linear_servo_rot_intercept);
-        // Serial.println(g_linear_servo_left_intercept);
-        // Serial.println(g_linear_servo_right_intercept);
-        // Serial.println(g_linear_servo_hand_intercept);
-        //
-        // Serial.println(g_linear_servo_rot_slope);
-        // Serial.println(g_linear_servo_left_slope);
-        // Serial.println(g_linear_servo_right_slope);
-        // Serial.println(g_linear_servo_hand_slope);
-}
-
+/* Use BUZZER for Alert
+* times - how many times
+* runTime - how long one time last when BUZZER speak
+* stopTime - Close BUZZER time
+*/
 void uArmClass::alert(byte times, byte runTime, byte stopTime)
 {
         for(int ct=0; ct < times; ct++)
@@ -44,47 +37,49 @@ void uArmClass::alert(byte times, byte runTime, byte stopTime)
 }
 
 
-/* The code below is written by jerry song */
-
+/* Write the angle to Servo
+* servo_number - SERVO_ROT_NUM, SERVO_LEFT_NUM, SERVO_RIGHT_NUM, SERVO_HAND_ROT_NUM
+* servo_angle  - Servo target angle
+* writeWithoffset - True: with Offset, False: without Offset
+*/
 void uArmClass::writeServoAngle(byte servo_number, double servo_angle, boolean writeWithoffset)
 {
-        // Serial.println(servo_angle);
         attachServo(servo_number);
         servo_angle = writeWithoffset ? round(inputToReal(servo_number,servo_angle)) : round(servo_angle);
         servo_angle = constrain(servo_angle,0,180);
         switch(servo_number)
         {
         case SERVO_ROT_NUM:       g_servo_rot.write(servo_angle);
-                // cur_rot = readAngle(SERVO_ROT_NUM);
                 cur_rot = servo_angle;
                 break;
         case SERVO_LEFT_NUM:      g_servo_left.write(servo_angle);
-                // cur_left = readAngle(SERVO_LEFT_NUM);
                 cur_left = servo_angle;
                 break;
         case SERVO_RIGHT_NUM:     g_servo_right.write(servo_angle);
-                // cur_right = readAngle(SERVO_RIGHT_NUM);
                 cur_right = servo_angle;
                 break;
         case SERVO_HAND_ROT_NUM:  g_servo_hand_rot.write(servo_angle);
-                // cur_hand = readAngle(SERVO_HAND_ROT_NUM);
                 cur_hand = servo_angle;
                 break;
         default:                  break;
         }
 }
 
+
+/* Write the left Servo & Right Servo in the same time (Avoid demage the Servo)
+* servo_left_angle - left servo target angle
+* servo_right_angle  - right servo target angle
+* writeWithoffset - True: with Offset, False: without Offset
+*/
 void uArmClass::writeLeftRightServoAngle(double servo_left_angle, double servo_right_angle, boolean writeWithoffset)
 {
         servo_left_angle = constrain(servo_left_angle,0,150);
         servo_right_angle = constrain(servo_right_angle,0,120);
         servo_left_angle = writeWithoffset ? round(inputToReal(SERVO_LEFT_NUM,servo_left_angle)) : round(servo_left_angle);
         servo_right_angle = writeWithoffset ? round(inputToReal(SERVO_RIGHT_NUM,servo_right_angle)) : round(servo_right_angle);
-        if(servo_left_angle + servo_right_angle > 180)
+        if(servo_left_angle + servo_right_angle > 180) // if left angle & right angle exceed 180 degree, it might be caused damage
         {
-                // servo_right_angle = 160 - servo_left_angle;
                 alert(1, 10, 0);
-                // delay(10);
                 return;
         }
         attachServo(SERVO_LEFT_NUM);
@@ -93,6 +88,8 @@ void uArmClass::writeLeftRightServoAngle(double servo_left_angle, double servo_r
         g_servo_right.write(servo_right_angle);
 }
 
+/* Warning, if you attach left servo & right servo without a movement, it might be caused a demage
+*/
 void uArmClass::attachAll()
 {
         attachServo(SERVO_ROT_NUM);
@@ -101,6 +98,9 @@ void uArmClass::attachAll()
         attachServo(SERVO_HAND_ROT_NUM);
 }
 
+/* Attach Servo by given servo number, SERVO_ROT_NUM, SERVO_LEFT_NUM, SERVO_RIGHT_NUM
+* if servo has not been attached, attach the servo, and read the current Angle
+*/
 void uArmClass::attachServo(byte servo_number)
 {
         switch(servo_number) {
@@ -131,6 +131,8 @@ void uArmClass::attachServo(byte servo_number)
         }
 }
 
+/* Detach All servo, you could move the arm
+*/
 void uArmClass::detachAll()
 {
         g_servo_rot.detach();
@@ -139,11 +141,15 @@ void uArmClass::detachAll()
         g_servo_hand_rot.detach();
 }
 
+/* get a input angle with servo Offset
+*/
 byte uArmClass::inputToReal(byte servo_num,byte input_angle)
 {
         return (byte)constrain(round((input_angle + readServoOffset(servo_num))),0,180);
 }
 
+/* Read the servo offset from EEPROM, From OFFSET_START_ADDRESS, each offset occupy 4 bytes in rom
+*/
 double uArmClass::readServoOffset(byte servo_num)
 {
         double linear_offset = 0.0f;
@@ -151,33 +157,37 @@ double uArmClass::readServoOffset(byte servo_num)
         return linear_offset;
 }
 
-/** read Linear Offset from EEPROM
+/** read Linear Offset from EEPROM,
+** From LINEAR_INTERCEPT_START_ADDRESS & LINEAR_SLOPE_START_ADDRESS, each offset occupy 4 bytes in rom
  **/
 void uArmClass::readLinearOffset(byte servo_num, double& intercept_val, double& slope_val){
         EEPROM.get(LINEAR_INTERCEPT_START_ADDRESS + servo_num * sizeof(intercept_val), intercept_val);
         EEPROM.get(LINEAR_SLOPE_START_ADDRESS + servo_num * sizeof(slope_val), slope_val);
 }
 
+/** Convert the Analog to Servo Angle, by this formatter
+** angle = intercept + slope * analog
+**/
 double uArmClass::analogToAngle(int input_analog, byte servo_num, boolean withOffset)
 {
         double intercept = 0.0f;
         double slope = 0.0f;
         readLinearOffset(servo_num, intercept, slope);
-
-         // readLinearOffset(servo_num, LINEAR_SLOPE);
         double angle = intercept + slope*input_analog;
-        // Serial.println(input_analog);
-        // Serial.println(intercept);
-        // Serial.println(slope);
-        // Serial.println(angle);
         return withOffset ? angle - readServoOffset(servo_num) : angle;
 }
 
+/** read Angle by servo_num, SERVO_ROT_NUM, SERVO_LEFT_NUM, SERVO_RIGHT_NUM, SERVO_HAND_ROT_NUM
+** without offset
+**/
 double uArmClass::readAngle(byte servo_num)
 {
         return readAngle(servo_num, false);
 }
 
+/** read Angle by servo_num, SERVO_ROT_NUM, SERVO_LEFT_NUM, SERVO_RIGHT_NUM, SERVO_HAND_ROT_NUM
+** withOffset - True: with Offset, False: Without Offset
+**/
 double uArmClass::readAngle(byte servo_num, boolean withOffset)
 {
         switch (servo_num)
@@ -206,6 +216,8 @@ double uArmClass::readAngle(byte servo_num, boolean withOffset)
 
 /*Action control */
 
+/** Calculate the angles from given coordinate x, y, z to theta_1, theta_2, theta_3
+**/
 void uArmClass::calAngles(double x, double y, double z, double& theta_1, double& theta_2, double& theta_3)
 {
         if (z > (MATH_L1 + MATH_L3 + TopOffset))
@@ -319,25 +331,16 @@ void uArmClass::calAngles(double x, double y, double z, double& theta_1, double&
         {theta_3 = uarm.readAngle(SERVO_RIGHT_NUM); }
 }
 
+/** This is an old control method to uArm.
+** Using uarm's Stretch and height
+** Stretch from 0 to 195
+** Height from -180 to 150
+**/
 void uArmClass::writeStretch(double armStretch, double armHeight){
         if(EEPROM.read(CALIBRATION_STRETCH_FLAG) != CALIBRATION_STRETCH_FLAG) {
                 alert(3, 200, 200);
                 return;
         }
-
-        // Serial.println(armStretch);
-        // Serial.println(armHeight);
-
-        // if(!digitalRead(LIMIT_SW))//limit switch protection
-        // {
-        //         // alert(1, 10, 0);
-        //         if(armHeight < heightLst)
-        //         {
-        //                 armHeight = heightLst;
-        //         }
-        // }
-
-
         double offsetL = 0;
         double offsetR = 0;
         EEPROM.get(OFFSET_STRETCH_START_ADDRESS + 1 * sizeof(offsetL), offsetL);
@@ -352,21 +355,14 @@ void uArmClass::writeStretch(double armStretch, double armHeight){
         int angleR =(int)(angleB + offsetR - 4);//int angleR =angleB + 40 + offsetR;
         int angleL =(int)(angleA + offsetL + 16);//int angleL =25 + angleA + offsetL;
         angleL = constrain(angleL, 5 + offsetL, 145 + offsetL);
-        // writeServoAngle(SERVO_LEFT_NUM, angleL,1);
-        // writeServoAngle(SERVO_RIGHT_NUM,angleR,1);
         writeLeftRightServoAngle(angleL,angleR,true);
 }
 
-
-// void uArmClass::calStretch(double theta_2, double theta_3, double & l_length_get, double & l_height_get)
-// {
-//         l_length_get = cos(theta_2)*MATH_L3 + cos(theta_3)*MATH_L4;
-//         l_height_get = sin(theta_2)*MATH_L3 - sin(theta_3)*MATH_L4;
-// }
-
+/** Calculate the X Y Z by given theta_1, theta_2, theta_3
+**
+**/
 void uArmClass::calXYZ(double theta_1, double theta_2, double theta_3)
 {
-
         double l5 = (MATH_L2 + MATH_L3*cos(theta_2 / MATH_TRANS) + MATH_L4*cos(theta_3 / MATH_TRANS));
 
         g_cal_x = -cos(abs(theta_1 / MATH_TRANS))*l5;
@@ -374,6 +370,8 @@ void uArmClass::calXYZ(double theta_1, double theta_2, double theta_3)
         g_cal_z = MATH_L1 + MATH_L3*sin(abs(theta_2 / MATH_TRANS)) - MATH_L4*sin(abs(theta_3 / MATH_TRANS));
 }
 
+/** Overload calXYZ()
+**/
 void uArmClass::calXYZ()
 {
         calXYZ(
@@ -382,6 +380,8 @@ void uArmClass::calXYZ()
                 uarm.analogToAngle(analogRead(SERVO_RIGHT_ANALOG_PIN),SERVO_RIGHT_NUM,false));
 }
 
+/** Action Control: Genernate the position array
+**/
 void uArmClass::interpolate(double start_val, double end_val, double (&interp_vals)[INTERP_INTVLS], byte ease_type) {
         double delta = end_val - start_val;
         for (byte f = 0; f < INTERP_INTVLS; f++) {
@@ -521,13 +521,14 @@ void uArmClass::moveToOpts(double x, double y, double z, double hand_angle, byte
 
 double uArmClass::calYonly(double theta_1, double theta_2, double theta_3)
 {
-        //g_l3_1_2 = MATH_L3 * cos(theta_2 / MATH_TRANS);
-        //g_l4_1_2 = MATH_L4*cos(theta_3 / MATH_TRANS);
         double l5_2 = (MATH_L2 + MATH_L3*cos(theta_2 / MATH_TRANS) + MATH_L4*cos(theta_3 / MATH_TRANS));
 
         return -sin(abs(theta_1 / MATH_TRANS))*l5_2;
 }
 
+/**
+Control the Gripper Catch
+**/
 void uArmClass::gripperCatch()
 {
         pinMode(GRIPPER, OUTPUT);
@@ -535,6 +536,9 @@ void uArmClass::gripperCatch()
         g_gripper_reset = true;
 }
 
+/**
+Control the Gripper Release
+**/
 void uArmClass::gripperRelease()
 {
         if(g_gripper_reset)
@@ -545,7 +549,9 @@ void uArmClass::gripperRelease()
         }
 }
 
-/* Action Control */
+/**
+Turn on the Pump
+**/
 void uArmClass::pumpOn()
 {
 
@@ -555,6 +561,9 @@ void uArmClass::pumpOn()
         digitalWrite(PUMP_EN, HIGH);
 }
 
+/**
+Turn off the Pump
+**/
 void uArmClass::pumpOff()
 {
         pinMode(PUMP_EN, OUTPUT);

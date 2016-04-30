@@ -118,13 +118,11 @@ class uArmClass
 public:
         uArmClass();
 
-        void readServoOffset();
         double readServoOffset(byte servo_num);
         void readLinearOffset(byte servo_num, double& intercept_val, double& slope_val);
         void detachServo(byte servo_num);
         void alert(byte times, byte runTime, byte stopTime);
         void detachAll();
-        // void writeAngle(double servo_rot_angle, double servo_left_angle, double servo_right_angle, double servo_hand_rot_angle);
         void writeServoAngle(byte servoNumber, double servoAngle,  boolean writeWithoffset);
         void writeLeftRightServoAngle(double servo_left_angle, double servo_right_angle, boolean writeWithoffset);
         byte inputToReal(byte servo_num, byte input_angle);
@@ -132,11 +130,7 @@ public:
         double readAngle(byte servo_num, boolean withOffset);
         double analogToAngle(int input_angle, byte servo_num, boolean withOffset);
         void writeAngle(byte servo_rot_angle, byte servo_left_angle, byte servo_right_angle, byte servo_hand_rot_angle, byte trigger);
-        // void writeAngle(byte servo_rot_angle, byte servo_left_angle, byte servo_right_angle);
 
-
-
-// Action control start
         void moveToOpts(double x, double y, double z, double hand_angle, byte relative_flags, double time, byte path_type, byte ease_type);
         void moveTo(double x, double y,double z) {
                 moveToOpts(x, y, z, 0, F_HAND_RELATIVE, 2.0, PATH_LINEAR, INTERP_EASE_INOUT_CUBIC);
@@ -155,17 +149,7 @@ public:
         }
 
         void writeStretch(double armStretch, double armHeight);
-        // void calStretch(double theta_2, double theta_3, double & l_lenght_get, double & l_height_get);
 
-        // double getTheta1() const {
-        //         return g_theta_1;
-        // }
-        // double getTheta2() const {
-        //         return g_theta_2;
-        // }
-        // double getTheta3() const {
-        //         return g_theta_3;
-        // }
 
         double getCalX() {
                 return g_cal_x;
@@ -184,9 +168,6 @@ public:
         }
 
         void calAngles(double x, double y, double z, double& theta_1, double& theta_2, double& theta_3);
-        // void getCalAngles(double x, double y, double z, double& theta_1, double& theta_2, double& theta_3) {
-        //         calAngles(x, y, z); theta_1 = g_theta_1; theta_2 = g_theta_2; theta_3 = g_theta_3;
-        // }
 
         void calXYZ(double theta_1, double theta_2, double theta_3);
         void calXYZ();
@@ -203,29 +184,6 @@ public:
         Servo g_servo_hand_rot;
         Servo g_servo_hand;
 
-        // // Servo offset
-        // double g_offset_servo_rot;
-        // double g_offset_servo_left;
-        // double g_offset_servo_right;
-        //
-        // // Servo Linear Offset
-        // double g_linear_servo_rot_intercept;
-        // double g_linear_servo_rot_slope;
-        // double g_linear_servo_left_intercept;
-        // double g_linear_servo_left_slope;
-        // double g_linear_servo_right_intercept;
-        // double g_linear_servo_right_slope;
-        // double g_linear_servo_hand_intercept;
-        // double g_linear_servo_hand_slope;
-
-        // for old method control offset
-        // double g_offset_old_servo_left;
-        // double g_offset_old_servo_right;
-        // boolean isCalibrated;
-        // boolean isStretchCalibrated;
-        // boolean isLinearCalibrated;
-        // boolean isManualCalibrated;
-
 protected:
         void attachAll();
         void attachServo(byte servo_num);
@@ -233,25 +191,14 @@ protected:
         double cur_left;
         double cur_right;
         double cur_hand;
-        // double getInterPolValueArray(int num) const {return g_interpol_val_arr[10];}
         double calYonly(double theta_1, double theta_2, double theta_3);
-
-        // double g_theta_1;
-        // double g_theta_2;
-        // double g_theta_3;
 
         double g_cal_x;
         double g_cal_y;
         double g_cal_z;
 
-        // double heightLst;
-
         boolean g_gripper_reset;
 
-// action control end
-private:
-        /*****************  Define variables  *****************/
-        // unsigned int addr;
 };
 
 extern uArmClass uarm;
