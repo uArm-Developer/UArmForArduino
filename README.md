@@ -12,9 +12,11 @@ Specification Please read Documentation Center /API
 ## Installation
 - Download [Arduino IDE][622f1188]
 - Clone the source code into your computer.
-- Unzip and Copy to `~/Documents/Arduino/libraries/` or `%userprofile%\Documents\Arduino\libraries\`
+- Open Arduino IDE, import the zip as library. Please refer this [Import Library][8cd4af00]
 - Upload the example to your uArm, Please refer this [Upload Guide][8f51bc38]
-- You need to recalibrate your uArm after upload this Guide. We recommend you use our GUI Calibration Tool.
+- You need to recalibrate When you are new to this library. We recommend the GUI Calibration tool.
+
+  [8cd4af00]: https://www.arduino.cc/en/Guide/Libraries "Import Library"
 
 
   [3]: http://developer.ufactory.cc/quickstart/arduino/
