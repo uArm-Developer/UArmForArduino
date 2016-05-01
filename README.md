@@ -11,7 +11,8 @@ Specification Please read Documentation Center /API
 
 ## Installation
 
-### Library Manager *Recommend*
+### Library Manager
+*Recommend*
 
 - Download [Arduino IDE][622f1188]  
 - Import the uArm Library (search uArmLibrary) using Library Manager.
