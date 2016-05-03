@@ -22,7 +22,7 @@
 
 #define UARM_MAJOR_VERSION      1
 #define UARM_MINOR_VERSION      5
-#define UARM_BUGFIX             2
+#define UARM_BUGFIX             3
 
 #define SERVO_ROT_NUM           0
 #define SERVO_LEFT_NUM          1
@@ -85,6 +85,7 @@
 #define LINEAR_SLOPE_START_ADDRESS          50
 #define OFFSET_START_ADDRESS                30
 #define OFFSET_STRETCH_START_ADDRESS        20
+#define SERIAL_NUMBER_ADDRESS               1024
 
 
 
@@ -109,7 +110,7 @@
 #define INTERP_EASE_IN          3
 #define INTERP_EASE_OUT         4
 
-#define LINEAR_INTERCEPT          1
+#define LINEAR_INTERCEPT        1
 #define LINEAR_SLOPE            2
 
 
@@ -119,6 +120,8 @@ public:
         uArmClass();
 
         double readServoOffset(byte servo_num);
+        void readSerialNumber(byte (&byte_sn_array)[14]);
+        void writeSerialNumber(byte (&byte_sn_array)[14]);
         void readLinearOffset(byte servo_num, double& intercept_val, double& slope_val);
         void detachServo(byte servo_num);
         void alert(byte times, byte runTime, byte stopTime);

@@ -20,6 +20,24 @@ uArmClass::uArmClass()
 
 }
 
+/* Read Serial Number from EEPROM
+* SERIAL NUMBER ADDRESS : 1024, Size: 14
+*/
+void uArmClass::readSerialNumber(byte (&byte_sn_array)[14]){
+  for(byte i=0; i<14; i++){
+    byte_sn_array[i] = EEPROM.read(SERIAL_NUMBER_ADDRESS+i);
+  }
+}
+
+/* Write Serial Number to EEPROM
+* SERIAL NUMBER ADDRESS : 1024, Size: 14
+*/
+void uArmClass::writeSerialNumber(byte (&byte_sn_array)[14]){
+  for(byte i=0; i<14; i++){
+    EEPROM.write(SERIAL_NUMBER_ADDRESS+i, byte_sn_array[i]);
+  }
+}
+
 /* Use BUZZER for Alert
 * times - how many times
 * runTime - how long one time last when BUZZER speak

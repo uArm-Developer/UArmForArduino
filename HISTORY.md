@@ -1,3 +1,10 @@
+## [1.5.3] - 2016-05-02
+
+### Changes
+
+- Add readSerialNumber & writeSerialNumber function
+
+
 ## [1.5.2] - 2016-04-29
 
 ### Changes
