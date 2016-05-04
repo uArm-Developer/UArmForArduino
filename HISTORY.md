@@ -1,8 +1,14 @@
+## [1.5.4] - 2016-05-02
+
+### Fix
+
+- if SERIAL_NUMBER_ADDRESS equal SERIAL_NUMBER_ADDRESS, then Serial Number exist in EEPROM
+
 ## [1.5.3] - 2016-05-02
 
 ### Changes
 
-- Add readSerialNumber & writeSerialNumber function
+- Add readSerialNumber & writeSerialNumber function (Serial Number: Address 1024, size:14)
 
 
 ## [1.5.2] - 2016-04-29

@@ -3,9 +3,6 @@
  * Author             : Joey Song
  * Updated            : Joey Song, Alex Tan, Dave Corboy
  * Email              : joey@ufactory.cc
- * Version            : V1.5.2
- * Date               : 12 Dec, 2014
- * Modified Date      : 18 Apr, 2016
  * Description        :
  * License            :
  * Copyright(C) 2016 UFactory Team. All right reserved.
@@ -24,18 +21,21 @@ uArmClass::uArmClass()
 * SERIAL NUMBER ADDRESS : 1024, Size: 14
 */
 void uArmClass::readSerialNumber(byte (&byte_sn_array)[14]){
-  for(byte i=0; i<14; i++){
-    byte_sn_array[i] = EEPROM.read(SERIAL_NUMBER_ADDRESS+i);
-  }
+        if (EEPROM.read(SERIAL_NUMBER_ADDRESS) == SERIAL_NUMBER_ADDRESS){
+            for(byte i=0; i<14; i++){
+                      byte_sn_array[i] = EEPROM.read(SERIAL_NUMBER_ADDRESS+i+1);
+            }
+        }
 }
 
 /* Write Serial Number to EEPROM
 * SERIAL NUMBER ADDRESS : 1024, Size: 14
 */
 void uArmClass::writeSerialNumber(byte (&byte_sn_array)[14]){
-  for(byte i=0; i<14; i++){
-    EEPROM.write(SERIAL_NUMBER_ADDRESS+i, byte_sn_array[i]);
-  }
+        for(byte i=0; i<14; i++){
+                EEPROM.write(SERIAL_NUMBER_ADDRESS+i+1, byte_sn_array[i]);
+        }
+        EEPROM.write(SERIAL_NUMBER_ADDRESS, SERIAL_NUMBER_ADDRESS);
 }
 
 /* Use BUZZER for Alert
