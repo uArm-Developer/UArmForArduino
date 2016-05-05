@@ -21,7 +21,7 @@ uArmClass::uArmClass()
 * SERIAL NUMBER ADDRESS : 1024, Size: 14
 */
 void uArmClass::readSerialNumber(byte (&byte_sn_array)[14]){
-        if (EEPROM.read(SERIAL_NUMBER_ADDRESS) == SERIAL_NUMBER_ADDRESS){
+        if (EEPROM.read(SERIAL_NUMBER_ADDRESS) == CONFIRM_FLAG){
             for(byte i=0; i<14; i++){
                       byte_sn_array[i] = EEPROM.read(SERIAL_NUMBER_ADDRESS+i+1);
             }
@@ -35,7 +35,7 @@ void uArmClass::writeSerialNumber(byte (&byte_sn_array)[14]){
         for(byte i=0; i<14; i++){
                 EEPROM.write(SERIAL_NUMBER_ADDRESS+i+1, byte_sn_array[i]);
         }
-        EEPROM.write(SERIAL_NUMBER_ADDRESS, SERIAL_NUMBER_ADDRESS);
+        EEPROM.write(SERIAL_NUMBER_ADDRESS, CONFIRM_FLAG);
 }
 
 /* Use BUZZER for Alert

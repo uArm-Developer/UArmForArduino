@@ -1,3 +1,9 @@
+## [1.5.5] - 2016-05-05
+
+### Fix
+
+- if SERIAL_NUMBER_ADDRESS equal CONFIRM_FLAG 0x80, then Serial Number exist in EEPROM
+
 ## [1.5.4] - 2016-05-02
 
 ### Fix
