@@ -1,3 +1,15 @@
+## [1.5.7] - 2016-05-07
+
+### Fix
+
+- Update SERVO_OFFST_ADDRESS to MANUAL_OFFSET_ADDRESS
+- Update indent for syntax
+
+### Changes
+
+- Add Calibration.ino into examples
+
+
 ## [1.5.6] - 2016-05-06
 
 ### Fix
