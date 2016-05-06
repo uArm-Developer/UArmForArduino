@@ -22,7 +22,7 @@
 
 #define UARM_MAJOR_VERSION      1
 #define UARM_MINOR_VERSION      5
-#define UARM_BUGFIX             5
+#define UARM_BUGFIX             6
 
 #define SERVO_ROT_NUM           0
 #define SERVO_LEFT_NUM          1
@@ -85,7 +85,7 @@
 #define LINEAR_SLOPE_START_ADDRESS          50
 #define OFFSET_START_ADDRESS                30
 #define OFFSET_STRETCH_START_ADDRESS        20
-#define SERIAL_NUMBER_ADDRESS               1024
+#define SERIAL_NUMBER_ADDRESS               100
 
 #define CONFIRM_FLAG                        0x80
 

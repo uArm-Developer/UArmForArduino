@@ -355,7 +355,7 @@ void uArmClass::calAngles(double x, double y, double z, double& theta_1, double&
 ** Height from -180 to 150
 **/
 void uArmClass::writeStretch(double armStretch, double armHeight){
-        if(EEPROM.read(CALIBRATION_STRETCH_FLAG) != CALIBRATION_STRETCH_FLAG) {
+        if(EEPROM.read(CALIBRATION_STRETCH_FLAG) != CONFIRM_FLAG) {
                 alert(3, 200, 200);
                 return;
         }

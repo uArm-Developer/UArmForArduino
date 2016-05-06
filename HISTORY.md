@@ -1,3 +1,9 @@
+## [1.5.6] - 2016-05-06
+
+### Fix
+
+- Update SERIAL_NUMBER_ADDRESS to 100, Update CALIBRATION_STRETCH_FLAG mark value is CONFIRM_FLAG
+
 ## [1.5.5] - 2016-05-05
 
 ### Fix
