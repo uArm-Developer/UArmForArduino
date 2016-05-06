@@ -143,18 +143,18 @@ void linear_calibration_servo(byte servo_num)
                 }
 
                 if(i == 0) {
-                        delay(2000);
+                        delay(1000);
                 }
 
                 for (int l = 0; l<3; l++) {
                         l_angle_analog = analogRead(l_analog_pin);
-                        delay(100);
+                        delay(50);
                 }
 
                 arr_real[i] = kServoRangeIni + dot_i;
                 arr_input[i] = l_angle_analog;
 
-                delay(800);
+                delay(100);
 
         }
         arr_real[0] = kServoRangeIni;

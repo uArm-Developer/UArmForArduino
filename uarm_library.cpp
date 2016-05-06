@@ -54,6 +54,32 @@ void uArmClass::alert(byte times, byte runTime, byte stopTime)
     }
 }
 
+void uArmClass::writeAngle(double servo_rot_angle, double servo_left_angle, double servo_right_angle, double servo_hand_rot_angle)
+{
+  attachAll();
+  
+  if(servo_left_angle < 10) servo_left_angle = 10;
+  if(servo_left_angle > 120) servo_left_angle = 120;
+  if(servo_right_angle < 10) servo_right_angle = 10;
+  if(servo_right_angle > 110) servo_right_angle = 110;
+
+  if(servo_left_angle + servo_right_angle > 160) 
+  {
+    servo_right_angle = 160 - servo_left_angle;
+    return;
+  }
+  writeServoAngle(SERVO_ROT_NUM,servo_rot_angle,true);
+  writeServoAngle(SERVO_LEFT_NUM,servo_left_angle,true);
+  writeServoAngle(SERVO_RIGHT_NUM,servo_right_angle,true);
+  writeServoAngle(SERVO_HAND_ROT_NUM,servo_hand_rot_angle,true);
+  
+
+  // refresh logical servo angle cache
+  cur_rot = servo_rot_angle;
+  cur_left = servo_left_angle;
+  cur_right = servo_right_angle;
+  cur_hand = servo_hand_rot_angle;
+}
 
 /* Write the angle to Servo
 * servo_number - SERVO_ROT_NUM, SERVO_LEFT_NUM, SERVO_RIGHT_NUM, SERVO_HAND_ROT_NUM
@@ -487,12 +513,12 @@ void uArmClass::calXYZ()
                 for (byte i = 0; i < INTERP_INTVLS; i++)
                 {
 
-                    // writeAngle(rot_array[i], left_array[i], right_array[i], hand_array[i]);
-                    writeServoAngle(SERVO_ROT_NUM, rot_array[i], true);
+                     writeAngle(rot_array[i], left_array[i], right_array[i], hand_array[i]);
+                    //writeServoAngle(SERVO_ROT_NUM, rot_array[i], true);
                     // writeServoAngle(SERVO_LEFT_NUM, left_array[i],true);
                     // writeServoAngle(SERVO_RIGHT_NUM, right_array[i],true);
-                    writeLeftRightServoAngle(left_array[i], right_array[i], true);
-                    writeServoAngle(SERVO_HAND_ROT_NUM, hand_array[i],true);
+                    //writeLeftRightServoAngle(left_array[i], right_array[i], true);
+                    //writeServoAngle(SERVO_HAND_ROT_NUM, hand_array[i],true);
                     delay(time * 1000 / INTERP_INTVLS);
                 }
             } else if (path_type == PATH_LINEAR) {
@@ -516,25 +542,25 @@ void uArmClass::calXYZ()
                     // Serial.println(left);
                     // Serial.println(right);
                     // Serial.println();
-                    writeServoAngle(SERVO_ROT_NUM, rot,true);
+                    //writeServoAngle(SERVO_ROT_NUM, rot,true);
                     // writeServoAngle(SERVO_LEFT_NUM, tgt_left,true);
                     // writeServoAngle(SERVO_RIGHT_NUM, tgt_right,true);
-                    writeLeftRightServoAngle(left, right, true);
+                    //writeLeftRightServoAngle(left, right, true);
                     // if(enable_hand)
-                    writeServoAngle(SERVO_HAND_ROT_NUM, hand_array[i], true);
-                    // writeAngle(rot, left, right, hand_array[i]);
+                    //writeServoAngle(SERVO_HAND_ROT_NUM, hand_array[i], true);
+                    writeAngle(rot, left, right, hand_array[i]);
                     delay(time * 1000 / INTERP_INTVLS);
                 }
             }
         }
 
         // set final target position at end of interpolation or "atOnce"
-        writeServoAngle(SERVO_ROT_NUM, tgt_rot, true);
+        //writeServoAngle(SERVO_ROT_NUM, tgt_rot, true);
         // writeServoAngle(SERVO_LEFT_NUM, tgt_left, true);
         // writeServoAngle(SERVO_RIGHT_NUM, tgt_right, true);
-        writeLeftRightServoAngle(tgt_left, tgt_right, true);
-        writeServoAngle(SERVO_HAND_ROT_NUM, hand_angle, true);
-        // writeAngle(tgt_rot, tgt_left, tgt_right, hand_angle);
+        //writeLeftRightServoAngle(tgt_left, tgt_right, true);
+        //writeServoAngle(SERVO_HAND_ROT_NUM, hand_angle, true);
+         writeAngle(tgt_rot, tgt_left, tgt_right, hand_angle);
     }
 
     double uArmClass::calYonly(double theta_1, double theta_2, double theta_3)

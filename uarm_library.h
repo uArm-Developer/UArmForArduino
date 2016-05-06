@@ -22,7 +22,7 @@
 
 #define UARM_MAJOR_VERSION      1
 #define UARM_MINOR_VERSION      5
-#define UARM_BUGFIX             7
+#define UARM_BUGFIX             8
 
 #define SERVO_ROT_NUM           0
 #define SERVO_LEFT_NUM          1
@@ -155,7 +155,7 @@ public:
     }
 
     void writeStretch(double armStretch, double armHeight);
-
+    void writeAngle(double servo_rot_angle, double servo_left_angle, double servo_right_angle, double servo_hand_rot_angle);
 
     double getCalX() {
         return g_cal_x;

@@ -1,9 +1,8 @@
-## [1.5.7] - 2016-05-07
+## [1.5.8] - 2016-05-07
 
 ### Fix
-
-- Update SERVO_OFFST_ADDRESS to MANUAL_OFFSET_ADDRESS
-- Update indent for syntax
+- Speed up Calibration, reduce delay
+- Use writeAngle() Function in MoveTo
 
 ### Changes
 
