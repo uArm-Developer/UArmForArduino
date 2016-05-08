@@ -1,0 +1,95 @@
+#######################################
+# Syntax Coloring Map For uArm
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+uarm                 KEYWORD1
+uArmClass            KEYWORD1
+g_servo_rot
+g_servo_left
+g_servo_right
+g_servo_hand_rot
+g_servo_hand
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+moveTo               KEYWORD2
+alert                KEYWORD2
+writeServoAngle      KEYWORD2
+readServoOffset      KEYWORD2
+readLinearOffset     KEYWORD2
+detachServo          KEYWORD2
+detachAll            KEYWORD2
+inputToReal          KEYWORD2
+readAngle            KEYWORD2
+analogToAngle        KEYWORD2
+writeAngle           KEYWORD2
+moveToOpts           KEYWORD2
+moveToAtOnce         KEYWORD2
+writeStretch         KEYWORD2
+getCalX              KEYWORD2
+getCalY              KEYWORD2
+getCalZ              KEYWORD2
+getCalXYZ            KEYWORD2
+calAngles            KEYWORD2
+gripperCatch         KEYWORD2
+gripperRelease       KEYWORD2
+interpolate          KEYWORD2
+pumpOn               KEYWORD2
+pumpOff              KEYWORD2
+writeLeftRightServoAngle KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+UARM_MAJOR_VERSION      LITERAL1
+UARM_MINOR_VERSION      LITERAL1
+UARM_BUGFIX             LITERAL1
+
+SERVO_ROT_NUM           LITERAL1
+SERVO_LEFT_NUM          LITERAL1
+SERVO_RIGHT_NUM         LITERAL1
+SERVO_HAND_ROT_NUM      LITERAL1
+
+SERVO_ROT_PIN           LITERAL1
+SERVO_LEFT_PIN          LITERAL1
+SERVO_RIGHT_PIN         LITERAL1
+SERVO_HAND_PIN          LITERAL1
+
+SERVO_ROT_ANALOG_PIN    LITERAL1
+SERVO_LEFT_ANALOG_PIN   LITERAL1
+SERVO_RIGHT_ANALOG_PIN  LITERAL1
+SERVO_HAND_ROT_ANALOG_PIN LITERAL1
+
+LIMIT_SW                LITERAL1
+PUMP_EN                 LITERAL1
+VALVE_EN                LITERAL1
+STOPPER                 LITERAL1
+BUZZER                  LITERAL1
+BTN_D4                  LITERAL1
+BTN_D7                  LITERAL1
+GRIPPER                 LITERAL1
+
+CALIBRATION_FLAG                    LITERAL1
+CALIBRATION_LINEAR_FLAG             LITERAL1
+CALIBRATION_MANUAL_FLAG             LITERAL1
+CALIBRATION_STRETCH_FLAG            LITERAL1
+
+LINEAR_INTERCEPT_START_ADDRESS      LITERAL1
+LINEAR_SLOPE_START_ADDRESS          LITERAL1
+OFFSET_START_ADDRESS                LITERAL1
+OFFSET_STRETCH_START_ADDRESS        LITERAL1
+
+INTERP_EASE_INOUT_CUBIC LITERAL1
+INTERP_LINEAR           LITERAL1
+INTERP_EASE_INOUT       LITERAL1
+INTERP_EASE_IN          LITERAL1
+INTERP_EASE_OUT         LITERAL1
+
+PATH_LINEAR     LITERAL1
+PATH_ANGLES     LITERAL1
