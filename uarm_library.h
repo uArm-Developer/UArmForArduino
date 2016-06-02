@@ -3,9 +3,7 @@
 * Author             : Joey Song
 * Updated            : Joey Song, Alex Tan, Dave Corboy
 * Email              : joey@ufactory.cc
-* Version            : V1.4.0
 * Date               : 12 Dec, 2014
-* Modified Date      : 11 Apr, 2016
 * Description        :
 * License            :
 * Copyright(C) 2016 UFactory Team. All right reserved.
@@ -22,7 +20,7 @@
 
 #define UARM_MAJOR_VERSION      1
 #define UARM_MINOR_VERSION      5
-#define UARM_BUGFIX             8
+#define UARM_BUGFIX             9
 
 #define SERVO_ROT_NUM           0
 #define SERVO_LEFT_NUM          1

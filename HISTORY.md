@@ -1,3 +1,8 @@
+## [1.5.9] - 2016-06-01
+
+### Fix
+- Fix writeStretch() offset address not correct
+
 ## [1.5.8] - 2016-05-07
 
 ### Fix

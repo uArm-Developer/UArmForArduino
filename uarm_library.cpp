@@ -57,13 +57,13 @@ void uArmClass::alert(byte times, byte runTime, byte stopTime)
 void uArmClass::writeAngle(double servo_rot_angle, double servo_left_angle, double servo_right_angle, double servo_hand_rot_angle)
 {
   attachAll();
-  
+
   if(servo_left_angle < 10) servo_left_angle = 10;
   if(servo_left_angle > 120) servo_left_angle = 120;
   if(servo_right_angle < 10) servo_right_angle = 10;
   if(servo_right_angle > 110) servo_right_angle = 110;
 
-  if(servo_left_angle + servo_right_angle > 160) 
+  if(servo_left_angle + servo_right_angle > 160)
   {
     servo_right_angle = 160 - servo_left_angle;
     return;
@@ -72,7 +72,7 @@ void uArmClass::writeAngle(double servo_rot_angle, double servo_left_angle, doub
   writeServoAngle(SERVO_LEFT_NUM,servo_left_angle,true);
   writeServoAngle(SERVO_RIGHT_NUM,servo_right_angle,true);
   writeServoAngle(SERVO_HAND_ROT_NUM,servo_hand_rot_angle,true);
-  
+
 
   // refresh logical servo angle cache
   cur_rot = servo_rot_angle;
@@ -387,8 +387,9 @@ void uArmClass::writeStretch(double armStretch, double armHeight){
     }
     double offsetL = 0;
     double offsetR = 0;
-    EEPROM.get(OFFSET_STRETCH_START_ADDRESS + 1 * sizeof(offsetL), offsetL);
-    EEPROM.get(OFFSET_STRETCH_START_ADDRESS + 2 * sizeof(offsetR), offsetR);
+
+    EEPROM.get(OFFSET_STRETCH_START_ADDRESS, offsetL);
+    EEPROM.get(OFFSET_STRETCH_START_ADDRESS + 4, offsetR);
     armStretch = constrain(armStretch, ARM_STRETCH_MIN, ARM_STRETCH_MAX) + 68;
     armHeight  = constrain(armHeight, ARM_HEIGHT_MIN, ARM_HEIGHT_MAX);
     double xx = armStretch*armStretch + armHeight*armHeight;
