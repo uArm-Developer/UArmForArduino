@@ -1,3 +1,8 @@
+## [1.5.11] - 2016-06-07
+
+### Fix
+- Fix Test.ino unused function
+
 ## [1.5.10] - 2016-06-07
 
 ### Fix

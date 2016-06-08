@@ -20,7 +20,7 @@
 
 #define UARM_MAJOR_VERSION      1
 #define UARM_MINOR_VERSION      5
-#define UARM_BUGFIX             10
+#define UARM_BUGFIX             11
 
 #define SERVO_ROT_NUM           0
 #define SERVO_LEFT_NUM          1
