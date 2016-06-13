@@ -2,6 +2,7 @@
 
 ### Fix
 - Fix Test.ino unused function
+- Update Code Format
 
 ## [1.5.10] - 2016-06-07
 
