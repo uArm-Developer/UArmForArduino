@@ -1,3 +1,14 @@
+## [1.6.0] - 2016-06-20
+
+### Fix
+- Add Limit for x*x + y*y < 32, Fix When x*x + y*y > 32 uArm will get wired position
+
+### Changes
+
+- Rewrite Servo.h to UFServo.h, using float when servo.write(), increase accuracy
+- Rewrite uArmFimata to UArmProtocol.ino   
+
+
 ## [1.5.11] - 2016-06-07
 
 ### Fix

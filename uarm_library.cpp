@@ -14,6 +14,25 @@ uArmClass uarm;
 
 uArmClass::uArmClass()
 {
+        // read Attach Setting from EEPROM Address: 07
+        // if (EEPROM.read(INIT_ATTACH_FLAG_ADDRESS) == CONFIRM_FLAG)
+        // {
+        //     g_servo_speed = 10;
+        //     attachAll();
+        //     servoL.write(map(readAngle(SERVO_L), SERVO_MIN, SERVO_MAX, 0, 180));
+    	// 	servoR.write(map(readAngle(SERVO_R), SERVO_MIN, SERVO_MAX, 0, 180));
+    	// 	servoRot.write(map(readAngle(SERVO_ROT), SERVO_MIN, SERVO_MAX, 0, 180));
+        //     writeServoAngle(SERVO_ROT_NUM, INIT_SERVO_ROT, false);
+        //     writeServoAngle(SERVO_LEFT_NUM, INIT_SERVO_LEFT, false);
+        //     writeServoAngle(SERVO_RIGHT_NUM, INIT_SERVO_RIGHT, false);
+        // }
+        // read Servo Speed Setting from EEPROM Address: 05
+        // g_servo_speed = DEFAULT_SERVO_SPEED;
+        // if (EEPROM.read(SERVO_SPEED_FLAG_ADDRESS) == CONFIRM_FLAG)
+        // {
+        //     EEPROM.get(SERVO_SPEED_ADDRESS, g_servo_speed);
+        // }
+
 
 }
 
@@ -89,8 +108,8 @@ void uArmClass::writeAngle(double servo_rot_angle, double servo_left_angle, doub
 void uArmClass::writeServoAngle(byte servo_number, double servo_angle, boolean writeWithoffset)
 {
         attachServo(servo_number);
-        servo_angle = writeWithoffset ? round(inputToReal(servo_number,servo_angle)) : round(servo_angle);
-        servo_angle = constrain(servo_angle,0,180);
+    servo_angle = writeWithoffset ? inputToReal(servo_number,servo_angle) : servo_angle;
+    servo_angle = constrain(servo_angle,0.0,180.0);
         switch(servo_number)
         {
         case SERVO_ROT_NUM:       g_servo_rot.write(servo_angle);
@@ -274,6 +293,7 @@ void uArmClass::calAngles(double x, double y, double z, double& theta_1, double&
                 z = MATH_L1 - MATH_L4 + BottomOffset;
         }
 
+
         double x_in = 0.0;
         double y_in = 0.0;
         double z_in = 0.0;
@@ -427,48 +447,54 @@ void uArmClass::calXYZ()
 
 /** Action Control: Genernate the position array
 **/
-void uArmClass::interpolate(double start_val, double end_val, double (&interp_vals)[INTERP_INTVLS], byte ease_type) {
+    void uArmClass::interpolate(double start_val, double end_val, double *interp_vals, byte ease_type) {
         double delta = end_val - start_val;
         for (byte f = 0; f < INTERP_INTVLS; f++) {
                 switch (ease_type) {
                 case INTERP_LINEAR:
-                        interp_vals[f] = delta * f / INTERP_INTVLS + start_val;
+                *(interp_vals+f) = delta * f / INTERP_INTVLS + start_val;
                         break;
                 case INTERP_EASE_INOUT:
                 {
                         float t = f / (INTERP_INTVLS / 2.0);
                         if (t < 1) {
-                                interp_vals[f] = delta / 2 * t * t + start_val;
+                        *(interp_vals+f) = delta / 2 * t * t + start_val;
                         } else {
                                 t--;
-                                interp_vals[f] = -delta / 2 * (t * (t - 2) - 1) + start_val;
+                        *(interp_vals+f)= -delta / 2 * (t * (t - 2) - 1) + start_val;
                         }
                 }
                 break;
                 case INTERP_EASE_IN:
                 {
                         float t = (float)f / INTERP_INTVLS;
-                        interp_vals[f] = delta * t * t + start_val;
+                    *(interp_vals+f) = delta * t * t + start_val;
                 }
                 break;
                 case INTERP_EASE_OUT:
                 {
-                        float t = (float)f / INTERP_INTVLS;
-                        interp_vals[f] = -delta * t * (t - 2) + start_val;
+                    float t = (float)f / INTERP_INTVLS;
+                    *(interp_vals+f) = -delta * t * (t - 2) + start_val;
                 }
                 break;
                 case INTERP_EASE_INOUT_CUBIC: // this is a compact version of Joey's original cubic ease-in/out
                 {
                         float t = (float)f / INTERP_INTVLS;
-                        interp_vals[f] = start_val + (3 * delta) * (t * t) + (-2 * delta) * (t * t * t);
+                    *(interp_vals+f) = start_val + (3 * delta) * (t * t) + (-2 * delta) * (t * t * t);
                 }
                 break;
                 }
         }
 }
 
-void uArmClass::moveToOpts(double x, double y, double z, double hand_angle, byte relative_flags, double time, byte path_type, byte ease_type) {
-
+int uArmClass::moveToOpts(double x, double y, double z, double hand_angle, byte relative_flags, double time, byte path_type, byte ease_type) {
+        float limit = sqrt((x*x + y*y));
+        if (limit > 32)
+        {
+            float k = 32/limit;
+            x = x * k;
+            y = y * k;
+        }
         attachAll();
 
         // find current position using cached servo values
@@ -489,6 +515,19 @@ void uArmClass::moveToOpts(double x, double y, double z, double hand_angle, byte
         double tgt_left;
         double tgt_right;
         calAngles(x, y, z, tgt_rot, tgt_left, tgt_right);
+
+        //calculate the length
+        unsigned int delta_rot=abs(tgt_rot-cur_rot);
+        unsigned int delta_left=abs(tgt_left-cur_left);
+        unsigned int delta_right=abs(tgt_right-cur_right);
+
+        //Serial.println(tgt_rot,DEC);
+
+        INTERP_INTVLS = max(delta_rot,delta_left);
+        INTERP_INTVLS = max(INTERP_INTVLS,delta_right);
+
+        //Serial.println(INTERP_INTVLS,DEC);
+        INTERP_INTVLS=(INTERP_INTVLS<80)?INTERP_INTVLS:80;
 
         // deal with relative hand orientation
         if (relative_flags & F_HAND_RELATIVE) {

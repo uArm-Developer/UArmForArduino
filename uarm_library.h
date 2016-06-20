@@ -12,7 +12,7 @@
 #include <Arduino.h>
 #include <EEPROM.h>
 #include <Wire.h>
-#include <Servo.h>
+#include "UFServo.h"
 #include "linreg.h"
 
 #ifndef uArm_library_h
@@ -21,6 +21,9 @@
 #define UARM_MAJOR_VERSION      1
 #define UARM_MINOR_VERSION      5
 #define UARM_BUGFIX             11
+
+#define SUCCESS                 1
+#define FAILED                  -1
 
 #define SERVO_ROT_NUM           0
 #define SERVO_LEFT_NUM          1
@@ -87,7 +90,10 @@
 
 #define CONFIRM_FLAG                        0x80
 
-
+// #define D090M_SERVO_MIN_PUL     500
+// #define D090M_SERVO_MAX_PUL     2500
+// #define D009A_SERVO_MIN_PUL     600
+// #define D009A_SERVO_MAX_PUL     2550
 
 
 // movement path types
@@ -102,7 +108,7 @@
 // #define F_NEXT_OPT   8   // these are flags, next option is next available bit
 
 // interpolation intervals
-#define INTERP_INTVLS 50
+//#define INTERP_INTVLS 100
 
 // interpolation types
 #define INTERP_EASE_INOUT_CUBIC 0  // original cubic ease in/out
@@ -114,6 +120,18 @@
 #define LINEAR_INTERCEPT        1
 #define LINEAR_SLOPE            2
 
+// Setting parameters
+// Servo Speed
+// #define SERVO_SPEED_FLAG_ADDRESS     5
+// #define SERVO_SPEED_ADDRESS          6
+// #define DEFAULT_SERVO_SPEED          2
+
+// // init postion when plug in
+// #define INIT_ATTACH_FLAG_ADDRESS     7
+// #define INIT_SERVO_ROT               90
+// #define INIT_SERVO_LEFT              90
+// #define INIT_SERVO_RIGHT             65
+// #define INIT_SERVO_HAND              10
 
 class uArmClass
 {
@@ -135,9 +153,9 @@ public:
         double analogToAngle(int input_angle, byte servo_num, boolean withOffset);
         void writeAngle(byte servo_rot_angle, byte servo_left_angle, byte servo_right_angle, byte servo_hand_rot_angle, byte trigger);
 
-        void moveToOpts(double x, double y, double z, double hand_angle, byte relative_flags, double time, byte path_type, byte ease_type);
+        int moveToOpts(double x, double y, double z, double hand_angle, byte relative_flags, double time, byte path_type, byte ease_type);
         void moveTo(double x, double y,double z) {
-                moveToOpts(x, y, z, 0, F_HAND_RELATIVE, 2.0, PATH_LINEAR, INTERP_EASE_INOUT_CUBIC);
+                moveToOpts(x, y, z, 0, F_HAND_RELATIVE, 1.0, PATH_LINEAR, INTERP_EASE_INOUT_CUBIC);
         }
         void moveTo(double x, double y,double z,int relative, double time) {
                 moveToOpts(x, y, z, 0, F_HAND_RELATIVE | (relative ? F_POSN_RELATIVE : 0), time, PATH_LINEAR, INTERP_EASE_INOUT_CUBIC);
@@ -182,15 +200,22 @@ public:
 
         void gripperCatch();
         void gripperRelease();
-        void interpolate(double start_val, double end_val, double (&interp_vals)[INTERP_INTVLS], byte ease_type);
+        void interpolate(double start_val, double end_val, double *interp_vals, byte ease_type);
         void pumpOn();
         void pumpOff();
 
+        // Servo g_servo_rot;
+        // Servo g_servo_left;
+        // Servo g_servo_right;
+        // Servo g_servo_hand_rot;
+        // Servo g_servo_hand;
         Servo g_servo_rot;
         Servo g_servo_left;
         Servo g_servo_right;
         Servo g_servo_hand_rot;
         Servo g_servo_hand;
+
+        // byte g_servo_speed;
 
 protected:
         void attachAll();
@@ -206,6 +231,7 @@ protected:
         double g_cal_z;
 
         boolean g_gripper_reset;
+        unsigned int INTERP_INTVLS;
 
 };
 
