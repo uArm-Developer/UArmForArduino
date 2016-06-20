@@ -19,7 +19,7 @@
 #define UARM_FIRMATA_BUGFIX        1
 
 #define UARM_FIRMWARE_MAJOR_VERSION 1
-#define UARM_FIRMWARE_MINOR_VERSION 6
+#define UARM_FIRMWARE_MINOR_VERSION 7
 #define UARM_FIRMWARE_BUGFIX        0
 
 #define START_SYSEX             0xF0 // start a MIDI Sysex message
