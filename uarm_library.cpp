@@ -76,6 +76,18 @@ void uArmClass::alert(byte times, byte runTime, byte stopTime)
 void uArmClass::writeAngle(double servo_rot_angle, double servo_left_angle, double servo_right_angle, double servo_hand_rot_angle)
 {
         attachAll();
+        writeAngle(servo_rot_angle, servo_left_angle, servo_right_angle);
+        writeServoAngle(SERVO_HAND_ROT_NUM,servo_hand_rot_angle,true);
+        cur_hand = servo_hand_rot_angle;
+}
+
+void uArmClass::writeAngle(double servo_rot_angle, double servo_left_angle, double servo_right_angle)
+{
+        // attachAll();
+
+        attachServo(SERVO_ROT_NUM);
+        attachServo(SERVO_LEFT_NUM);
+        attachServo(SERVO_RIGHT_NUM);
 
         if(servo_left_angle < 10) servo_left_angle = 10;
         if(servo_left_angle > 120) servo_left_angle = 120;
@@ -90,14 +102,14 @@ void uArmClass::writeAngle(double servo_rot_angle, double servo_left_angle, doub
         writeServoAngle(SERVO_ROT_NUM,servo_rot_angle,true);
         writeServoAngle(SERVO_LEFT_NUM,servo_left_angle,true);
         writeServoAngle(SERVO_RIGHT_NUM,servo_right_angle,true);
-        writeServoAngle(SERVO_HAND_ROT_NUM,servo_hand_rot_angle,true);
+        // writeServoAngle(SERVO_HAND_ROT_NUM,servo_hand_rot_angle,true);
 
 
         // refresh logical servo angle cache
         cur_rot = servo_rot_angle;
         cur_left = servo_left_angle;
         cur_right = servo_right_angle;
-        cur_hand = servo_hand_rot_angle;
+        // cur_hand = servo_hand_rot_angle;
 }
 
 /* Write the angle to Servo
@@ -487,7 +499,7 @@ void uArmClass::calXYZ()
         }
 }
 
-int uArmClass::moveToOpts(double x, double y, double z, double hand_angle, byte relative_flags, double time, byte path_type, byte ease_type) {
+int uArmClass::moveToOpts(double x, double y, double z, double hand_angle, byte relative_flags, double time, byte path_type, byte ease_type, boolean enable_hand) {
         float limit = sqrt((x*x + y*y));
         if (limit > 32)
         {
@@ -495,7 +507,12 @@ int uArmClass::moveToOpts(double x, double y, double z, double hand_angle, byte 
             x = x * k;
             y = y * k;
         }
-        attachAll();
+        // attachAll();
+        attachServo(SERVO_ROT_NUM);
+        attachServo(SERVO_LEFT_NUM);
+        attachServo(SERVO_RIGHT_NUM);
+        if(enable_hand)
+            attachServo(SERVO_HAND_ROT_NUM);
 
         // find current position using cached servo values
         double current_x;
@@ -552,8 +569,10 @@ int uArmClass::moveToOpts(double x, double y, double z, double hand_angle, byte 
 
                         for (byte i = 0; i < INTERP_INTVLS; i++)
                         {
-
+                            if(enable_hand)
                                 writeAngle(rot_array[i], left_array[i], right_array[i], hand_array[i]);
+                            else
+                                writeAngle(rot_array[i], left_array[i], right_array[i]);
                                 //writeServoAngle(SERVO_ROT_NUM, rot_array[i], true);
                                 // writeServoAngle(SERVO_LEFT_NUM, left_array[i],true);
                                 // writeServoAngle(SERVO_RIGHT_NUM, right_array[i],true);
@@ -588,7 +607,10 @@ int uArmClass::moveToOpts(double x, double y, double z, double hand_angle, byte 
                                 //writeLeftRightServoAngle(left, right, true);
                                 // if(enable_hand)
                                 //writeServoAngle(SERVO_HAND_ROT_NUM, hand_array[i], true);
-                                writeAngle(rot, left, right, hand_array[i]);
+                                if(enable_hand)
+                                    writeAngle(rot, left, right, hand_array[i]);
+                                else
+                                    writeAngle(rot, left, right);
                                 delay(time * 1000 / INTERP_INTVLS);
                         }
                 }
@@ -600,7 +622,10 @@ int uArmClass::moveToOpts(double x, double y, double z, double hand_angle, byte 
         // writeServoAngle(SERVO_RIGHT_NUM, tgt_right, true);
         //writeLeftRightServoAngle(tgt_left, tgt_right, true);
         //writeServoAngle(SERVO_HAND_ROT_NUM, hand_angle, true);
-        writeAngle(tgt_rot, tgt_left, tgt_right, hand_angle);
+        if (enable_hand)
+            writeAngle(tgt_rot, tgt_left, tgt_right, hand_angle);
+        else
+            writeAngle(tgt_rot, tgt_left, tgt_right);
 }
 
 double uArmClass::calYonly(double theta_1, double theta_2, double theta_3)

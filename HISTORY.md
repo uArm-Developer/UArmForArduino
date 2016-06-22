@@ -1,3 +1,9 @@
+## [1.6.1] - 2016-06-22
+
+### Fix
+- Fix MoveTo Lock Hand Servo issue.
+
+
 ## [1.6.0] - 2016-06-20
 
 ### Fix

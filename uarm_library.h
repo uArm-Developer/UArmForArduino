@@ -20,7 +20,7 @@
 
 #define UARM_MAJOR_VERSION      1
 #define UARM_MINOR_VERSION      6
-#define UARM_BUGFIX             0 
+#define UARM_BUGFIX             1
 
 #define SUCCESS                 1
 #define FAILED                  -1
@@ -153,29 +153,33 @@ public:
         double analogToAngle(int input_angle, byte servo_num, boolean withOffset);
         void writeAngle(byte servo_rot_angle, byte servo_left_angle, byte servo_right_angle, byte servo_hand_rot_angle, byte trigger);
 
-        int moveToOpts(double x, double y, double z, double hand_angle, byte relative_flags, double time, byte path_type, byte ease_type);
+        int moveToOpts(double x, double y, double z, double hand_angle, byte relative_flags, double time, byte path_type, byte ease_type, boolean enable_hand);
         void moveTo(double x, double y,double z) {
-                moveToOpts(x, y, z, 0, F_HAND_RELATIVE, 1.0, PATH_LINEAR, INTERP_EASE_INOUT_CUBIC);
+                moveToOpts(x, y, z, 0, F_HAND_RELATIVE, 1.0, PATH_LINEAR, INTERP_EASE_INOUT_CUBIC, false);
+        }
+        void moveTo(double x, double y,double z,double hand_angle) {
+                moveToOpts(x, y, z, hand_angle, F_HAND_RELATIVE, 1.0, PATH_LINEAR, INTERP_EASE_INOUT_CUBIC, true);
         }
         void moveTo(double x, double y,double z,int relative, double time) {
-                moveToOpts(x, y, z, 0, F_HAND_RELATIVE | (relative ? F_POSN_RELATIVE : 0), time, PATH_LINEAR, INTERP_EASE_INOUT_CUBIC);
+                moveToOpts(x, y, z, 0, F_HAND_RELATIVE | (relative ? F_POSN_RELATIVE : 0), time, PATH_LINEAR, INTERP_EASE_INOUT_CUBIC, false);
         }
         void moveTo(double x, double y,double z,int relative, double time, double servo_4_angle) {
-                moveToOpts(x, y, z, servo_4_angle, relative ? F_POSN_RELATIVE : 0, time, PATH_LINEAR, INTERP_EASE_INOUT_CUBIC);
+                moveToOpts(x, y, z, servo_4_angle, relative ? F_POSN_RELATIVE : 0, time, PATH_LINEAR, INTERP_EASE_INOUT_CUBIC, true);
         }
         void moveTo(double x, double y, double z, int relative, double time, int servo_4_relative, double servo_4_angle) {
-                moveToOpts(x, y, z, servo_4_angle, (relative ? F_POSN_RELATIVE : 0) | (servo_4_relative ? F_HAND_RELATIVE : 0), time, PATH_LINEAR, INTERP_EASE_INOUT_CUBIC);
+                moveToOpts(x, y, z, servo_4_angle, (relative ? F_POSN_RELATIVE : 0) | (servo_4_relative ? F_HAND_RELATIVE : 0), time, PATH_LINEAR, INTERP_EASE_INOUT_CUBIC, true);
         }
 
         void moveToAtOnce(double x, double y, double z) {
-                moveToOpts(x, y, z, 0, F_HAND_RELATIVE, 0.0, PATH_LINEAR, INTERP_LINEAR);
+                moveToOpts(x, y, z, 0, F_HAND_RELATIVE, 0.0, PATH_LINEAR, INTERP_LINEAR, false);
         }
         void moveToAtOnce(double x, double y, double z, int relative, double servo_4_angle) {
-                moveToOpts(x, y, z, servo_4_angle, relative ? F_POSN_RELATIVE : 0, 0.0, PATH_LINEAR, INTERP_LINEAR);
+                moveToOpts(x, y, z, servo_4_angle, relative ? F_POSN_RELATIVE : 0, 0.0, PATH_LINEAR, INTERP_LINEAR, true);
         }
 
         void writeStretch(double armStretch, double armHeight);
         void writeAngle(double servo_rot_angle, double servo_left_angle, double servo_right_angle, double servo_hand_rot_angle);
+        void writeAngle(double servo_rot_angle, double servo_left_angle, double servo_right_angle);
 
         double getCalX() {
                 return g_cal_x;

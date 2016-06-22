@@ -16,11 +16,11 @@
 
 #define UARM_FIRMATA_MAJOR_VERSION 1
 #define UARM_FIRMATA_MINOR_VERSION 3
-#define UARM_FIRMATA_BUGFIX        1
+#define UARM_FIRMATA_BUGFIX        2
 
 #define UARM_FIRMWARE_MAJOR_VERSION 1
 #define UARM_FIRMWARE_MINOR_VERSION 6
-#define UARM_FIRMWARE_BUGFIX        0
+#define UARM_FIRMWARE_BUGFIX        1
 
 #define START_SYSEX             0xF0 // start a MIDI Sysex message
 #define END_SYSEX               0xF7 // end a MIDI Sysex message
@@ -136,9 +136,11 @@ boolean handleSysex(byte command, byte argc, byte *argv)
             float time_spend = argv[17] + (argv[18] << 7) + float(argv[19])/100;
             byte path_type = argv[20];
             byte ease_type = argv[21];
-            // boolean enable_hand = argv[22];
+            boolean enable_hand = false;
+            if (argv[22] == 1 || argv[22] ==0)
+                enable_hand = argv[22];
             delay(5);
-            uarm.moveToOpts(x,y,z,hand_angle,relative_flags,time_spend,path_type,ease_type);
+            uarm.moveToOpts(x,y,z,hand_angle,relative_flags,time_spend,path_type,ease_type,enable_hand);
             delay(10);
         }
 
