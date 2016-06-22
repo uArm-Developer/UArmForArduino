@@ -7,7 +7,6 @@
 * License            :
 * Copyright(C) 2016 UFactory Team. All right reserved.
 *******************************************************************************/
-
 #include <uarm_library.h>
 #include <EEPROM.h>
 
@@ -313,14 +312,9 @@ boolean handleSysex(byte command, byte argc, byte *argv)
         //0X22 WRITE_SERIAL_NUMBER
         if (uarmCommand == WRITE_SERIAL_NUMBER)
         {
-            byte sn_array[14];
             for(byte i=0; i<14; i++){
-                sn_array[i] = 0;
+                EEPROM.write(SERIAL_NUMBER_ADDRESS+i+1, argv[i+1]);
             }
-            for(byte i=0; i<14; i++){
-                sn_array[i] = argv[i+1];
-            }
-            uarm.writeSerialNumber(sn_array);
             return true;
         }
         //0X21 READ_SERIAL_NUMBER
@@ -328,14 +322,12 @@ boolean handleSysex(byte command, byte argc, byte *argv)
         {
             Serial.write(START_SYSEX);
             Serial.write(UARM_CODE);
-            Serial.write(READ_SERIAL_NUMBER);
-            byte sn_array[14];
-            for(byte i=0; i<14; i++){
-                sn_array[i] = 0;
-            }
-            uarm.readSerialNumber(sn_array);
-            for(byte i=0; i<14; i++){
-                Serial.write(sn_array[i]);
+            if (EEPROM.read(SERIAL_NUMBER_ADDRESS) == CONFIRM_FLAG) {
+                Serial.write(READ_SERIAL_NUMBER);
+                for(byte i=0; i<14; i++) {
+                        byte c = EEPROM.read(SERIAL_NUMBER_ADDRESS+i+1);
+                        Serial.write(c);
+                }
             }
             Serial.write(END_SYSEX);
             return true;

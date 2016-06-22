@@ -151,7 +151,7 @@ public:
         double readAngle(byte servo_num);
         double readAngle(byte servo_num, boolean withOffset);
         double analogToAngle(int input_angle, byte servo_num, boolean withOffset);
-        void writeAngle(byte servo_rot_angle, byte servo_left_angle, byte servo_right_angle, byte servo_hand_rot_angle, byte trigger);
+
 
         int moveToOpts(double x, double y, double z, double hand_angle, byte relative_flags, double time, byte path_type, byte ease_type, boolean enable_hand);
         void moveTo(double x, double y,double z) {
@@ -178,8 +178,7 @@ public:
         }
 
         void writeStretch(double armStretch, double armHeight);
-        void writeAngle(double servo_rot_angle, double servo_left_angle, double servo_right_angle, double servo_hand_rot_angle);
-        void writeAngle(double servo_rot_angle, double servo_left_angle, double servo_right_angle);
+
 
         double getCalX() {
                 return g_cal_x;
@@ -199,7 +198,6 @@ public:
 
         void calAngles(double x, double y, double z, double& theta_1, double& theta_2, double& theta_3);
 
-        void calXYZ(double theta_1, double theta_2, double theta_3);
         void calXYZ();
 
         void gripperCatch();
@@ -208,11 +206,6 @@ public:
         void pumpOn();
         void pumpOff();
 
-        // Servo g_servo_rot;
-        // Servo g_servo_left;
-        // Servo g_servo_right;
-        // Servo g_servo_hand_rot;
-        // Servo g_servo_hand;
         Servo g_servo_rot;
         Servo g_servo_left;
         Servo g_servo_right;
@@ -222,8 +215,8 @@ public:
         // byte g_servo_speed;
 
 protected:
-        void attachAll();
-        void attachServo(byte servo_num);
+
+
         double cur_rot;
         double cur_left;
         double cur_right;
@@ -236,7 +229,12 @@ protected:
 
         boolean g_gripper_reset;
         unsigned int INTERP_INTVLS;
-
+private:
+        int writeAngle(byte servo_rot_angle, byte servo_left_angle, byte servo_right_angle, byte servo_hand_rot_angle, byte trigger);
+        int writeAngle(double servo_rot_angle, double servo_left_angle, double servo_right_angle, double servo_hand_rot_angle);
+        int writeAngle(double servo_rot_angle, double servo_left_angle, double servo_right_angle);
+        void attachAll();
+        void attachServo(byte servo_num);
 };
 
 extern uArmClass uarm;
