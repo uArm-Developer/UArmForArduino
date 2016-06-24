@@ -22,10 +22,7 @@
 
 // headers should must include these four headers
 
-#include <EEPROM.h>
-#include <Wire.h>
 #include "uarm_library.h"
-#include <Servo.h>
 
 // define a uArm
 //uArmLibrary uArm;
@@ -51,7 +48,7 @@ void loop() {
       // x = 13, y = -13, z = 3
 
       if (readSerial == '1') {
-        uarm.moveTo(13,-13,3);
+        uarm.move_to(13,-13,3);
         delay(1000);
        }
 
@@ -60,7 +57,7 @@ void loop() {
       // x = -13, y = -13, z = 3
 
       if (readSerial == '2') {
-        uarm.moveTo(-13,-13,3);
+        uarm.move_to(-13,-13,3);
         delay(1000);
        }
 
@@ -69,7 +66,7 @@ void loop() {
       // (dot) dx = 4, dy = -3, dz = 2 in 5 seconds
 
       if (readSerial == '3') {
-        uarm.moveTo(1,1,1,RELATIVE,2);
+        uarm.move_to(5,0,0,RELATIVE,2);
         delay(1000);
        }
 
@@ -78,40 +75,12 @@ void loop() {
       // (dot) dx = -4, dy = 3, dz = -2 in 5 seconds
 
       if (readSerial == '4') {
-        uarm.moveTo(-4,3,-2,RELATIVE,5);
+        uarm.move_to(-4,3,-2,RELATIVE,5);
         delay(1000);
        }
 
-      //----------------------------------  function 5  ------------------------------------
-      // function below is for move uArm to draw a Rectangle with 10 cm long and 5 cm
-      // width in 2 seconds for one arm ( 8s totally)
-
-//      if (readSerial == '5') {
-//        uarm.drawRec(10,5,2);
-//        delay(1000);
-//       }
-//
-//      //----------------------------------  function 6  ------------------------------------
-//      // function below is for move uArm to draw a ellipse with 10 cm long and 10 cm
-//      // width (circle) for full 360 degree in 2 seconds
-//
-//      if (readSerial == '6') {
-//        uarm.drawCur(6,6,360,2);
-//        delay(1000);
-//       }
-
-      //----------------------------------  function 7  ------------------------------------
-      // function below is atach all servos
-
-//      if (readSerial == 'a') {
-//        uarm.attachAll();
-//      }
-
-      //----------------------------------  function 8  ------------------------------------
-      // function below is detach all servos
-
       if (readSerial == 'd') {
-        uarm.detachAll();
+        uarm.detach_all_servos();
       }
 
       //----------------------------------  function 9  ------------------------------------
@@ -125,33 +94,35 @@ void loop() {
       // function below is for print current x,y,z absolute location
 
       if (readSerial == 'g') {
+        uarm.detach_all_servos();
+        uarm.get_current_xyz();
         Serial.print("The current location is ");
-        Serial.print(uarm.getCalX());
+        Serial.print(uarm.get_current_x());
         Serial.print(" , ");
-        Serial.print(uarm.getCalY());
+        Serial.print(uarm.get_current_y());
         Serial.print(" , ");
-        Serial.print(uarm.getCalZ());
+        Serial.print(uarm.get_current_z());
         Serial.println();
         delay(1000);
       }
 
       if (readSerial == 'k') {
         Serial.print("SERVO_ROT_NUM offset:");
-        Serial.println(uarm.readServoOffset(SERVO_ROT_NUM));
+        Serial.println(uarm.read_servo_offset(SERVO_ROT_NUM));
         Serial.print("SERVO_LEFT_NUM offset:");
-        Serial.println(uarm.readServoOffset(SERVO_LEFT_NUM));
+        Serial.println(uarm.read_servo_offset(SERVO_LEFT_NUM));
         Serial.print("SERVO_RIGHT_NUM offset:");
-        Serial.println(uarm.readServoOffset(SERVO_RIGHT_NUM));
+        Serial.println(uarm.read_servo_offset(SERVO_RIGHT_NUM));
         Serial.print("SERVO_HAND_ROT_NUM offset:");
-        Serial.println(uarm.readServoOffset(SERVO_HAND_ROT_NUM));
+        Serial.println(uarm.read_servo_offset(SERVO_HAND_ROT_NUM));
       }
 
       if (readSerial == 'o') {
-        uarm.pumpOn();
+        uarm.pump_on();
       }
 
       if (readSerial == 'f') {
-        uarm.pumpOff();
+        uarm.pump_off();
       }
 
       //----------------------------------  function 11  ------------------------------------
