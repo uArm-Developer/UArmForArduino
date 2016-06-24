@@ -5,14 +5,13 @@ void setup(){
 }
 
 void loop(){
-  uarm.calXYZ();
+  uarm.get_current_xyz();
   Serial.print("X: ");
-  Serial.println(uarm.getCalX());
+  Serial.println(uarm.get_current_x());
   Serial.print("Y: ");
-  Serial.println(uarm.getCalY());
+  Serial.println(uarm.get_current_y());
   Serial.print("Z: ");
-  Serial.println(uarm.getCalZ()); 
+  Serial.println(uarm.get_current_z());
   Serial.println();
-  delay(500);   
+  delay(500);
 }
-
