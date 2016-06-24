@@ -30,18 +30,18 @@ void loop() {
           if (readSerial == 'c') {
             calibration_start();
             delay(1000);
-            uarm.moveTo(0,-15,6);
+            uarm.move_to(0,-15,6);
           }
 
           //----------------------------------  Test Function  ------------------------------------
           if (readSerial == '1') {
-            uarm.moveTo(15,-15,5);
+            uarm.move_to(15,-15,5);
             delay(1000);
            }
 
 
           if (readSerial == '2') {
-            uarm.moveTo(-15,-15,5);
+            uarm.move_to(-15,-15,5);
             delay(1000);
            }
 
@@ -53,17 +53,17 @@ void loop() {
               Serial.println(i);
               double a = 0.0f;
               double b = 0.0f;
-              uarm.readLinearOffset(i,a,b);
+              uarm.read_linear_offset(i,a,b);
               Serial.print("A: ");
               Serial.print(a);
               Serial.print(", B: ");
               Serial.println(b);
               Serial.print("Manual Offset: ");
-              Serial.print(uarm.readServoOffset(i));
+              Serial.print(uarm.read_servo_offset(i));
               Serial.println("");
             }
             delay(1000);
-           }           
+           }
         }
 }
 
@@ -72,7 +72,7 @@ void loop() {
 **/
 void calibration_start(){
 
-        cleanEEPROM();
+//        cleanEEPROM();
 
         for (int k = 0; k < 4; k++) {
 
@@ -115,27 +115,27 @@ void linear_calibration_servo(byte servo_num)
                 {
                 case SERVO_ROT_NUM:
                         l_analog_pin = SERVO_ROT_ANALOG_PIN;
-                        uarm.writeServoAngle(SERVO_ROT_NUM, angle, false);
-                        uarm.writeLeftRightServoAngle(60, 30, false);
+                        uarm.write_servo_angle(SERVO_ROT_NUM, angle, false);
+                        uarm.write_left_right_servo_angle(60, 30, false);
                         break;
 
                 case SERVO_LEFT_NUM:
                         l_analog_pin = SERVO_LEFT_ANALOG_PIN;
-                        uarm.writeServoAngle(SERVO_ROT_NUM, 90, false);
-                        uarm.writeLeftRightServoAngle(angle, 30, false);
+                        uarm.write_servo_angle(SERVO_ROT_NUM, 90, false);
+                        uarm.write_left_right_servo_angle(angle, 30, false);
                         break;
 
                 case SERVO_RIGHT_NUM:
                         l_analog_pin = SERVO_RIGHT_ANALOG_PIN;
-                        uarm.writeServoAngle(SERVO_ROT_NUM, 90, false);
-                        uarm.writeLeftRightServoAngle(30, angle, false);
+                        uarm.write_servo_angle(SERVO_ROT_NUM, 90, false);
+                        uarm.write_left_right_servo_angle(30, angle, false);
                         break;
 
                 case SERVO_HAND_ROT_NUM:
                         l_analog_pin = SERVO_HAND_ROT_ANALOG_PIN;
-                        uarm.writeServoAngle(SERVO_ROT_NUM, 90, false);
-                        uarm.writeLeftRightServoAngle(60, 30, false);
-                        uarm.writeServoAngle(SERVO_HAND_ROT_NUM, angle, false);
+                        uarm.write_servo_angle(SERVO_ROT_NUM, 90, false);
+                        uarm.write_left_right_servo_angle(60, 30, false);
+                        uarm.write_servo_angle(SERVO_HAND_ROT_NUM, angle, false);
                         break;
                 default:
 
@@ -181,7 +181,7 @@ void manual_calibration_section()
 {
         int setLoop = 1;
 
-        uarm.detachAll();
+        uarm.detach_all_servos();
 
         Serial.println("Put uarm in calibration posture (servo 1 to 3: 45, 130, 20 degree respectively), then input 1");
         while (setLoop) {
@@ -192,9 +192,9 @@ void manual_calibration_section()
 
                         if (inputChar=='1')
                         {
-                                double offsetRot = uarm.readAngle(SERVO_ROT_NUM,true) - 45;
-                                double offsetL = uarm.readAngle(SERVO_LEFT_NUM,true) - 130;
-                                double offsetR = uarm.readAngle(SERVO_RIGHT_NUM,true) - 20;
+                                double offsetRot = uarm.read_servo_angle(SERVO_ROT_NUM,true) - 45;
+                                double offsetL = uarm.read_servo_angle(SERVO_LEFT_NUM,true) - 130;
+                                double offsetR = uarm.read_servo_angle(SERVO_RIGHT_NUM,true) - 20;
 
                                 Serial.print("Offsets for servo 1 to 3 are ");
                                 Serial.println(offsetRot);

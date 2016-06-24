@@ -152,38 +152,38 @@ void alert(byte beeps) {
 }
 
 void move_home_position(float time) {
-  uarm.moveToOpts(0, -21, 20, 90, F_ABSOLUTE, time, PATH_ANGLES, INTERP_EASE_INOUT);
+  uarm.move_to(0, -21, 20, 90, F_ABSOLUTE, time, PATH_ANGLES, INTERP_EASE_INOUT,true);
 }
 
 void many_xyz_start_points(bool recalc_servos) {
   // detaching the servos after each move forces the cache to be recalculated, generating the errors
   // this mimics the previous behavior where positions were always recalculated between moves
   if (recalc_servos) {
-    uarm.detachAll();
+    uarm.detach_all_servos();
   }
-  uarm.moveToOpts(-14, -19, 20, 90, F_ABSOLUTE, .5, PATH_ANGLES, INTERP_EASE_INOUT);
+  uarm.move_to(-14, -19, 20, 90, F_ABSOLUTE, .5, PATH_ANGLES, INTERP_EASE_INOUT, true);
   if (recalc_servos) {
-    uarm.detachAll();
-  }
-  delay(500);
-  uarm.moveToOpts(-7, -26, 14, 90, F_ABSOLUTE, .5, PATH_ANGLES, INTERP_EASE_INOUT);
-  if (recalc_servos) {
-    uarm.detachAll();
+    uarm.detach_all_servos();
   }
   delay(500);
-  uarm.moveToOpts(0, -19, 20, 90, F_ABSOLUTE, .5, PATH_ANGLES, INTERP_EASE_INOUT);
+  uarm.move_to(-7, -26, 14, 90, F_ABSOLUTE, .5, PATH_ANGLES, INTERP_EASE_INOUT,true);
   if (recalc_servos) {
-    uarm.detachAll();
+    uarm.detach_all_servos();
   }
   delay(500);
-  uarm.moveToOpts(7, -26, 14, 90, F_ABSOLUTE, .5, PATH_ANGLES, INTERP_EASE_INOUT);
+  uarm.move_to(0, -19, 20, 90, F_ABSOLUTE, .5, PATH_ANGLES, INTERP_EASE_INOUT,true);
   if (recalc_servos) {
-    uarm.detachAll();
+    uarm.detach_all_servos();
   }
   delay(500);
-  uarm.moveToOpts(14, -19, 20, 90, F_ABSOLUTE, .5, PATH_ANGLES, INTERP_EASE_INOUT);
+  uarm.move_to(7, -26, 14, 90, F_ABSOLUTE, .5, PATH_ANGLES, INTERP_EASE_INOUT,true);
   if (recalc_servos) {
-    uarm.detachAll();
+    uarm.detach_all_servos();
+  }
+  delay(500);
+  uarm.move_to(14, -19, 20, 90, F_ABSOLUTE, .5, PATH_ANGLES, INTERP_EASE_INOUT,true);
+  if (recalc_servos) {
+    uarm.detach_all_servos();
   }
   delay(500);
 }
@@ -191,43 +191,42 @@ void many_xyz_start_points(bool recalc_servos) {
 void path_moves(byte path_type) {
   // PATH_LINEAR creates a linear path between the start end and point
   // PATH_ANGLES instead interpolates the start and ending servos positions
-  uarm.moveToOpts(-7, -14, 10, 90, F_ABSOLUTE, 1, path_type, INTERP_EASE_INOUT);
+  uarm.move_to(-7, -14, 10, 90, F_ABSOLUTE, 1, path_type, INTERP_EASE_INOUT,true);
   delay(500);
-  uarm.moveToOpts(15, -26, 20, 90, F_ABSOLUTE, 1, path_type, INTERP_EASE_INOUT);
+  uarm.move_to(15, -26, 20, 90, F_ABSOLUTE, 1, path_type, INTERP_EASE_INOUT,true);
   delay(500);
-  uarm.moveToOpts(-15, -26, 20, 90, F_ABSOLUTE, 1, path_type, INTERP_EASE_INOUT);
+  uarm.move_to(-15, -26, 20, 90, F_ABSOLUTE, 1, path_type, INTERP_EASE_INOUT,true);
   delay(500);
-  uarm.moveToOpts(7, -14, 10, 90, F_ABSOLUTE, 1, path_type, INTERP_EASE_INOUT);
+  uarm.move_to(7, -14, 10, 90, F_ABSOLUTE, 1, path_type, INTERP_EASE_INOUT,true);
   delay(500);
-  uarm.moveToOpts(0, -21, 20, 90, F_ABSOLUTE, 1, path_type, INTERP_EASE_INOUT);
+  uarm.move_to(0, -21, 20, 90, F_ABSOLUTE, 1, path_type, INTERP_EASE_INOUT,true);
 }
 
 void ease_moves(byte ease_type) {
-  uarm.moveToOpts(-10, -26, 15, 90, F_ABSOLUTE, 1, PATH_ANGLES, INTERP_EASE_INOUT);
+  uarm.move_to(-10, -26, 15, 90, F_ABSOLUTE, 1, PATH_ANGLES, INTERP_EASE_INOUT,true);
   delay(750);
-  uarm.moveToOpts(10, -26, 15, 90, F_ABSOLUTE, .75, PATH_ANGLES, ease_type);
+  uarm.move_to(10, -26, 15, 90, F_ABSOLUTE, .75, PATH_ANGLES, ease_type,true);
   delay(500);
-  uarm.moveToOpts(10, -14, 15, 90, F_ABSOLUTE, .75, PATH_ANGLES, ease_type);
+  uarm.move_to(10, -14, 15, 90, F_ABSOLUTE, .75, PATH_ANGLES, ease_type,true);
   delay(500);
-  uarm.moveToOpts(-10, -14, 15, 90, F_ABSOLUTE, .75, PATH_ANGLES, ease_type);
+  uarm.move_to(-10, -14, 15, 90, F_ABSOLUTE, .75, PATH_ANGLES, ease_type,true);
   delay(500);
-  uarm.moveToOpts(-10, -26, 15, 90, F_ABSOLUTE, .75, PATH_ANGLES, ease_type);
+  uarm.move_to(-10, -26, 15, 90, F_ABSOLUTE, .75, PATH_ANGLES, ease_type,true);
   delay(750);
-  uarm.moveToOpts(0, -21, 20, 90, F_ABSOLUTE, 1, PATH_ANGLES, INTERP_EASE_INOUT);
+  uarm.move_to(0, -21, 20, 90, F_ABSOLUTE, 1, PATH_ANGLES, INTERP_EASE_INOUT,true);
 }
 
 void hand_moves(byte relative) {
   // F_HAND_ROT_REL will keep the hand orientation contstant through a move
-  uarm.moveToOpts(-15, -15, 12, relative ? 0 : 90, relative, 1, PATH_ANGLES, INTERP_EASE_INOUT);
+  uarm.move_to(-15, -15, 12, relative ? 0 : 90, relative, 1, PATH_ANGLES, INTERP_EASE_INOUT,true);
   delay(500);
-  uarm.moveToOpts(-15, -15, 8, relative ? 0 : 90, relative, .5, PATH_ANGLES, INTERP_EASE_INOUT);
+  uarm.move_to(-15, -15, 8, relative ? 0 : 90, relative, .5, PATH_ANGLES, INTERP_EASE_INOUT,true);
   delay(500);
-  uarm.moveToOpts(-15, -15, 17, relative ? 0 : 90, relative, .5, PATH_ANGLES, INTERP_EASE_INOUT);
+  uarm.move_to(-15, -15, 17, relative ? 0 : 90, relative, .5, PATH_ANGLES, INTERP_EASE_INOUT,true);
   delay(500);
-  uarm.moveToOpts(15, -15, 17, relative ? 0 : 90, relative, 2, PATH_ANGLES, INTERP_EASE_INOUT);
+  uarm.move_to(15, -15, 17, relative ? 0 : 90, relative, 2, PATH_ANGLES, INTERP_EASE_INOUT,true);
   delay(500);
-  uarm.moveToOpts(15, -15, 8, relative ? 0 : 90, relative, .5, PATH_ANGLES, INTERP_EASE_INOUT);
+  uarm.move_to(15, -15, 8, relative ? 0 : 90, relative, .5, PATH_ANGLES, INTERP_EASE_INOUT,true);
   delay(500);
-  uarm.moveToOpts(0, -21, 20, 90, F_ABSOLUTE, 1, PATH_ANGLES, INTERP_EASE_INOUT);
+  uarm.move_to(0, -21, 20, 90, F_ABSOLUTE, 1, PATH_ANGLES, INTERP_EASE_INOUT,true);
 }
-

@@ -183,11 +183,16 @@ public:
         void pump_on();
         void pump_off();
 
+        int write_servo_angle(byte servo_rot_angle, byte servo_left_angle, byte servo_right_angle, byte servo_hand_rot_angle, byte trigger);
+        int write_servo_angle(double servo_rot_angle, double servo_left_angle, double servo_right_angle, double servo_hand_rot_angle);
+        int write_servo_angle(double servo_rot_angle, double servo_left_angle, double servo_right_angle);        
+
         Servo g_servo_rot;
         Servo g_servo_left;
         Servo g_servo_right;
         Servo g_servo_hand_rot;
         Servo g_servo_hand;
+        unsigned int INTERP_INTVLS;
 
 protected:
         double cur_rot;
@@ -201,11 +206,9 @@ protected:
         double g_current_z;
 
         boolean g_gripper_reset;
-        unsigned int INTERP_INTVLS;
+
 private:
-        int write_servo_angle(byte servo_rot_angle, byte servo_left_angle, byte servo_right_angle, byte servo_hand_rot_angle, byte trigger);
-        int write_servo_angle(double servo_rot_angle, double servo_left_angle, double servo_right_angle, double servo_hand_rot_angle);
-        int write_servo_angle(double servo_rot_angle, double servo_left_angle, double servo_right_angle);
+
         void attach_all();
         void attach_servo(byte servo_num);
 };

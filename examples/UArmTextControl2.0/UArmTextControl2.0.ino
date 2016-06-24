@@ -157,7 +157,7 @@ String runCommand(String cmnd){
        if(errorResponse.length() > 0) {return errorResponse;}
        float values[1];
        getCommandValues(cmnd, pumpParameters, 1, values);
-       if(values[0] > 0){  uarm.pumpOn();  }else if(values[0] <= 0){  uarm.pumpOff();  } 
+       if(values[0] > 0){  uarm.pump_on();  }else if(values[0] <= 0){  uarm.pump_off();  } 
        return ok + cmnd + endB;
     }
     
@@ -224,7 +224,7 @@ String runCommand(String cmnd){
     if(cmnd.indexOf(F("gcoords")) >= 0){
       double x = 0;   double y = 0;   double z = 0;
       //uarm.getCalXYZ(x, y, z);
-      uarm.getCalXYZ(uarm.readAngle(SERVO_ROT_NUM), uarm.readAngle(SERVO_LEFT_NUM), uarm.readAngle(SERVO_RIGHT_NUM), x, y, z);
+      uarm.angle_to_coordinate(uarm.read_servo_angle(SERVO_ROT_NUM), uarm.read_servo_angle(SERVO_LEFT_NUM), uarm.read_servo_angle(SERVO_RIGHT_NUM), x, y, z);
       return "[coordsX" + String(x) + "Y" + String(y) + "Z" + String(z) + "]\n";
     }
     
@@ -235,7 +235,7 @@ String runCommand(String cmnd){
        float values[1];
 
        getCommandValues(cmnd, gServoParameters, 1, values);
-       float angle = uarm.readAngle(values[0]);
+       float angle = uarm.read_servo_angle(values[0]);
        return "[angleA" + String(angle) + endB;
     }
     
@@ -373,19 +373,19 @@ void setMove(double x, double y, double z, double goalSpeed) {
   //double cur_rot   = uarm.readAngle(SERVO_ROT_NUM);
   //double cur_right = uarm.readAngle(SERVO_RIGHT_NUM);
   //double cur_left  = uarm.readAngle(SERVO_LEFT_NUM);
-  double cur_rot   = uarm.readAngle(SERVO_ROT_NUM);
-  double cur_left   = uarm.readAngle(SERVO_LEFT_NUM);
-  double cur_right = uarm.readAngle(SERVO_RIGHT_NUM);
+  double cur_rot   = uarm.read_servo_angle(SERVO_ROT_NUM);
+  double cur_left   = uarm.read_servo_angle(SERVO_LEFT_NUM);
+  double cur_right = uarm.read_servo_angle(SERVO_RIGHT_NUM);
   
 
-  uarm.getCalXYZ(cur_rot,  cur_left, cur_right, current_x, current_y, current_z);
+  uarm.angle_to_coordinate(cur_rot,  cur_left, cur_right, current_x, current_y, current_z);
 
   
   // find target angles
   double tgt_rot;
   double tgt_left;
   double tgt_right;
-  uarm.calAngles(x, y, z, tgt_rot, tgt_left, tgt_right);
+  uarm.coordinate_to_angle(x, y, z, tgt_rot, tgt_left, tgt_right);
   
   
   // calculate the length, to calculate the # of interpolations that will be necessary
@@ -457,17 +457,17 @@ void moveStep() {
   double rot,left, right; 
   
   // Find target angle for the step, and write it
-  uarm.calAngles(x_array[currentStep], y_array[currentStep], z_array[currentStep], rot, left, right);
+  uarm.coordinate_to_angle(x_array[currentStep], y_array[currentStep], z_array[currentStep], rot, left, right);
    
 
-  uarm.writeAngle(rot, left, right, currentHand);
+  uarm.write_servo_angle(rot, left, right, currentHand);
   currentStep += 1;
 
 
   if (currentStep == INTERP_INTVLS) { 
     // Make the final move, to ensure arrival to the final destination.
-    uarm.calAngles(x_array[INTERP_INTVLS], y_array[INTERP_INTVLS], z_array[INTERP_INTVLS], rot, left, right);
-    uarm.writeAngle(rot, left, right, currentHand);
+    uarm.coordinate_to_angle(x_array[INTERP_INTVLS], y_array[INTERP_INTVLS], z_array[INTERP_INTVLS], rot, left, right);
+    uarm.write_servo_angle(rot, left, right, currentHand);
     currentStep = 255;
   }
 }

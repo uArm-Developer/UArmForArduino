@@ -1,3 +1,9 @@
+## [1.7.0] - 2016-06-24
+
+### Fix
+- Update examples Calibration.ino, movement.ino, Add new UArmTextControl2.0.ino
+- Update uarm_library.h make some protected value be public
+
 ## [1.6.2] - 2016-06-24
 
 ### Fix
