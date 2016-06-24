@@ -6,7 +6,7 @@
    \license GNU
    \copyright(c) 2016 UFactory Team. All right reserved
  */
-#include uarm_library.h
+#include "uarm_library.h"
 
 uArmClass uarm;
 
@@ -40,11 +40,11 @@ void uArmClass::alert(byte times, byte runTime, byte stopTime)
    \param servo_hand_rot_angle SERVO_HAND_ROT_NUM
    \return SUCCESS, FAILED
  */
-int uArmClass::writeAngle(double servo_rot_angle, double servo_left_angle, double servo_right_angle, double servo_hand_rot_angle)
+int uArmClass::write_servo_angle(double servo_rot_angle, double servo_left_angle, double servo_right_angle, double servo_hand_rot_angle)
 {
-        attachAll();
-        writeAngle(servo_rot_angle, servo_left_angle, servo_right_angle);
-        writeServoAngle(SERVO_HAND_ROT_NUM,servo_hand_rot_angle,true);
+        attach_all();
+        write_servo_angle(servo_rot_angle, servo_left_angle, servo_right_angle);
+        write_servo_angle(SERVO_HAND_ROT_NUM,servo_hand_rot_angle,true);
         cur_hand = servo_hand_rot_angle;
 }
 
@@ -55,11 +55,11 @@ int uArmClass::writeAngle(double servo_rot_angle, double servo_left_angle, doubl
    \param servo_right_angle SERVO_RIGHT_NUM
    \return SUCCESS, FAILED
  */
-int uArmClass::writeAngle(double servo_rot_angle, double servo_left_angle, double servo_right_angle)
+int uArmClass::write_servo_angle(double servo_rot_angle, double servo_left_angle, double servo_right_angle)
 {
-        attachServo(SERVO_ROT_NUM);
-        attachServo(SERVO_LEFT_NUM);
-        attachServo(SERVO_RIGHT_NUM);
+        attach_servo(SERVO_ROT_NUM);
+        attach_servo(SERVO_LEFT_NUM);
+        attach_servo(SERVO_RIGHT_NUM);
 
         if(servo_left_angle < 10) servo_left_angle = 10;
         if(servo_left_angle > 120) servo_left_angle = 120;
@@ -69,11 +69,11 @@ int uArmClass::writeAngle(double servo_rot_angle, double servo_left_angle, doubl
         if(servo_left_angle + servo_right_angle > 160)
         {
                 servo_right_angle = 160 - servo_left_angle;
-                return;
+                return FAILED;
         }
-        writeServoAngle(SERVO_ROT_NUM,servo_rot_angle,true);
-        writeServoAngle(SERVO_LEFT_NUM,servo_left_angle,true);
-        writeServoAngle(SERVO_RIGHT_NUM,servo_right_angle,true);
+        write_servo_angle(SERVO_ROT_NUM,servo_rot_angle,true);
+        write_servo_angle(SERVO_LEFT_NUM,servo_left_angle,true);
+        write_servo_angle(SERVO_RIGHT_NUM,servo_right_angle,true);
 
         // refresh logical servo angle cache
         cur_rot = servo_rot_angle;
@@ -87,10 +87,10 @@ int uArmClass::writeAngle(double servo_rot_angle, double servo_left_angle, doubl
    \param servo_angle Servo target angle, 0.00 - 180.00
    \param writeWithoffset True: with Offset, False: without Offset
  */
-void uArmClass::writeServoAngle(byte servo_number, double servo_angle, boolean writeWithoffset)
+void uArmClass::write_servo_angle(byte servo_number, double servo_angle, boolean writeWithoffset)
 {
-        attachServo(servo_number);
-        servo_angle = writeWithoffset ? inputToReal(servo_number,servo_angle) : servo_angle;
+        attach_servo(servo_number);
+        servo_angle = writeWithoffset ? (servo_angle + read_servo_offset(servo_number)) : servo_angle;
         servo_angle = constrain(servo_angle,0.0,180.0);
         switch(servo_number)
         {
@@ -116,19 +116,19 @@ void uArmClass::writeServoAngle(byte servo_number, double servo_angle, boolean w
    \param servo_right_angle right servo target angle
    \param writeWithoffset True: with Offset, False: without Offset
  */
-void uArmClass::writeLeftRightServoAngle(double servo_left_angle, double servo_right_angle, boolean writeWithoffset)
+void uArmClass::write_left_right_servo_angle(double servo_left_angle, double servo_right_angle, boolean writeWithoffset)
 {
         servo_left_angle = constrain(servo_left_angle,0,150);
         servo_right_angle = constrain(servo_right_angle,0,120);
-        servo_left_angle = writeWithoffset ? round(inputToReal(SERVO_LEFT_NUM,servo_left_angle)) : round(servo_left_angle);
-        servo_right_angle = writeWithoffset ? round(inputToReal(SERVO_RIGHT_NUM,servo_right_angle)) : round(servo_right_angle);
+        servo_left_angle = writeWithoffset ? (servo_left_angle + read_servo_offset(SERVO_LEFT_NUM)) : servo_left_angle;
+        servo_right_angle = writeWithoffset ? (servo_right_angle + read_servo_offset(SERVO_RIGHT_NUM)) : servo_right_angle;
         if(servo_left_angle + servo_right_angle > 180) // if left angle & right angle exceed 180 degree, it might be caused damage
         {
                 alert(1, 10, 0);
                 return;
         }
-        attachServo(SERVO_LEFT_NUM);
-        attachServo(SERVO_RIGHT_NUM);
+        attach_servo(SERVO_LEFT_NUM);
+        attach_servo(SERVO_RIGHT_NUM);
         g_servo_left.write(servo_left_angle);
         g_servo_right.write(servo_right_angle);
 }
@@ -137,43 +137,43 @@ void uArmClass::writeLeftRightServoAngle(double servo_left_angle, double servo_r
    \brief Attach All Servo
    \note Warning, if you attach left servo & right servo without a movement, it might be caused a demage
  */
-void uArmClass::attachAll()
+void uArmClass::attach_all()
 {
-        attachServo(SERVO_ROT_NUM);
-        attachServo(SERVO_LEFT_NUM);
-        attachServo(SERVO_RIGHT_NUM);
-        attachServo(SERVO_HAND_ROT_NUM);
+        attach_servo(SERVO_ROT_NUM);
+        attach_servo(SERVO_LEFT_NUM);
+        attach_servo(SERVO_RIGHT_NUM);
+        attach_servo(SERVO_HAND_ROT_NUM);
 }
 
 /*!
    \brief Attach Servo, if servo has not been attached, attach the servo, and read the current Angle
    \param servo number SERVO_ROT_NUM, SERVO_LEFT_NUM, SERVO_RIGHT_NUM, SERVO_HAND_ROT_NUM
  */
-void uArmClass::attachServo(byte servo_number)
+void uArmClass::attach_servo(byte servo_number)
 {
         switch(servo_number) {
         case SERVO_ROT_NUM:
                 if(!g_servo_rot.attached()) {
                         g_servo_rot.attach(SERVO_ROT_PIN);
-                        cur_rot = readAngle(SERVO_ROT_NUM);
+                        cur_rot = read_servo_angle(SERVO_ROT_NUM);
                 }
                 break;
         case SERVO_LEFT_NUM:
                 if (!g_servo_left.attached()) {
                         g_servo_left.attach(SERVO_LEFT_PIN);
-                        cur_left = readAngle(SERVO_LEFT_NUM);
+                        cur_left = read_servo_angle(SERVO_LEFT_NUM);
                 }
                 break;
         case SERVO_RIGHT_NUM:
                 if (!g_servo_right.attached()) {
                         g_servo_right.attach(SERVO_RIGHT_PIN);
-                        cur_right = readAngle(SERVO_RIGHT_NUM);
+                        cur_right = read_servo_angle(SERVO_RIGHT_NUM);
                 }
                 break;
         case SERVO_HAND_ROT_NUM:
                 if (!g_servo_hand_rot.attached()) {
                         g_servo_hand_rot.attach(SERVO_HAND_PIN);
-                        cur_hand = readAngle(SERVO_HAND_ROT_NUM);
+                        cur_hand = read_servo_angle(SERVO_HAND_ROT_NUM);
                 }
                 break;
         }
@@ -182,7 +182,7 @@ void uArmClass::attachServo(byte servo_number)
 /*!
    \brief Detach All servo, you could move the arm
  */
-void uArmClass::detachAll()
+void uArmClass::detach_all_servos()
 {
         g_servo_rot.detach();
         g_servo_left.detach();
@@ -213,22 +213,11 @@ void uArmClass::detach_servo(byte servo_number)
 }
 
 /*!
-   \brief return angle with offset
-   \param servo_num SERVO_ROT_NUM, SERVO_LEFT_NUM, SERVO_RIGHT_NUM, SERVO_HAND_ROT_NUM
-   \param input_angle input angle 0.00 - 180.00
-   \return Return Angle with offset
- */
-double uArmClass::inputToReal(byte servo_num,double input_angle)
-{
-        return constrain(round((input_angle + readServoOffset(servo_num))),0.00,180.00);
-}
-
-/*!
    \brief Read Servo Offset from EEPROM. From OFFSET_START_ADDRESS, each offset occupy 4 bytes in rom
    \param servo_num SERVO_ROT_NUM, SERVO_LEFT_NUM, SERVO_RIGHT_NUM, SERVO_HAND_ROT_NUM
    \return Return servo offset
  */
-double uArmClass::readServoOffset(byte servo_num)
+double uArmClass::read_servo_offset(byte servo_num)
 {
         double manual_servo_offset = 0.0f;
         EEPROM.get(MANUAL_OFFSET_ADDRESS + servo_num * sizeof(manual_servo_offset), manual_servo_offset);
@@ -241,7 +230,7 @@ double uArmClass::readServoOffset(byte servo_num)
    \param intercept_val get intercept_val
    \param slope_val get slope_val
  */
-void uArmClass::readLinearOffset(byte servo_num, double& intercept_val, double& slope_val){
+void uArmClass::read_linear_offset(byte servo_num, double& intercept_val, double& slope_val){
         EEPROM.get(LINEAR_INTERCEPT_START_ADDRESS + servo_num * sizeof(intercept_val), intercept_val);
         EEPROM.get(LINEAR_SLOPE_START_ADDRESS + servo_num * sizeof(slope_val), slope_val);
 }
@@ -253,13 +242,13 @@ void uArmClass::readLinearOffset(byte servo_num, double& intercept_val, double& 
    \param withOffset true, false
    \return Return Servo Angle
  */
-double uArmClass::analogToAngle(int input_analog, byte servo_num, boolean withOffset)
+double uArmClass::analog_to_angle(int input_analog, byte servo_num, boolean withOffset)
 {
         double intercept = 0.0f;
         double slope = 0.0f;
-        readLinearOffset(servo_num, intercept, slope);
+        read_linear_offset(servo_num, intercept, slope);
         double angle = intercept + slope*input_analog;
-        return withOffset ? angle - readServoOffset(servo_num) : angle;
+        return withOffset ? angle + read_servo_offset(servo_num) : angle;
 }
 
 /*!
@@ -267,9 +256,9 @@ double uArmClass::analogToAngle(int input_analog, byte servo_num, boolean withOf
    \param servo_num SERVO_ROT_NUM, SERVO_LEFT_NUM, SERVO_RIGHT_NUM, SERVO_HAND_ROT_NUM
    \return Return servo_num Angle
  */
-double uArmClass::readAngle(byte servo_num)
+double uArmClass::read_servo_angle(byte servo_num)
 {
-        return readAngle(servo_num, false);
+        return read_servo_angle(servo_num, false);
 }
 
 /*!
@@ -278,30 +267,35 @@ double uArmClass::readAngle(byte servo_num)
    \param withOffset true, false
    \return Return servo_num Angle
  */
-double uArmClass::readAngle(byte servo_num, boolean withOffset)
+double uArmClass::read_servo_angle(byte servo_num, boolean withOffset)
 {
-        switch (servo_num)
-        {
-        case SERVO_ROT_NUM:
-                return analogToAngle(analogRead(SERVO_ROT_ANALOG_PIN),SERVO_ROT_NUM,withOffset);
-                break;
+        double angle = 0;
+        for (byte i = 0; i < 5; i++){
+            switch (servo_num)
+            {
+            case SERVO_ROT_NUM:
+                    angle += analog_to_angle(analogRead(SERVO_ROT_ANALOG_PIN),SERVO_ROT_NUM,withOffset);
+                    break;
 
-        case SERVO_LEFT_NUM:
-                return analogToAngle(analogRead(SERVO_LEFT_ANALOG_PIN),SERVO_LEFT_NUM,withOffset);
-                break;
+            case SERVO_LEFT_NUM:
+                    angle += analog_to_angle(analogRead(SERVO_LEFT_ANALOG_PIN),SERVO_LEFT_NUM,withOffset);
+                    break;
 
-        case SERVO_RIGHT_NUM:
-                return analogToAngle(analogRead(SERVO_RIGHT_ANALOG_PIN),SERVO_RIGHT_NUM,withOffset);
-                break;
+            case SERVO_RIGHT_NUM:
+                    angle += analog_to_angle(analogRead(SERVO_RIGHT_ANALOG_PIN),SERVO_RIGHT_NUM,withOffset);
+                    break;
 
-        case SERVO_HAND_ROT_NUM:
-                return analogToAngle(analogRead(SERVO_HAND_ROT_ANALOG_PIN),SERVO_HAND_ROT_NUM,withOffset);
-                break;
+            case SERVO_HAND_ROT_NUM:
+                    angle += analog_to_angle(analogRead(SERVO_HAND_ROT_ANALOG_PIN),SERVO_HAND_ROT_NUM,withOffset);
+                    break;
 
-        default:
-                break;
+            default:
+                    break;
 
+            }
+            delay(10);
         }
+        return angle/5;
 }
 
 /** Calculate the angles from given coordinate x, y, z to theta_1, theta_2, theta_3
@@ -315,7 +309,7 @@ double uArmClass::readAngle(byte servo_num, boolean withOffset)
    \param theta_2 SERVO_LEFT_NUM servo angles
    \param theta_3 SERVO_RIGHT_NUM servo angles
  */
-void uArmClass::calAngles(double x, double y, double z, double& theta_1, double& theta_2, double& theta_3)
+void uArmClass::coordinate_to_angle(double x, double y, double z, double& theta_1, double& theta_2, double& theta_3)
 {
         if (z > (MATH_L1 + MATH_L3 + TopOffset))
         {
@@ -415,18 +409,18 @@ void uArmClass::calAngles(double x, double y, double z, double& theta_1, double&
 
         if (theta_3 < 0 ) {}
         else{
-                if ((calYonly(theta_1,theta_2, theta_3)>y+0.1)||(calYonly(theta_1,theta_2, theta_3)<y-0.1))
+                if ((angle_to_coordinate_y(theta_1,theta_2, theta_3)>y+0.1)||(angle_to_coordinate_y(theta_1,theta_2, theta_3)<y-0.1))
                 {
                         theta_2 = 180 - theta_2;
                 }
         }
 
         if(isnan(theta_1)||isinf(theta_1))
-        {theta_1 = uarm.readAngle(SERVO_ROT_NUM); }
+        {theta_1 = uarm.read_servo_angle(SERVO_ROT_NUM); }
         if(isnan(theta_2)||isinf(theta_2))
-        {theta_2 = uarm.readAngle(SERVO_LEFT_NUM); }
+        {theta_2 = uarm.read_servo_angle(SERVO_LEFT_NUM); }
         if(isnan(theta_3)||isinf(theta_3)||(theta_3<0))
-        {theta_3 = uarm.readAngle(SERVO_RIGHT_NUM); }
+        {theta_3 = uarm.read_servo_angle(SERVO_RIGHT_NUM); }
 }
 
 /*!
@@ -435,7 +429,7 @@ void uArmClass::calAngles(double x, double y, double z, double& theta_1, double&
    \param armStretch Stretch from 0 to 195
    \param armHeight Height from -150 to 150
  */
-void uArmClass::writeStretch(double armStretch, double armHeight){
+void uArmClass::write_stretch_height(double armStretch, double armHeight){
         if(EEPROM.read(CALIBRATION_STRETCH_FLAG) != CONFIRM_FLAG) {
                 alert(3, 200, 200);
                 return;
@@ -455,26 +449,39 @@ void uArmClass::writeStretch(double armStretch, double armHeight){
         int angleR =(int)(angleB + offsetR - 4);//int angleR =angleB + 40 + offsetR;
         int angleL =(int)(angleA + offsetL + 16);//int angleL =25 + angleA + offsetL;
         angleL = constrain(angleL, 5 + offsetL, 145 + offsetL);
-        writeLeftRightServoAngle(angleL,angleR,true);
+        write_left_right_servo_angle(angleL,angleR,true);
 }
 
 /*!
-   \brief Calculate X,Y,Z to g_cal_x,g_cal_y,g_cal_z
+   \brief Calculate X,Y,Z to g_current_x,g_current_y,g_current_z
  */
-void uArmClass::calXYZ()
+void uArmClass::get_current_xyz()
 {
-        double theta_1 = uarm.analogToAngle(analogRead(SERVO_ROT_ANALOG_PIN),SERVO_ROT_NUM,false);
-        double theta_2 = uarm.analogToAngle(analogRead(SERVO_LEFT_ANALOG_PIN),SERVO_LEFT_NUM,false);
-        double theta_3 = uarm.analogToAngle(analogRead(SERVO_RIGHT_ANALOG_PIN),SERVO_RIGHT_NUM,false);
-        double l5 = (MATH_L2 + MATH_L3*cos(theta_2 / MATH_TRANS) + MATH_L4*cos(theta_3 / MATH_TRANS));
-
-        g_cal_x = -cos(abs(theta_1 / MATH_TRANS))*l5;
-        g_cal_y = -sin(abs(theta_1 / MATH_TRANS))*l5;
-        g_cal_z = MATH_L1 + MATH_L3*sin(abs(theta_2 / MATH_TRANS)) - MATH_L4*sin(abs(theta_3 / MATH_TRANS));
+        double theta_1 = uarm.analog_to_angle(analogRead(SERVO_ROT_ANALOG_PIN),SERVO_ROT_NUM,false);
+        double theta_2 = uarm.analog_to_angle(analogRead(SERVO_LEFT_ANALOG_PIN),SERVO_LEFT_NUM,false);
+        double theta_3 = uarm.analog_to_angle(analogRead(SERVO_RIGHT_ANALOG_PIN),SERVO_RIGHT_NUM,false);
+        get_current_xyz(theta_1, theta_2, theta_3);
 }
 
-/** Action Control: Genernate the position array
-**/
+/*!
+   \brief Calculate X,Y,Z to g_current_x,g_current_y,g_current_z
+ */
+void uArmClass::get_current_xyz(double theta_1, double theta_2, double theta_3)
+{
+        double l5 = (MATH_L2 + MATH_L3*cos(theta_2 / MATH_TRANS) + MATH_L4*cos(theta_3 / MATH_TRANS));
+
+        g_current_x = -cos(abs(theta_1 / MATH_TRANS))*l5;
+        g_current_y = -sin(abs(theta_1 / MATH_TRANS))*l5;
+        g_current_z = MATH_L1 + MATH_L3*sin(abs(theta_2 / MATH_TRANS)) - MATH_L4*sin(abs(theta_3 / MATH_TRANS));
+}
+
+/*!
+   \brief "Genernate the position array"
+   \param start_val Start Position
+   \param end_val End Position
+   \param interp_vals interpolation array
+   \param ease_type INTERP_EASE_INOUT_CUBIC, INTERP_LINEAR, INTERP_EASE_INOUT, INTERP_EASE_IN, INTERP_EASE_OUT
+*/
 void uArmClass::interpolate(double start_val, double end_val, double *interp_vals, byte ease_type) {
         double delta = end_val - start_val;
         for (byte f = 0; f < INTERP_INTVLS; f++) {
@@ -515,7 +522,18 @@ void uArmClass::interpolate(double start_val, double end_val, double *interp_val
         }
 }
 
-int uArmClass::moveToOpts(double x, double y, double z, double hand_angle, byte relative_flags, double time, byte path_type, byte ease_type, boolean enable_hand) {
+/*!
+   \brief Move To, Action Control Core Function
+   \param x X Axis Value
+   \param y Y Axis Value
+   \param z Z Axis Value
+   \param hand_angle Hand Axis
+   \param relative_flags ABSOLUTE, RELATIVE
+   \param path_type PATH_LINEAR, PATH_ANGLES
+   \param enable_hand Enable Hand Axis
+   \return SUCCESS, FAILED
+*/
+int uArmClass::move_to(double x, double y, double z, double hand_angle, byte relative_flags, double time, byte path_type, byte ease_type, boolean enable_hand) {
         float limit = sqrt((x*x + y*y));
         if (limit > 32)
         {
@@ -523,18 +541,18 @@ int uArmClass::moveToOpts(double x, double y, double z, double hand_angle, byte 
                 x = x * k;
                 y = y * k;
         }
-        // attachAll();
-        attachServo(SERVO_ROT_NUM);
-        attachServo(SERVO_LEFT_NUM);
-        attachServo(SERVO_RIGHT_NUM);
+        // attach_all();
+        attach_servo(SERVO_ROT_NUM);
+        attach_servo(SERVO_LEFT_NUM);
+        attach_servo(SERVO_RIGHT_NUM);
         if(enable_hand)
-                attachServo(SERVO_HAND_ROT_NUM);
+                attach_servo(SERVO_HAND_ROT_NUM);
 
         // find current position using cached servo values
         double current_x;
         double current_y;
         double current_z;
-        getCalXYZ(cur_rot, cur_left, cur_right, current_x, current_y, current_z);
+        angle_to_coordinate(cur_rot, cur_left, cur_right, current_x, current_y, current_z);
 
 
         // deal with relative xyz positioning
@@ -547,7 +565,7 @@ int uArmClass::moveToOpts(double x, double y, double z, double hand_angle, byte 
         double tgt_rot;
         double tgt_left;
         double tgt_right;
-        calAngles(x, y, z, tgt_rot, tgt_left, tgt_right);
+        coordinate_to_angle(x, y, z, tgt_rot, tgt_left, tgt_right);
 
         //calculate the length
         unsigned int delta_rot=abs(tgt_rot-cur_rot);
@@ -586,9 +604,9 @@ int uArmClass::moveToOpts(double x, double y, double z, double hand_angle, byte 
                         for (byte i = 0; i < INTERP_INTVLS; i++)
                         {
                                 if(enable_hand)
-                                        writeAngle(rot_array[i], left_array[i], right_array[i], hand_array[i]);
+                                        write_servo_angle(rot_array[i], left_array[i], right_array[i], hand_array[i]);
                                 else
-                                        writeAngle(rot_array[i], left_array[i], right_array[i]);
+                                        write_servo_angle(rot_array[i], left_array[i], right_array[i]);
                                 delay(time * 1000 / INTERP_INTVLS);
                         }
                 } else if (path_type == PATH_LINEAR) {
@@ -606,11 +624,11 @@ int uArmClass::moveToOpts(double x, double y, double z, double hand_angle, byte 
                         for (byte i = 0; i < INTERP_INTVLS; i++)
                         {
                                 double rot,left, right;
-                                calAngles(x_array[i], y_array[i], z_array[i], rot, left, right);
+                                coordinate_to_angle(x_array[i], y_array[i], z_array[i], rot, left, right);
                                 if(enable_hand)
-                                        writeAngle(rot, left, right, hand_array[i]);
+                                        write_servo_angle(rot, left, right, hand_array[i]);
                                 else
-                                        writeAngle(rot, left, right);
+                                        write_servo_angle(rot, left, right);
                                 delay(time * 1000 / INTERP_INTVLS);
                         }
                 }
@@ -618,32 +636,39 @@ int uArmClass::moveToOpts(double x, double y, double z, double hand_angle, byte 
 
         // set final target position at end of interpolation or atOnce
         if (enable_hand)
-                writeAngle(tgt_rot, tgt_left, tgt_right, hand_angle);
+                write_servo_angle(tgt_rot, tgt_left, tgt_right, hand_angle);
         else
-                writeAngle(tgt_rot, tgt_left, tgt_right);
+                write_servo_angle(tgt_rot, tgt_left, tgt_right);
 }
 
-double uArmClass::calYonly(double theta_1, double theta_2, double theta_3)
+/*!
+   \brief Calculate Y
+   \param theta_1
+   \param theta_2
+   \param theta_3
+   \return Y Axis Value
+*/
+double uArmClass::angle_to_coordinate_y(double theta_1, double theta_2, double theta_3)
 {
         double l5_2 = (MATH_L2 + MATH_L3*cos(theta_2 / MATH_TRANS) + MATH_L4*cos(theta_3 / MATH_TRANS));
 
         return -sin(abs(theta_1 / MATH_TRANS))*l5_2;
 }
 
-/**
-   Control the Gripper Catch
- **/
-void uArmClass::gripperCatch()
+/*!
+   \brief Close Gripper
+*/
+void uArmClass::gripper_catch()
 {
         pinMode(GRIPPER, OUTPUT);
         digitalWrite(GRIPPER, LOW); // gripper catch
         g_gripper_reset = true;
 }
 
-/**
-   Control the Gripper Release
- **/
-void uArmClass::gripperRelease()
+/*!
+   \brief Release Gripper
+*/
+void uArmClass::gripper_release()
 {
         if(g_gripper_reset)
         {
@@ -653,10 +678,10 @@ void uArmClass::gripperRelease()
         }
 }
 
-/**
-   Turn on the Pump
- **/
-void uArmClass::pumpOn()
+/*!
+   \brief Turn on Pump
+*/
+void uArmClass::pump_on()
 {
 
         pinMode(PUMP_EN, OUTPUT);
@@ -665,10 +690,10 @@ void uArmClass::pumpOn()
         digitalWrite(PUMP_EN, HIGH);
 }
 
-/**
-   Turn off the Pump
- **/
-void uArmClass::pumpOff()
+/*!
+   \brief Turn off Pump
+*/
+void uArmClass::pump_off()
 {
         pinMode(PUMP_EN, OUTPUT);
         pinMode(VALVE_EN, OUTPUT);

@@ -19,7 +19,7 @@
 
 #define UARM_FIRMWARE_MAJOR_VERSION 1
 #define UARM_FIRMWARE_MINOR_VERSION 6
-#define UARM_FIRMWARE_BUGFIX        1
+#define UARM_FIRMWARE_BUGFIX        2
 
 #define START_SYSEX             0xF0 // start a MIDI Sysex message
 #define END_SYSEX               0xF7 // end a MIDI Sysex message
@@ -84,7 +84,7 @@ boolean handleSysex(byte command, byte argc, byte *argv)
             Serial.write(START_SYSEX);
             Serial.write(UARM_CODE);
             Serial.write(servo_num);
-            float angle = uarm.readAngle(servo_num,withOffset);
+            float angle = uarm.read_servo_angle(servo_num,withOffset);
             sendFloatAsThree7bitBytes(angle);
 
             Serial.write(END_SYSEX);
@@ -97,7 +97,7 @@ boolean handleSysex(byte command, byte argc, byte *argv)
             byte servo_num = argv[1];
             double servo_angle = argv[2] + (argv[3] << 7) + float(argv[4])/100;
             boolean writeWithOffset = argv[5];
-            uarm.writeServoAngle(servo_num,servo_angle,writeWithOffset);
+            uarm.write_servo_angle(servo_num,servo_angle,writeWithOffset);
             return true;
         }
 
@@ -107,10 +107,10 @@ boolean handleSysex(byte command, byte argc, byte *argv)
             Serial.write(START_SYSEX);
             Serial.write(UARM_CODE);
             Serial.write(READ_COORDS);
-            uarm.calXYZ();
-            float x = uarm.getCalX();
-            float y = uarm.getCalY();
-            float z = uarm.getCalZ();
+            uarm.get_current_xyz();
+            float x = uarm.get_current_x();
+            float y = uarm.get_current_y();
+            float z = uarm.get_current_z();
             sendFloatAsFour7bitBytes(x);
             sendFloatAsFour7bitBytes(y);
             sendFloatAsFour7bitBytes(z);
@@ -139,7 +139,7 @@ boolean handleSysex(byte command, byte argc, byte *argv)
             if (argv[22] == 1 || argv[22] ==0)
                 enable_hand = argv[22];
             delay(5);
-            uarm.moveToOpts(x,y,z,hand_angle,relative_flags,time_spend,path_type,ease_type,enable_hand);
+            uarm.move_to(x,y,z,hand_angle,relative_flags,time_spend,path_type,ease_type,enable_hand);
             delay(10);
         }
 
@@ -272,7 +272,7 @@ boolean handleSysex(byte command, byte argc, byte *argv)
         // CMD 1C Servo Attach or Detach
         if (uarmCommand == DETACH_SERVO)
         {
-            uarm.detachAll();
+            uarm.detach_all_servos();
             return true;
         }
 
@@ -280,14 +280,14 @@ boolean handleSysex(byte command, byte argc, byte *argv)
         if (uarmCommand == PUMP_STATUS)
         {
             byte pump_status = argv[1];
-            pump_status == 1 ? uarm.pumpOn() : uarm.pumpOff();
+            pump_status == 1 ? uarm.pump_on() : uarm.pump_off();
             return true;
         }
         // CMD 20 GRIPPER Status
         if (uarmCommand == GRIPPER_STATUS)
         {
             byte gripper_status = argv[1];
-            gripper_status == 1 ? uarm.gripperCatch() : uarm.gripperRelease();
+            gripper_status == 1 ? uarm.gripper_catch() : uarm.gripper_release();
             return true;
         }
         //0X1E WRITE_STRETCH
@@ -297,7 +297,7 @@ boolean handleSysex(byte command, byte argc, byte *argv)
             length = argv[1] == 1 ? -length : length;
             double height = argv[6] + (argv[7] << 7) + float(argv[8])/100;
             height = argv[5] == 1 ? -height : height;
-            uarm.writeStretch(length,height);
+            uarm.write_stretch_height(length,height);
             return true;
         }
         //0X1F WRITE_LEFT_RIGHT_ANGLE
@@ -306,7 +306,7 @@ boolean handleSysex(byte command, byte argc, byte *argv)
             double left = argv[1] + (argv[2] << 7) + float(argv[3])/100;
             double right = argv[4] + (argv[5] << 7) + float(argv[6])/100;
             boolean withOffset = argv[7];
-            uarm.writeLeftRightServoAngle(left,right, withOffset);
+            uarm.write_left_right_servo_angle(left,right, withOffset);
             return true;
         }
         //0X22 WRITE_SERIAL_NUMBER

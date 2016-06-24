@@ -1,14 +1,12 @@
-/******************************************************************************
- * File Name          : uArm_library.h
- * Author             : Joey Song
- * Updated            : Joey Song, Alex Tan, Dave Corboy
- * Email              : joey@ufactory.cc
- * Date               : 12 Dec, 2014
- * Description        :
- * License            :
- * Copyright(C) 2016 UFactory Team. All right reserved.
- *******************************************************************************/
-
+/*! ******************************************************************************
+   \file uarm_library.h
+   \brief uarm library header
+   \author Joey Song
+   \update Joey Song, Alex Tan, Dave Corboy
+   \date 12/Dec/2014
+   \License GNU
+   \Copyright 2016 UFactory Team. All right reserved
+* *******************************************************************************/
 #include <Arduino.h>
 #include <EEPROM.h>
 #include <Wire.h>
@@ -20,7 +18,7 @@
 
 #define UARM_MAJOR_VERSION      1
 #define UARM_MINOR_VERSION      6
-#define UARM_BUGFIX             1
+#define UARM_BUGFIX             2
 
 #define SUCCESS                 1
 #define FAILED                  -1
@@ -88,13 +86,9 @@
 #define OFFSET_STRETCH_START_ADDRESS        20
 #define SERIAL_NUMBER_ADDRESS               100
 
+#define A
+
 #define CONFIRM_FLAG                        0x80
-
-// #define D090M_SERVO_MIN_PUL     500
-// #define D090M_SERVO_MAX_PUL     2500
-// #define D009A_SERVO_MIN_PUL     600
-// #define D009A_SERVO_MAX_PUL     2550
-
 
 // movement path types
 #define PATH_LINEAR     0   // path based on linear interpolation
@@ -104,11 +98,8 @@
 #define F_ABSOLUTE      0
 #define F_POSN_RELATIVE 1
 #define F_HAND_RELATIVE 2   // standard relative, current + hand parameter
-#define F_HAND_ROT_REL  4   // hand keeps orientation relative to rotation servo (+/- hand parameter)
+#define F_HAND_ROT_REL  4   // hand keeps orientation relative to rotationxn servo (+/- hand parameter)
 // #define F_NEXT_OPT   8   // these are flags, next option is next available bit
-
-// interpolation intervals
-//#define INTERP_INTVLS 100
 
 // interpolation types
 #define INTERP_EASE_INOUT_CUBIC 0  // original cubic ease in/out
@@ -120,91 +111,77 @@
 #define LINEAR_INTERCEPT        1
 #define LINEAR_SLOPE            2
 
-// Setting parameters
-// Servo Speed
-// #define SERVO_SPEED_FLAG_ADDRESS     5
-// #define SERVO_SPEED_ADDRESS          6
-// #define DEFAULT_SERVO_SPEED          2
-
-// // init postion when plug in
-// #define INIT_ATTACH_FLAG_ADDRESS     7
-// #define INIT_SERVO_ROT               90
-// #define INIT_SERVO_LEFT              90
-// #define INIT_SERVO_RIGHT             65
-// #define INIT_SERVO_HAND              10
-
 class uArmClass
 {
 public:
         uArmClass();
 
-        double readServoOffset(byte servo_num);
-        void readSerialNumber(byte (&byte_sn_array)[14]);
-        void writeSerialNumber(byte (&byte_sn_array)[14]);
-        void readLinearOffset(byte servo_num, double& intercept_val, double& slope_val);
-        void detachServo(byte servo_num);
-        void alert(byte times, byte runTime, byte stopTime);
-        void detachAll();
-        void writeServoAngle(byte servoNumber, double servoAngle,  boolean writeWithoffset);
-        void writeLeftRightServoAngle(double servo_left_angle, double servo_right_angle, boolean writeWithoffset);
-        byte inputToReal(byte servo_num, byte input_angle);
-        double readAngle(byte servo_num);
-        double readAngle(byte servo_num, boolean withOffset);
-        double analogToAngle(int input_angle, byte servo_num, boolean withOffset);
+        double read_servo_offset(byte servo_num);
+        void read_linear_offset(byte servo_num, double& intercept_val, double& slope_val);
+        void detach_servo(byte servo_num);
+        void alert(byte times, byte runt_time, byte stop_time);
+        void detach_all_servos();
+        void write_servo_angle(byte servo_num, double servo_angle,  boolean with_offset);
+        void write_left_right_servo_angle(double servo_left_angle, double servo_right_angle, boolean with_offset);
+        double read_servo_angle(byte servo_num);
+        double read_servo_angle(byte servo_num, boolean with_offset);
+        double analog_to_angle(int input_angle, byte servo_num, boolean with_offset);
 
 
-        int moveToOpts(double x, double y, double z, double hand_angle, byte relative_flags, double time, byte path_type, byte ease_type, boolean enable_hand);
-        void moveTo(double x, double y,double z) {
-                moveToOpts(x, y, z, 0, F_HAND_RELATIVE, 1.0, PATH_LINEAR, INTERP_EASE_INOUT_CUBIC, false);
+        int move_to(double x, double y, double z, double hand_angle, byte relative_flags, double time, byte path_type, byte ease_type, boolean enable_hand);
+        void move_to(double x, double y,double z) {
+                move_to(x, y, z, 0, F_HAND_RELATIVE, 1.0, PATH_LINEAR, INTERP_EASE_INOUT_CUBIC, false);
         }
-        void moveTo(double x, double y,double z,double hand_angle) {
-                moveToOpts(x, y, z, hand_angle, F_HAND_RELATIVE, 1.0, PATH_LINEAR, INTERP_EASE_INOUT_CUBIC, true);
+        void move_to(double x, double y,double z,double hand_angle) {
+                move_to(x, y, z, hand_angle, F_HAND_RELATIVE, 1.0, PATH_LINEAR, INTERP_EASE_INOUT_CUBIC, true);
         }
-        void moveTo(double x, double y,double z,int relative, double time) {
-                moveToOpts(x, y, z, 0, F_HAND_RELATIVE | (relative ? F_POSN_RELATIVE : 0), time, PATH_LINEAR, INTERP_EASE_INOUT_CUBIC, false);
+        void move_to(double x, double y,double z,int relative, double time) {
+                move_to(x, y, z, 0, F_HAND_RELATIVE | (relative ? F_POSN_RELATIVE : 0), time, PATH_LINEAR, INTERP_EASE_INOUT_CUBIC, false);
         }
-        void moveTo(double x, double y,double z,int relative, double time, double servo_4_angle) {
-                moveToOpts(x, y, z, servo_4_angle, relative ? F_POSN_RELATIVE : 0, time, PATH_LINEAR, INTERP_EASE_INOUT_CUBIC, true);
+        void move_to(double x, double y,double z,int relative, double time, double servo_4_angle) {
+                move_to(x, y, z, servo_4_angle, relative ? F_POSN_RELATIVE : 0, time, PATH_LINEAR, INTERP_EASE_INOUT_CUBIC, true);
         }
-        void moveTo(double x, double y, double z, int relative, double time, int servo_4_relative, double servo_4_angle) {
-                moveToOpts(x, y, z, servo_4_angle, (relative ? F_POSN_RELATIVE : 0) | (servo_4_relative ? F_HAND_RELATIVE : 0), time, PATH_LINEAR, INTERP_EASE_INOUT_CUBIC, true);
-        }
-
-        void moveToAtOnce(double x, double y, double z) {
-                moveToOpts(x, y, z, 0, F_HAND_RELATIVE, 0.0, PATH_LINEAR, INTERP_LINEAR, false);
-        }
-        void moveToAtOnce(double x, double y, double z, int relative, double servo_4_angle) {
-                moveToOpts(x, y, z, servo_4_angle, relative ? F_POSN_RELATIVE : 0, 0.0, PATH_LINEAR, INTERP_LINEAR, true);
+        void move_to(double x, double y, double z, int relative, double time, int servo_4_relative, double servo_4_angle) {
+                move_to(x, y, z, servo_4_angle, (relative ? F_POSN_RELATIVE : 0) | (servo_4_relative ? F_HAND_RELATIVE : 0), time, PATH_LINEAR, INTERP_EASE_INOUT_CUBIC, true);
         }
 
-        void writeStretch(double armStretch, double armHeight);
-
-
-        double getCalX() {
-                return g_cal_x;
+        void move_to_at_once(double x, double y, double z) {
+                move_to(x, y, z, 0, F_HAND_RELATIVE, 0.0, PATH_LINEAR, INTERP_LINEAR, false);
         }
-        double getCalY() {
-                return g_cal_y;
-        }
-        double getCalZ() {
-                return g_cal_z;
-        }
-        void getCalXYZ(double& x, double& y, double &z) {
-                calXYZ(); x = g_cal_x; y = g_cal_y; z = g_cal_z;
-        }
-        void getCalXYZ(double theta_1, double theta_2, double theta_3, double& x, double& y, double &z) {
-                calXYZ(theta_1, theta_2, theta_3); x = g_cal_x; y = g_cal_y; z = g_cal_z;
+        void move_to_at_once(double x, double y, double z, int relative, double servo_4_angle) {
+                move_to(x, y, z, servo_4_angle, relative ? F_POSN_RELATIVE : 0, 0.0, PATH_LINEAR, INTERP_LINEAR, true);
         }
 
-        void calAngles(double x, double y, double z, double& theta_1, double& theta_2, double& theta_3);
+        void write_stretch_height(double stretch, double height);
 
-        void calXYZ();
 
-        void gripperCatch();
-        void gripperRelease();
+        double get_current_x() {
+                return g_current_x;
+        }
+        double get_current_y() {
+                return g_current_y;
+        }
+        double get_current_z() {
+                return g_current_z;
+        }
+
+        void get_current_xyz();
+        void get_current_xyz(double theta_1, double theta_2, double theta_3);
+
+        void angle_to_coordinate(double& x, double& y, double &z) {
+                get_current_xyz(); x = g_current_x; y = g_current_y; z = g_current_z;
+        }
+        void angle_to_coordinate(double theta_1, double theta_2, double theta_3, double& x, double& y, double &z) {
+                get_current_xyz(theta_1, theta_2, theta_3); x = g_current_x; y = g_current_y; z = g_current_z;
+        }
+        void coordinate_to_angle(double x, double y, double z, double& theta_1, double& theta_2, double& theta_3);
+
+
+        void gripper_catch();
+        void gripper_release();
         void interpolate(double start_val, double end_val, double *interp_vals, byte ease_type);
-        void pumpOn();
-        void pumpOff();
+        void pump_on();
+        void pump_off();
 
         Servo g_servo_rot;
         Servo g_servo_left;
@@ -212,29 +189,25 @@ public:
         Servo g_servo_hand_rot;
         Servo g_servo_hand;
 
-        // byte g_servo_speed;
-
 protected:
-
-
         double cur_rot;
         double cur_left;
         double cur_right;
         double cur_hand;
-        double calYonly(double theta_1, double theta_2, double theta_3);
+        double angle_to_coordinate_y(double theta_1, double theta_2, double theta_3);
 
-        double g_cal_x;
-        double g_cal_y;
-        double g_cal_z;
+        double g_current_x;
+        double g_current_y;
+        double g_current_z;
 
         boolean g_gripper_reset;
         unsigned int INTERP_INTVLS;
 private:
-        int writeAngle(byte servo_rot_angle, byte servo_left_angle, byte servo_right_angle, byte servo_hand_rot_angle, byte trigger);
-        int writeAngle(double servo_rot_angle, double servo_left_angle, double servo_right_angle, double servo_hand_rot_angle);
-        int writeAngle(double servo_rot_angle, double servo_left_angle, double servo_right_angle);
-        void attachAll();
-        void attachServo(byte servo_num);
+        int write_servo_angle(byte servo_rot_angle, byte servo_left_angle, byte servo_right_angle, byte servo_hand_rot_angle, byte trigger);
+        int write_servo_angle(double servo_rot_angle, double servo_left_angle, double servo_right_angle, double servo_hand_rot_angle);
+        int write_servo_angle(double servo_rot_angle, double servo_left_angle, double servo_right_angle);
+        void attach_all();
+        void attach_servo(byte servo_num);
 };
 
 extern uArmClass uarm;

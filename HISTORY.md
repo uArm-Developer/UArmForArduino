@@ -1,3 +1,8 @@
+## [1.6.2] - 2016-06-24
+
+### Fix
+- Change Lots of function names according to Programming Rules
+
 ## [1.6.1] - 2016-06-22
 
 ### Fix
