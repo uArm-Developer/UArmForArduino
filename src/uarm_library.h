@@ -185,7 +185,7 @@ public:
 
         int write_servo_angle(byte servo_rot_angle, byte servo_left_angle, byte servo_right_angle, byte servo_hand_rot_angle, byte trigger);
         int write_servo_angle(double servo_rot_angle, double servo_left_angle, double servo_right_angle, double servo_hand_rot_angle);
-        int write_servo_angle(double servo_rot_angle, double servo_left_angle, double servo_right_angle);        
+        int write_servo_angle(double servo_rot_angle, double servo_left_angle, double servo_right_angle);
 
         Servo g_servo_rot;
         Servo g_servo_left;

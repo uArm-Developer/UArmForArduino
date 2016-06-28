@@ -1,12 +1,11 @@
-/******************************************************************************************
-* File Name          : Calibration.ino
-* Author             : Joey Song
-* Update             : Alex Tan
-* Version            : V2.0
-* Description        : This documents is for calibration with uArm Metal version
-* Copyright(C) 2016 uArm Team. All right reserved.
-*******************************************************************************************/
-
+/*!
+   \file Calibration.ino
+   \brief Calibration Arduino Sketch
+   \author Joe Song
+   \update Alex Tan
+   \license GNU
+   \copyright(c) 2016 UFactory Team. All right reserved
+ */
 #include "uarm_library.h"
 
 int value;        // value is the data recevied

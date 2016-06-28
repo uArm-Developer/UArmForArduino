@@ -1,13 +1,13 @@
-/******************************************************************************************
-  File Name          : movement.ino
-  Author             : Dave Corboy
-  Version            : V1.0
-  Date               : 24 Feb, 2016
-  Modified Date      : 28 Feb, 2016
-  Description        : uArm Metal Movement Type Demo
-*******************************************************************************************/
+/*!
+   \example movement.ino
+   \file movement.ino
+   \brief movement Arduino Sketch
+   \author Dave Corboy
+   \update Alex Tan
+   \license GNU
+   \copyright(c) 2016 UFactory Team. All right reserved
+ */
 
-#include <Wire.h>
 #include <uarm_library.h>
 
 // states

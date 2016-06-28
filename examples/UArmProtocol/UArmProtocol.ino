@@ -1,12 +1,13 @@
-/******************************************************************************
-* File Name          : UArmFirmata.ino
-* Author             : Joey Song
-* Updated            : Joey Song/Alex Tan
-* Email              : joey@ufactory.cc
-* Description        :
-* License            :
-* Copyright(C) 2016 UFactory Team. All right reserved.
-*******************************************************************************/
+/*!
+   \example UArmProtocol.ino
+   \file UArmProtocol.ino
+   \brief uArm Protocol Arduino Sketch
+   \author Alex Tan
+   \update Alex Tan
+   \license GNU
+   \copyright(c) 2016 UFactory Team. All right reserved
+ */
+
 #include <uarm_library.h>
 #include <EEPROM.h>
 

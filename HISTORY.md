@@ -1,8 +1,12 @@
+# uArm Arduino Library Release Note
+
 ## [1.7.0] - 2016-06-24
 
 ### Fix
 - Update examples Calibration.ino, movement.ino, Add new UArmTextControl2.0.ino
 - Update uarm_library.h make some protected value be public
+- Move All source code to src folder
+- Create Docs folder to store Doxygen Configure & Html header footer files
 
 ## [1.6.2] - 2016-06-24
 
