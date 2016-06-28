@@ -167,7 +167,7 @@ String runCommand(String cmnd){
                 if(errorResponse.length() > 0) {return errorResponse; }
                 float values[1];
                 getCommandValues(cmnd, attachDetachParameters, 1, values);
-                if(values[0] == 1) {           uarm.g_servo_rot.attach(SERVO_ROT_PIN); }else if(values[0] == 2) {    uarm.g_servo_left.attach(SERVO_LEFT_PIN); }else if(values[0] == 3) {   uarm.g_servo_right.attach(SERVO_RIGHT_PIN); }else if(values[0] == 4) {uarm.g_servo_hand_rot.attach(SERVO_HAND_PIN); }else{ return F("[ERROR: Servo number does not exist]\n"); }
+                if(values[0] == 1) {           uarm.set_servo_status(true, SERVO_ROT_NUM); }else if(values[0] == 2) {     uarm.set_servo_status(true, SERVO_LEFT_NUM); }else if(values[0] == 3) {    uarm.set_servo_status(true, SERVO_RIGHT_NUM); }else if(values[0] == 4) { uarm.set_servo_status(true, SERVO_HAND_ROT_NUM); }else{ return F("[ERROR: Servo number does not exist]\n"); }
                 return ok + cmnd + endB;
         }
 
@@ -177,7 +177,7 @@ String runCommand(String cmnd){
                 if(errorResponse.length() > 0) {return errorResponse; }
                 float values[1];
                 getCommandValues(cmnd, attachDetachParameters, 1, values);
-                if(values[0] == 1) {      uarm.g_servo_rot.detach(); }else if(values[0] == 2) {uarm.g_servo_left.detach(); }else if(values[0] == 3) {uarm.g_servo_right.detach(); }else if(values[0] == 4) {uarm.g_servo_hand_rot.detach(); }else{ return "[ERROR: Servo number " + String(values[0]) + " does not exist]\n"; }
+                if(values[0] == 1) {      uarm.set_servo_status(false, SERVO_ROT_NUM); }else if(values[0] == 2) {uarm.set_servo_status(false, SERVO_LEFT_NUM); }else if(values[0] == 3) {uarm.set_servo_status(false, SERVO_RIGHT_NUM); }else if(values[0] == 4) {uarm.set_servo_status(false, SERVO_HAND_ROT_NUM); }else{ return "[ERROR: Servo number " + String(values[0]) + " does not exist]\n"; }
                 return ok + cmnd + endB;
         }
 

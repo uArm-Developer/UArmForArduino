@@ -1,5 +1,11 @@
 # uArm Arduino Library Release Note
 
+## [1.7.1] - 2016-06-28
+
+### Fix
+- Set Current angle after attach servo
+- rewrite set_servo_status replace attach_servo detach_servo
+
 ## [1.7.0] - 2016-06-24
 
 ### Fix

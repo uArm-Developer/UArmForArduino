@@ -17,8 +17,8 @@
 #define uArm_library_h
 
 #define UARM_MAJOR_VERSION      1
-#define UARM_MINOR_VERSION      6
-#define UARM_BUGFIX             2
+#define UARM_MINOR_VERSION      7
+#define UARM_BUGFIX             1
 
 #define SUCCESS                 1
 #define FAILED                  -1
@@ -118,9 +118,7 @@ public:
 
         double read_servo_offset(byte servo_num);
         void read_linear_offset(byte servo_num, double& intercept_val, double& slope_val);
-        void detach_servo(byte servo_num);
         void alert(byte times, byte runt_time, byte stop_time);
-        void detach_all_servos();
         void write_servo_angle(byte servo_num, double servo_angle,  boolean with_offset);
         void write_left_right_servo_angle(double servo_left_angle, double servo_right_angle, boolean with_offset);
         double read_servo_angle(byte servo_num);
@@ -193,6 +191,9 @@ public:
         Servo g_servo_hand_rot;
         Servo g_servo_hand;
         unsigned int INTERP_INTVLS;
+        // void attach_all();
+        boolean set_servo_status(boolean attach_state, byte servo_num);
+        void init();
 
 protected:
         double cur_rot;
@@ -209,8 +210,7 @@ protected:
 
 private:
 
-        void attach_all();
-        void attach_servo(byte servo_num);
+
 };
 
 extern uArmClass uarm;

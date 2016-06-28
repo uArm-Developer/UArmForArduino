@@ -80,8 +80,21 @@ void loop() {
                 // Detach Servo
 
                 if (readSerial == 'd') {
-                        uarm.detach_all_servos();
+                    uarm.set_servo_status(false, SERVO_ROT_NUM);
+                    uarm.set_servo_status(false, SERVO_LEFT_NUM);
+                    uarm.set_servo_status(false, SERVO_RIGHT_NUM);
+                    uarm.set_servo_status(false, SERVO_HAND_ROT_NUM);
                 }
+                //----------------------------------  function a  ------------------------------------
+                // Detach Servo
+
+                if (readSerial == 'a') {
+                    uarm.set_servo_status(true, SERVO_ROT_NUM);
+                    uarm.set_servo_status(true, SERVO_LEFT_NUM);
+                    uarm.set_servo_status(true, SERVO_RIGHT_NUM);
+                    uarm.set_servo_status(true, SERVO_HAND_ROT_NUM);
+                }
+
                 //----------------------------------  function o  ------------------------------------
                 // Pump on
                 if (readSerial == 'o') {
@@ -97,7 +110,6 @@ void loop() {
                 // function below is for print current x,y,z absolute location
 
                 if (readSerial == 'g') {
-                        uarm.detach_all_servos();
                         uarm.get_current_xyz();
                         Serial.print("The current location is ");
                         Serial.print(uarm.get_current_x());

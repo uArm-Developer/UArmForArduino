@@ -15,6 +15,14 @@ uArmClass::uArmClass()
 
 }
 
+void uArmClass::init()
+{
+    set_servo_status(true, SERVO_ROT_NUM);
+    set_servo_status(true, SERVO_LEFT_NUM);
+    set_servo_status(true, SERVO_RIGHT_NUM);
+    set_servo_status(true, SERVO_HAND_ROT_NUM);
+}
+
 /*!
    \brief Use BUZZER for Alert
    \param times Beep Times
@@ -42,7 +50,7 @@ void uArmClass::alert(byte times, byte runTime, byte stopTime)
  */
 int uArmClass::write_servo_angle(double servo_rot_angle, double servo_left_angle, double servo_right_angle, double servo_hand_rot_angle)
 {
-        attach_all();
+        // attach_all();
         write_servo_angle(servo_rot_angle, servo_left_angle, servo_right_angle);
         write_servo_angle(SERVO_HAND_ROT_NUM,servo_hand_rot_angle,true);
         cur_hand = servo_hand_rot_angle;
@@ -57,9 +65,9 @@ int uArmClass::write_servo_angle(double servo_rot_angle, double servo_left_angle
  */
 int uArmClass::write_servo_angle(double servo_rot_angle, double servo_left_angle, double servo_right_angle)
 {
-        attach_servo(SERVO_ROT_NUM);
-        attach_servo(SERVO_LEFT_NUM);
-        attach_servo(SERVO_RIGHT_NUM);
+        // setServoStatus(true, SERVO_ROT_NUM);
+        // setServoStatus(true, SERVO_LEFT_NUM);
+        // setServoStatus(true, SERVO_RIGHT_NUM);
 
         if(servo_left_angle < 10) servo_left_angle = 10;
         if(servo_left_angle > 120) servo_left_angle = 120;
@@ -89,7 +97,7 @@ int uArmClass::write_servo_angle(double servo_rot_angle, double servo_left_angle
  */
 void uArmClass::write_servo_angle(byte servo_number, double servo_angle, boolean writeWithoffset)
 {
-        attach_servo(servo_number);
+        // attach_servo(servo_number);
         servo_angle = writeWithoffset ? (servo_angle + read_servo_offset(servo_number)) : servo_angle;
         servo_angle = constrain(servo_angle,0.0,180.0);
         switch(servo_number)
@@ -127,8 +135,8 @@ void uArmClass::write_left_right_servo_angle(double servo_left_angle, double ser
                 alert(1, 10, 0);
                 return;
         }
-        attach_servo(SERVO_LEFT_NUM);
-        attach_servo(SERVO_RIGHT_NUM);
+        // attach_servo(SERVO_LEFT_NUM);
+        // attach_servo(SERVO_RIGHT_NUM);
         g_servo_left.write(servo_left_angle);
         g_servo_right.write(servo_right_angle);
 }
@@ -137,79 +145,66 @@ void uArmClass::write_left_right_servo_angle(double servo_left_angle, double ser
    \brief Attach All Servo
    \note Warning, if you attach left servo & right servo without a movement, it might be caused a demage
  */
-void uArmClass::attach_all()
-{
-        attach_servo(SERVO_ROT_NUM);
-        attach_servo(SERVO_LEFT_NUM);
-        attach_servo(SERVO_RIGHT_NUM);
-        attach_servo(SERVO_HAND_ROT_NUM);
-}
+// void uArmClass::attach_all()
+// {
+//         attach_servo(SERVO_ROT_NUM);
+//         attach_servo(SERVO_LEFT_NUM);
+//         attach_servo(SERVO_RIGHT_NUM);
+//         attach_servo(SERVO_HAND_ROT_NUM);
+// }
+
 
 /*!
    \brief Attach Servo, if servo has not been attached, attach the servo, and read the current Angle
    \param servo number SERVO_ROT_NUM, SERVO_LEFT_NUM, SERVO_RIGHT_NUM, SERVO_HAND_ROT_NUM
  */
-void uArmClass::attach_servo(byte servo_number)
-{
-        switch(servo_number) {
-        case SERVO_ROT_NUM:
-                if(!g_servo_rot.attached()) {
-                        g_servo_rot.attach(SERVO_ROT_PIN);
-                        cur_rot = read_servo_angle(SERVO_ROT_NUM);
-                }
-                break;
-        case SERVO_LEFT_NUM:
-                if (!g_servo_left.attached()) {
-                        g_servo_left.attach(SERVO_LEFT_PIN);
-                        cur_left = read_servo_angle(SERVO_LEFT_NUM);
-                }
-                break;
-        case SERVO_RIGHT_NUM:
-                if (!g_servo_right.attached()) {
-                        g_servo_right.attach(SERVO_RIGHT_PIN);
-                        cur_right = read_servo_angle(SERVO_RIGHT_NUM);
-                }
-                break;
-        case SERVO_HAND_ROT_NUM:
-                if (!g_servo_hand_rot.attached()) {
-                        g_servo_hand_rot.attach(SERVO_HAND_PIN);
-                        cur_hand = read_servo_angle(SERVO_HAND_ROT_NUM);
-                }
-                break;
-        }
-}
+boolean uArmClass::set_servo_status(boolean setAttached, byte servoNum){
+        // Attach or detach a servo, and set the position instantly after doing so to prevent "snap"
+        // Returns true or false if the servo was a valid number
+        // Serial.println("Starting new func");
 
-/*!
-   \brief Detach All servo, you could move the arm
- */
-void uArmClass::detach_all_servos()
-{
-        g_servo_rot.detach();
-        g_servo_left.detach();
-        g_servo_right.detach();
-        g_servo_hand_rot.detach();
-}
-
-/*!
-   \brief Detach Servo by Servo Number, SERVO_ROT_NUM, SERVO_LEFT_NUM, SERVO_RIGHT_NUM, SERVO_HAND_ROT_NUM
-   \param servo_number SERVO_ROT_NUM, SERVO_LEFT_NUM, SERVO_RIGHT_NUM, SERVO_HAND_ROT_NUM
- */
-void uArmClass::detach_servo(byte servo_number)
-{
-        switch(servo_number) {
-        case SERVO_ROT_NUM:
-                g_servo_rot.detach();
-                break;
-        case SERVO_LEFT_NUM:
-                g_servo_left.detach();
-                break;
-        case SERVO_RIGHT_NUM:
-                g_servo_right.detach();
-                break;
-        case SERVO_HAND_ROT_NUM:
-                g_servo_hand_rot.detach();
-                break;
+        double angleBefore = 90;
+        if(servoNum == SERVO_ROT_NUM) {
+                if(setAttached) {
+                        angleBefore = read_servo_angle(SERVO_ROT_NUM);
+                        // Serial.println("New angle" + String(angleBefore));
+                        uarm.g_servo_rot.attach(SERVO_ROT_PIN);
+                        uarm.g_servo_rot.write(angleBefore);
+                        cur_rot = angleBefore;
+                }else{
+                        uarm.g_servo_rot.detach();
+                }
+        }else if(servoNum == SERVO_LEFT_NUM) {
+                if(setAttached) {
+                        angleBefore = uarm.read_servo_angle(SERVO_LEFT_NUM);
+                        uarm.g_servo_left.attach(SERVO_LEFT_PIN);
+                        uarm.g_servo_left.write(angleBefore);
+                        cur_left = angleBefore;
+                }else{
+                        uarm.g_servo_left.detach();
+                }
+        }else if(servoNum == SERVO_RIGHT_NUM) {
+                if(setAttached) {
+                        angleBefore = uarm.read_servo_angle(SERVO_RIGHT_NUM);
+                        uarm.g_servo_right.attach(SERVO_RIGHT_PIN);
+                        uarm.g_servo_right.write(angleBefore);
+                        cur_right = angleBefore;
+                }else{
+                        uarm.g_servo_right.detach();
+                }
+        }else if(servoNum == SERVO_HAND_ROT_NUM) {
+                if(setAttached) {
+                        angleBefore = uarm.read_servo_angle(SERVO_HAND_ROT_NUM);
+                        uarm.g_servo_hand_rot.attach(SERVO_HAND_PIN);
+                        uarm.g_servo_hand_rot.write(angleBefore);
+                        cur_hand = angleBefore;
+                }else{
+                        uarm.g_servo_hand_rot.detach();
+                }
+        }else{
+                return false;
         }
+        return true;
 }
 
 /*!
@@ -542,11 +537,11 @@ int uArmClass::move_to(double x, double y, double z, double hand_angle, byte rel
                 y = y * k;
         }
         // attach_all();
-        attach_servo(SERVO_ROT_NUM);
-        attach_servo(SERVO_LEFT_NUM);
-        attach_servo(SERVO_RIGHT_NUM);
-        if(enable_hand)
-                attach_servo(SERVO_HAND_ROT_NUM);
+        // setServoStatus(true, SERVO_ROT_NUM);
+        // setServoStatus(true, SERVO_LEFT_NUM);
+        // setServoStatus(true, SERVO_RIGHT_NUM);
+        // if(enable_hand)
+        //         setServoStatus(true, SERVO_HAND_ROT_NUM);
 
         // find current position using cached servo values
         double current_x;

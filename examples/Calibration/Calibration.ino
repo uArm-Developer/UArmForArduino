@@ -180,7 +180,10 @@ void manual_calibration_section()
 {
         int setLoop = 1;
 
-        uarm.detach_all_servos();
+        uarm.set_servo_status(false, SERVO_ROT_NUM);
+        uarm.set_servo_status(false, SERVO_LEFT_NUM);
+        uarm.set_servo_status(false, SERVO_RIGHT_NUM);
+        uarm.set_servo_status(false, SERVO_HAND_ROT_NUM);
 
         Serial.println("Put uarm in calibration posture (servo 1 to 3: 45, 130, 20 degree respectively), then input 1");
         while (setLoop) {

@@ -19,8 +19,8 @@
 #define UARM_FIRMATA_BUGFIX        2
 
 #define UARM_FIRMWARE_MAJOR_VERSION 1
-#define UARM_FIRMWARE_MINOR_VERSION 6
-#define UARM_FIRMWARE_BUGFIX        2
+#define UARM_FIRMWARE_MINOR_VERSION 7
+#define UARM_FIRMWARE_BUGFIX        1
 
 #define START_SYSEX             0xF0 // start a MIDI Sysex message
 #define END_SYSEX               0xF7 // end a MIDI Sysex message
@@ -37,7 +37,7 @@
 #define WRITE_ANALOG                (0X17)
 #define READ_EEPROM                 (0X1A)
 #define WRITE_EEPROM                (0X1B)
-#define DETACH_SERVO                (0X1C)
+#define SERVO_STATUS                (0X1C)
 #define PUMP_STATUS                 (0X1D)
 #define WRITE_STRETCH               (0X1E)
 #define WRITE_LEFT_RIGHT_ANGLE      (0X1F)
@@ -61,6 +61,7 @@ int sysexBytesRead;
 void setup()
 {
   Serial.begin(57600);
+  uarm.init();
 }
 
 void loop()
@@ -271,9 +272,12 @@ boolean handleSysex(byte command, byte argc, byte *argv)
         }
 
         // CMD 1C Servo Attach or Detach
-        if (uarmCommand == DETACH_SERVO)
+        if (uarmCommand == SERVO_STATUS)
         {
-            uarm.detach_all_servos();
+            // uarm.detach_all_servos();
+            byte servo_num = argv[1];
+            boolean servo_status = argv[2] == 0 ?  false : true;
+            uarm.set_servo_status(servo_status, servo_num);
             return true;
         }
 
