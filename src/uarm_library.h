@@ -18,7 +18,7 @@
 
 #define UARM_MAJOR_VERSION      1
 #define UARM_MINOR_VERSION      7
-#define UARM_BUGFIX             1
+#define UARM_BUGFIX             2
 
 #define SUCCESS                 1
 #define FAILED                  -1
@@ -185,11 +185,7 @@ public:
         int write_servo_angle(double servo_rot_angle, double servo_left_angle, double servo_right_angle, double servo_hand_rot_angle);
         int write_servo_angle(double servo_rot_angle, double servo_left_angle, double servo_right_angle);
 
-        Servo g_servo_rot;
-        Servo g_servo_left;
-        Servo g_servo_right;
-        Servo g_servo_hand_rot;
-        Servo g_servo_hand;
+
         unsigned int INTERP_INTVLS;
         // void attach_all();
         boolean set_servo_status(boolean attach_state, byte servo_num);
@@ -209,7 +205,11 @@ protected:
         boolean g_gripper_reset;
 
 private:
-
+        Servo g_servo_rot;
+        Servo g_servo_left;
+        Servo g_servo_right;
+        Servo g_servo_hand_rot;
+        Servo g_servo_hand;
 
 };
 
