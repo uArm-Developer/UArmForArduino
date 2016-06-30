@@ -1,0 +1,90 @@
+/******************************************************************************************
+* File Name          : Test.ino
+* Author             : Joey Song
+* Version            : V1.0
+* Date               : 26 Aug, 2014
+* Modified Date      : 19 Nov, 2015
+* Description        : This documents is for quick start with uArm Metal version
+* Copyright(C) 2015 uArm Team. All right reserved.
+*******************************************************************************************/
+
+/*
+ * Table of Content
+
+ * Function 1 - 4 :    move to a certain point (f)
+ * Fucntion 5 - 6 :    move a Rectangle or a curve (function 5-6)
+ * Function 7 - 8 :    attach or detach all servos (function 7-8)
+ * Function 9     :    uArm calibration
+ * Function 10    :    read current coordinate x,y,z
+ * Function 11    :    recording mode
+
+*/
+
+// headers should must include these four headers
+
+#include "uarm_library.h"
+
+// define a uArm
+//uArmLibrary uArm;
+int value;        // value is the data recevied
+unsigned char i=0,dat[10];
+void setup() {
+
+      pinMode(4,INPUT_PULLUP);
+      if(digitalRead(4)==LOW)
+      {
+        while(digitalRead(4)==LOW);
+        
+        uarm.write_servos_angle(90,90,0);
+        while(1);
+      }
+      //Wire.begin();        // join i2c bus (address optional for master)
+      Serial.begin(9600);  // start serial port at 9600 bps
+      Serial.println(uarm.move_to(0,200,100));
+      //Serial.println(uarm.iic_readbuf(dat,EXTERNAL_EEPROM_DEVICE_ADDRESS,0x0000,255));
+}
+
+
+double x=46,y=65,z=44;
+void loop() {
+//  x=34;
+//  y=76;
+//  z=110;
+//  uarm.read_servo_calibration_data(&x,&y,&z);delay(1000);
+//Serial.println(x,DEC);
+//Serial.println(y,DEC);
+//Serial.println(z,DEC);
+  if(Serial.available())
+  {
+    char inChar = (char)Serial.read();
+    dat[i]=inChar-48;
+    if((dat[i]+48)=='e')
+    {
+      Serial.println("enter");
+      i=0;
+      x=dat[0]*100.0+dat[1]*10.0+dat[2];
+      y=dat[3]*100.0+dat[4]*10.0+dat[5];
+      z=dat[6]*100.0+dat[7]*10.0+dat[8];
+      if(uarm.move_to(x,y,z)==IN_RANGE)
+      {
+        Serial.println("succeed");
+      }
+      else
+      {
+        Serial.println("fail");
+      }
+      //uarm.write_servo_angle(x,y,z);
+        Serial.println("xyz\n");
+        Serial.println(x,DEC);
+        Serial.println(y,DEC);
+        Serial.println(z,DEC);
+    }
+    else
+    {
+      i++;
+    }
+
+  }
+  
+
+}
