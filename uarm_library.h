@@ -136,8 +136,7 @@ public:
         void write_servo_angle(byte servo_num, double servo_angle,  boolean with_offset);
         void write_left_right_servo_angle(double servo_left_angle, double servo_right_angle, boolean with_offset);
         double read_servo_angle(byte servo_num);
-        double read_servo_angle(byte servo_num, boolean with_offset);
-        double analog_to_angle(int input_angle, byte servo_num, boolean with_offset);
+        double analog_to_angle(int input_angle, byte servo_num);
 
 
         unsigned char move_to(double x, double y, double z, double hand_angle, byte relative_flags, double time, byte ease_type, boolean enable_hand);
@@ -208,7 +207,7 @@ public:
         void attach_all();
         void attach_servo(byte servo_num);
 
-//private:
+private:
         void delay_us();
         void iic_start();
         void iic_stop();
