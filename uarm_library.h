@@ -54,9 +54,9 @@
 #define ARM_HEIGHT_MIN   -150
 #define ARM_HEIGHT_MAX   160
 #define L3_MAX_ANGLE     120
-#define L3_MIN_ANGLE     0
+#define L3_MIN_ANGLE     5
 #define L4_MAX_ANGLE     120
-#define L4_MIN_ANGLE     0
+#define L4_MIN_ANGLE     5
 #define L4L3_MAX_ANGLE     150
 #define L4L3_MIN_ANGLE     30
 
@@ -127,17 +127,18 @@ class uArmClass
 {
 public:
         uArmClass();
-
+        void arm_setup();
         double read_servo_offset(byte servo_num);
         void read_servo_calibration_data(double *rot, double *left, double *right);
         void detach_servo(byte servo_num);
         void alert(byte times, byte runt_time, byte stop_time);
         void detach_all_servos();
         void write_servo_angle(byte servo_num, double servo_angle,  boolean with_offset);
-        void write_left_right_servo_angle(double servo_left_angle, double servo_right_angle, boolean with_offset);
         double read_servo_angle(byte servo_num);
         double analog_to_angle(int input_angle, byte servo_num);
 
+        void arm_process_commands();
+        bool available();
 
         unsigned char move_to(double x, double y, double z, double hand_angle, byte relative_flags, double time, byte ease_type, boolean enable_hand);
         unsigned char move_to(double x, double y,double z) {
@@ -178,14 +179,13 @@ public:
         }
 
         void get_current_xyz();
-        void get_current_xyz(double theta_1, double theta_2, double theta_3);
 
-        void angle_to_coordinate(double& x, double& y, double &z) {
+        /*void angle_to_coordinate(double& x, double& y, double &z) {
                 get_current_xyz(); x = g_current_x; y = g_current_y; z = g_current_z;
         }
         void angle_to_coordinate(double theta_1, double theta_2, double theta_3, double& x, double& y, double &z) {
                 get_current_xyz(theta_1, theta_2, theta_3); x = g_current_x; y = g_current_y; z = g_current_z;
-        }
+        }*/
         unsigned char coordinate_to_angle(double x, double y, double z, double& theta_1, double& theta_2, double& theta_3);
 
 
@@ -219,18 +219,25 @@ private:
         unsigned char iic_readbuf(unsigned char *buf,unsigned char device_addr,unsigned int addr,unsigned char len);
 
 protected:
-        double cur_rot;
-        double cur_left;
-        double cur_right;
-        double cur_hand;
+        double cur_rot = 90;
+        double cur_left = 90;
+        double cur_right = 90;
+        double cur_hand = 90;
         double angle_to_coordinate_y(double theta_1, double theta_2, double theta_3);
 
-        double g_current_x;
-        double g_current_y;
-        double g_current_z;
+        double g_current_x = 0;
+        double g_current_y = 200;
+        double g_current_z = 100;
 
         boolean g_gripper_reset;
         unsigned int INTERP_INTVLS;
+
+        unsigned char move_times = 255;//255 means no move
+        // the arrays to store the xyz coordinates first and then change to the rot left right angles
+        double x_array[61];
+        double y_array[61];
+        double z_array[61];
+        double hand_array[61];
 
 };
 

@@ -10,11 +10,82 @@
 
 uArmClass uarm;
 
+unsigned int sys_tick;
+
 uArmClass::uArmClass()
 {
-
+  /*TCNT2   = 0;
+  TCCR2A = (1 << WGM21); // Configure timer 2 for CTC mode
+  TCCR2B = (1 << CS22); // Start timer at Fcpu/64
+  TIMSK2 = (1 << OCIE2A); // Enable CTC interrupt
+  OCR2A   = 249; // Set CTC compare value with a prescaler of 64  2ms*/
 }
 
+/*!
+   \brief check the arm status
+   \Return true:free; false:busy
+ */
+bool uArmClass::available()
+{
+  if(move_times!=255)
+  {
+    return false;
+  }
+  if (Serial.available())
+  {
+    return false;
+  }
+  return true;
+}
+
+/*!
+   \brief process the uarm movement
+   \no parameter
+*/
+void uArmClass::arm_process_commands()
+{
+//for (byte i = 0; i < INTERP_INTVLS; i++)
+  if(sys_tick%40==0)
+  {
+    
+    if(move_times <= INTERP_INTVLS)
+    {
+      //Serial.println(move_times,DEC);
+      y_array[move_times] = y_array[move_times] - LEFT_SERVO_OFFSET;//assembling offset
+      z_array[move_times] = z_array[move_times] - RIGHT_SERVO_OFFSET;//assembling offset
+      read_servo_calibration_data(&x_array[move_times],&y_array[move_times],&z_array[move_times]);
+
+      //if(enable_hand)
+      write_servos_angle(x_array[move_times], y_array[move_times], z_array[move_times], hand_array[move_times]);
+      move_times++;
+      if(move_times > INTERP_INTVLS)
+      {
+        move_times = 255;//disable the move
+      }
+      //delay(1000);
+      //else
+      //  write_servos_angle(rot, left, right);
+      //delay(time * 1000 / INTERP_INTVLS);
+    }
+  }
+}
+
+void uArmClass::arm_setup()
+{
+  TCNT2   = 0;
+  TCCR2A = (1 << WGM21); // Configure timer 2 for CTC mode
+  TCCR2B = (1 << CS22); // Start timer at Fcpu/64
+  TIMSK2 = (1 << OCIE2A); // Enable CTC interrupt
+  OCR2A   = 249; // Set CTC compare value with a prescaler of 64  2ms
+  pinMode(4,INPUT_PULLUP);
+  if(digitalRead(4)==LOW)
+  {
+    while(digitalRead(4)==LOW);
+        
+    write_servos_angle(90,90,0);
+    while(1);
+  }
+}
 
 /*!
    \brief Use BUZZER for Alert
@@ -103,7 +174,6 @@ int uArmClass::write_servos_angle(double servo_rot_angle, double servo_left_angl
         attach_all();
         write_servos_angle(servo_rot_angle, servo_left_angle, servo_right_angle);
         write_servo_angle(SERVO_HAND_ROT_NUM,servo_hand_rot_angle,true);
-        cur_hand = servo_hand_rot_angle;
 }
 
 /*!
@@ -156,29 +226,6 @@ void uArmClass::write_servo_angle(byte servo_number, double servo_angle, boolean
 }
 
 /*!
-   \brief Write the left Servo & Right Servo in the same time (Avoid demage the Servo)
-   \param servo_left_angle left servo target angle
-   \param servo_right_angle right servo target angle
-   \param writeWithoffset True: with Offset, False: without Offset
- */
-void uArmClass::write_left_right_servo_angle(double servo_left_angle, double servo_right_angle, boolean writeWithoffset)
-{
-        servo_left_angle = constrain(servo_left_angle,0,150);
-        servo_right_angle = constrain(servo_right_angle,0,120);
-        servo_left_angle = writeWithoffset ? (servo_left_angle + read_servo_offset(SERVO_LEFT_NUM)) : servo_left_angle;
-        servo_right_angle = writeWithoffset ? (servo_right_angle + read_servo_offset(SERVO_RIGHT_NUM)) : servo_right_angle;
-        if(servo_left_angle + servo_right_angle > 180) // if left angle & right angle exceed 180 degree, it might be caused damage
-        {
-                alert(1, 10, 0);
-                return;
-        }
-        attach_servo(SERVO_LEFT_NUM);
-        attach_servo(SERVO_RIGHT_NUM);
-        g_servo_left.write(servo_left_angle);
-        g_servo_right.write(servo_right_angle);
-}
-
-/*!
    \brief Attach All Servo
    \note Warning, if you attach left servo & right servo without a movement, it might be caused a demage
  */
@@ -200,25 +247,25 @@ void uArmClass::attach_servo(byte servo_number)
         case SERVO_ROT_NUM:
                 if(!g_servo_rot.attached()) {
                         g_servo_rot.attach(SERVO_ROT_PIN);
-                        cur_rot = read_servo_angle(SERVO_ROT_NUM);
+                        //cur_rot = read_servo_angle(SERVO_ROT_NUM);
                 }
                 break;
         case SERVO_LEFT_NUM:
                 if (!g_servo_left.attached()) {
                         g_servo_left.attach(SERVO_LEFT_PIN);
-                        cur_left = read_servo_angle(SERVO_LEFT_NUM);
+                        //cur_left = read_servo_angle(SERVO_LEFT_NUM);
                 }
                 break;
         case SERVO_RIGHT_NUM:
                 if (!g_servo_right.attached()) {
                         g_servo_right.attach(SERVO_RIGHT_PIN);
-                        cur_right = read_servo_angle(SERVO_RIGHT_NUM);
+                        //cur_right = read_servo_angle(SERVO_RIGHT_NUM);
                 }
                 break;
         case SERVO_HAND_ROT_NUM:
                 if (!g_servo_hand_rot.attached()) {
                         g_servo_hand_rot.attach(SERVO_HAND_PIN);
-                        cur_hand = read_servo_angle(SERVO_HAND_ROT_NUM);
+                        //cur_hand = read_servo_angle(SERVO_HAND_ROT_NUM);
                 }
                 break;
         }
@@ -278,23 +325,42 @@ double uArmClass::read_servo_offset(byte servo_num)
  */
 double uArmClass::analog_to_angle(int input_analog, byte servo_num)
 {
-        /*double intercept = 0.0f;
-        double slope = 0.0f;
-        //read_linear_offset(servo_num, intercept, slope);
-        double angle = intercept + slope*input_analog;
-        return withOffset ? angle + read_servo_offset(servo_num) : angle;*/  
   unsigned char adc_calibration_data[DATA_LENGTH],data[4]; //get the calibration data around the data input
   unsigned int min_data_calibration_address, max_calibration_data, min_calibration_data;
   unsigned int angle_range_min, angle_range_max;
+  switch(servo_num)
+  {
+    case  SERVO_ROT_NUM:      iic_readbuf(&data[0], EXTERNAL_EEPROM_DEVICE_ADDRESS, ROT_SERVO_ADDRESS + 360, 2);//get the min adc calibration data for the map() function
+                              iic_readbuf(&data[2], EXTERNAL_EEPROM_DEVICE_ADDRESS, ROT_SERVO_ADDRESS + 360 + 358, 2);//get the max adc calibraiton data for the map() function
+                              break;
+    case  SERVO_LEFT_NUM:     iic_readbuf(&data[0], EXTERNAL_EEPROM_DEVICE_ADDRESS, LEFT_SERVO_ADDRESS + 360, 2);//get the min adc calibration data for the map() function
+                              iic_readbuf(&data[2], EXTERNAL_EEPROM_DEVICE_ADDRESS, LEFT_SERVO_ADDRESS + 360 + 358, 2);//get the max adc calibraiton data for the map() function
+                              break;
+    case  SERVO_RIGHT_NUM:    iic_readbuf(&data[0], EXTERNAL_EEPROM_DEVICE_ADDRESS, RIGHT_SERVO_ADDRESS + 360, 2);//get the min adc calibration data for the map() function
+                              iic_readbuf(&data[2], EXTERNAL_EEPROM_DEVICE_ADDRESS, RIGHT_SERVO_ADDRESS + 360 + 358, 2);//get the max adc calibraiton data for the map() function
+                              break;
+    default:                  break;
+  }
 
-  iic_readbuf(&data[0], EXTERNAL_EEPROM_DEVICE_ADDRESS, ROT_SERVO_ADDRESS + 360, 2);//get the min adc calibration data for the map() function
-  iic_readbuf(&data[2], EXTERNAL_EEPROM_DEVICE_ADDRESS, ROT_SERVO_ADDRESS + 360 + 358, 2);//get the max adc calibraiton data for the map() function
   max_calibration_data = (data[2]<<8) + data[3];
   min_calibration_data = (data[0]<<8) + data[1];
+  /*Serial.println("++++++++++++++++++++++");
+  Serial.println(max_calibration_data,DEC);
+  Serial.println(min_calibration_data,DEC);*/
 
-  angle_range_min = map(input_analog, min_calibration_data, max_calibration_data, 0, 180) - (DATA_LENGTH>>2);
+  angle_range_min = map(input_analog, min_calibration_data, max_calibration_data, 1, 180) - (DATA_LENGTH>>2);
   min_data_calibration_address = (angle_range_min * 2);
-  iic_readbuf(adc_calibration_data, EXTERNAL_EEPROM_DEVICE_ADDRESS, ROT_SERVO_ADDRESS + min_data_calibration_address + 360, DATA_LENGTH);//360 means the adc calibration data offset
+  switch(servo_num)
+  {
+    case  SERVO_ROT_NUM:      iic_readbuf(adc_calibration_data, EXTERNAL_EEPROM_DEVICE_ADDRESS, ROT_SERVO_ADDRESS + min_data_calibration_address + 360, DATA_LENGTH);//360 means the adc calibration data offset
+                              break;
+    case  SERVO_LEFT_NUM:     iic_readbuf(adc_calibration_data, EXTERNAL_EEPROM_DEVICE_ADDRESS, LEFT_SERVO_ADDRESS + min_data_calibration_address + 360, DATA_LENGTH);//360 means the adc calibration data offset
+                              break;
+    case  SERVO_RIGHT_NUM:    iic_readbuf(adc_calibration_data, EXTERNAL_EEPROM_DEVICE_ADDRESS, RIGHT_SERVO_ADDRESS + min_data_calibration_address + 360, DATA_LENGTH);//360 means the adc calibration data offset
+                              break;
+    default:                  break;    
+  }
+
   unsigned int deltaA = 0xffff, deltaB = 0, i, i_min = 0;
   for(i=0;i<(DATA_LENGTH >> 1);i++)
   {
@@ -306,10 +372,8 @@ double uArmClass::analog_to_angle(int input_analog, byte servo_num)
       }
   }
 
-  angle_range_min = angle_range_min + i_min + 1;
+  angle_range_min = angle_range_min + i_min;
   angle_range_max = angle_range_min + 1;
-  Serial.println(angle_range_max,DEC);
-  Serial.println(angle_range_min,DEC);
   if((((adc_calibration_data[i_min+i_min]<<8) + adc_calibration_data[1+i_min+i_min]) - input_analog) >= 0)//determine if the current value bigger than the input_analog
   {
     //angle_rang_min = map(input_analog, min_calibration_data, max_calibration_data, 0, 180) - (DATA_LENGTH>>2);
@@ -318,17 +382,10 @@ double uArmClass::analog_to_angle(int input_analog, byte servo_num)
   }
   else
   {
+    angle_range_min++;//change the degree range
+    angle_range_max++;
     max_calibration_data = (adc_calibration_data[i_min+i_min+2]<<8) + adc_calibration_data[i_min+i_min+3];
     min_calibration_data = (adc_calibration_data[i_min+i_min]<<8) + adc_calibration_data[i_min+i_min+1];
-  }
-
-  if(min_calibration_data < max_calibration_data)
-  {
-    return ( 1.0 * (input_analog - min_calibration_data)/(max_calibration_data - min_calibration_data) + angle_range_min);
-  }
-  else
-  {
-    return (angle_range_min + angle_range_max) / 2.0;//angle from 1-180 but the address from 0-179
   }
   
 }
@@ -530,38 +587,32 @@ void uArmClass::write_stretch_height(double armStretch, double armHeight){
  */
 void uArmClass::get_current_xyz()
 {
-        double theta_rot = uarm.analog_to_angle(analogRead(SERVO_ROT_ANALOG_PIN),SERVO_ROT_NUM);
-        double theta_left = uarm.analog_to_angle(analogRead(SERVO_LEFT_ANALOG_PIN),SERVO_LEFT_NUM);
-        double theta_right = uarm.analog_to_angle(analogRead(SERVO_RIGHT_ANALOG_PIN),SERVO_RIGHT_NUM);
-        //get_current_xyz(theta_1, theta_2, theta_3);
-        //add the offset first
-        theta_left = theta_left + LEFT_SERVO_OFFSET;
-        theta_right = theta_right + RIGHT_SERVO_OFFSET;
-        /*double l5 = (MATH_L2 + MATH_L3*cos(theta_2 / MATH_TRANS) + MATH_L4*cos(theta_3 / MATH_TRANS));
+  double theta_rot = uarm.analog_to_angle(analogRead(SERVO_ROT_ANALOG_PIN),SERVO_ROT_NUM);
+  double theta_left = uarm.analog_to_angle(analogRead(SERVO_LEFT_ANALOG_PIN),SERVO_LEFT_NUM);
+  double theta_right = uarm.analog_to_angle(analogRead(SERVO_RIGHT_ANALOG_PIN),SERVO_RIGHT_NUM);
+  //double theta_rot = uarm.analog_to_angle(257,SERVO_ROT_NUM);
+  //double theta_left = uarm.analog_to_angle(214,SERVO_LEFT_NUM);
+  //double theta_right = uarm.analog_to_angle(207,SERVO_RIGHT_NUM);
+  //get_current_xyz(theta_1, theta_2, theta_3);
+  
+/*Serial.println(analogRead(SERVO_ROT_ANALOG_PIN), DEC);
+Serial.println(analogRead(SERVO_LEFT_ANALOG_PIN), DEC);
+Serial.println(analogRead(SERVO_RIGHT_ANALOG_PIN), DEC);*/
+Serial.println(theta_rot, DEC);
+Serial.println(theta_left, DEC);
+Serial.println(theta_right, DEC);
+  //add the offset first
+  theta_left = theta_left + LEFT_SERVO_OFFSET;
+  theta_right = theta_right + RIGHT_SERVO_OFFSET;
 
-        g_current_x = -cos(abs(theta_1 / MATH_TRANS))*l5;
-        g_current_y = -sin(abs(theta_1 / MATH_TRANS))*l5;
-        g_current_z = MATH_L1 + MATH_L3*sin(abs(theta_2 / MATH_TRANS)) - MATH_L4*sin(abs(theta_3 / MATH_TRANS));*/
-        double stretch = MATH_L3 * cos(theta_left / MATH_TRANS) + MATH_L4 * cos(theta_right / MATH_TRANS) + MATH_L2;
-        double height = MATH_L3 * sin(theta_left / MATH_TRANS) - MATH_L4 * sin(theta_right / MATH_TRANS) + MATH_L1;
-        g_current_x = stretch * cos(theta_rot / MATH_TRANS);
-        g_current_y = stretch * sin(theta_rot / MATH_TRANS);
-        g_current_z = height;
-Serial.println(g_current_x,DEC);
-Serial.println(g_current_y,DEC);
-Serial.println(g_current_z,DEC);
-}
-
-/*!
-   \brief Calculate X,Y,Z to g_current_x,g_current_y,g_current_z
- */
-void uArmClass::get_current_xyz(double theta_1, double theta_2, double theta_3)
-{
-        double l5 = (MATH_L2 + MATH_L3*cos(theta_2 / MATH_TRANS) + MATH_L4*cos(theta_3 / MATH_TRANS));
-
-        g_current_x = -cos(abs(theta_1 / MATH_TRANS))*l5;
-        g_current_y = -sin(abs(theta_1 / MATH_TRANS))*l5;
-        g_current_z = MATH_L1 + MATH_L3*sin(abs(theta_2 / MATH_TRANS)) - MATH_L4*sin(abs(theta_3 / MATH_TRANS));
+  double stretch = MATH_L3 * cos(theta_left / MATH_TRANS) + MATH_L4 * cos(theta_right / MATH_TRANS) + MATH_L2;
+  double height = MATH_L3 * sin(theta_left / MATH_TRANS) - MATH_L4 * sin(theta_right / MATH_TRANS) + MATH_L1;
+  g_current_x = stretch * cos(theta_rot / MATH_TRANS);
+  g_current_y = stretch * sin(theta_rot / MATH_TRANS);
+  g_current_z = height;
+Serial.println(g_current_x, DEC);
+Serial.println(g_current_y, DEC);
+Serial.println(g_current_z, DEC);
 }
 
 /*!
@@ -658,24 +709,46 @@ unsigned char uArmClass::move_to(double x, double y, double z, double hand_angle
   INTERP_INTVLS = max(delta_rot,delta_left);
   INTERP_INTVLS = max(INTERP_INTVLS,delta_right);
 
-  INTERP_INTVLS = (INTERP_INTVLS<80) ? INTERP_INTVLS : 80;
+  INTERP_INTVLS = (INTERP_INTVLS<60) ? INTERP_INTVLS : 60;
   INTERP_INTVLS = INTERP_INTVLS * time;// speed determine the number of interpolation
-  INTERP_INTVLS = 0;
+  //INTERP_INTVLS = 0;
 
-  if (time > 0)
-  {
-    // we will calculate linear path targets
-    double x_array[INTERP_INTVLS];
-    double y_array[INTERP_INTVLS];
-    double z_array[INTERP_INTVLS];
-    double hand_array[INTERP_INTVLS];
+  //if (time > 0)
+  //{
 
     interpolate(g_current_x, x, x_array, ease_type);// /10 means to make sure the t*t*t is still in the range
     interpolate(g_current_y, y, y_array, ease_type);
     interpolate(g_current_z, z, z_array, ease_type);
     interpolate(cur_hand, hand_angle, hand_array, ease_type);
-
-    for (byte i = 0; i < INTERP_INTVLS; i++)
+    //give the final destination value to the array
+    x_array[INTERP_INTVLS] = x;
+    y_array[INTERP_INTVLS] = y;
+    z_array[INTERP_INTVLS] = z;
+    hand_array[INTERP_INTVLS] = hand_angle;
+    double rot, left, right;
+    for (byte i = 0; i <= INTERP_INTVLS; i++)
+    {
+      
+      if(coordinate_to_angle(x_array[i], y_array[i], z_array[i], rot, left, right) == OUT_OF_RANGE)//check if all the data in range
+      {
+        return OUT_OF_RANGE;
+      }
+      else
+      {
+        //change to the rot/left/right angles
+        x_array[i] = rot;
+        y_array[i] = left;
+        z_array[i] = right;
+      }
+    }
+g_current_x=x;
+g_current_y=y;
+g_current_z=z;
+cur_rot=rot;
+cur_left=left;
+cur_right=right;
+    move_times=0;//start to caculate the movement
+    /*for (byte i = 0; i < INTERP_INTVLS; i++)
     {
       double rot, left, right;
       if(coordinate_to_angle(x_array[i], y_array[i], z_array[i], rot, left, right) == OUT_OF_RANGE)
@@ -692,12 +765,12 @@ unsigned char uArmClass::move_to(double x, double y, double z, double hand_angle
       //else
       //  write_servos_angle(rot, left, right);
       delay(time * 1000 / INTERP_INTVLS);
-    }
-  }
+    }*/
+  //}
 
       
 // the destination
-  tgt_left = tgt_left - LEFT_SERVO_OFFSET;//assembling offset
+/*  tgt_left = tgt_left - LEFT_SERVO_OFFSET;//assembling offset
   tgt_right = tgt_right - RIGHT_SERVO_OFFSET;//assembling offset    
   
 
@@ -711,7 +784,7 @@ Serial.println(tgt_right,DEC);
     //if (enable_hand)
   write_servos_angle(tgt_rot, tgt_left, tgt_right, hand_angle);
     //else
-    //  write_servo_angle(tgt_rot, tgt_left, tgt_right);
+    //  write_servo_angle(tgt_rot, tgt_left, tgt_right);*/
 
   return IN_RANGE;
 }
@@ -778,6 +851,15 @@ void uArmClass::pump_off()
         digitalWrite(VALVE_EN,LOW);
 }
 
+/*!
+  \brief systick
+*/
+
+ISR(TIMER2_COMPA_vect) 
+{ 
+  sys_tick++;
+  PORTB ^= 0x01;
+}
 
 //*************************************private functions***************************************//
 //**just used by the 512k external eeprom**//
