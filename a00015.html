@@ -8,7 +8,7 @@
         <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
         <meta name="generator" content="Doxygen 1.8.11"/>
         <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
-        <title>UArm Arduino Library: /Users/alex/Workspace/develop/uarm_metal/uarm4arduino/examples/UArmTextControl2.0/UArmTextControl2.0.ino File Reference</title>
+        <title>UArm Arduino Library: /Users/alex/Workspace/develop/uarm_metal/uarm4arduino/examples/Calibration/Calibration.ino File Reference</title>
         <!--<link href="tabs.css" rel="stylesheet" type="text/css"/>-->
         <script type="text/javascript" src="dynsections.js"></script>
         <link href="search/search.css" rel="stylesheet" type="text/css"/>
@@ -90,7 +90,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><a class="el" href="dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="dir_1a98773d75fe27b428f3720cd80183e4.html">UArmTextControl2.0</a></li>  </ul>
+<li class="navelem"><a class="el" href="dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="dir_c43ffed018fae7654a900ab6da451d2b.html">Calibration</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
@@ -98,10 +98,13 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <a href="#func-members">Functions</a> &#124;
 <a href="#var-members">Variables</a>  </div>
   <div class="headertitle">
-<div class="title">UArmTextControl2.0.ino File Reference</div>  </div>
+<div class="title">Calibration.ino File Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &lt;<a class="el" href="a00022_source.html">uarm_library.h</a>&gt;</code><br />
+
+<p>Calibration Arduino Sketch.  
+<a href="#details">More...</a></p>
+<div class="textblock"><code>#include &quot;<a class="el" href="a00024_source.html">uarm_library.h</a>&quot;</code><br />
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
@@ -109,131 +112,75 @@ Functions</h2></td></tr>
 <tr class="separator:a4fc01d736fe50cf5b977f755b675f11d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afe461d27b9c48d5921c00d521181f12f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00015.html#afe461d27b9c48d5921c00d521181f12f">loop</a> ()</td></tr>
 <tr class="separator:afe461d27b9c48d5921c00d521181f12f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac672a8c0d9c99f9f6be8d1febed949fd"><td class="memItemLeft" align="right" valign="top">String&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00015.html#ac672a8c0d9c99f9f6be8d1febed949fd">runCommand</a> (String cmnd)</td></tr>
-<tr class="separator:ac672a8c0d9c99f9f6be8d1febed949fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0f8a8a8541e8941b6b93c8825b3eebfc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00015.html#a0f8a8a8541e8941b6b93c8825b3eebfc">getCommandValues</a> (String cmnd, String parameters[], int parameterCount, float *valueArray)</td></tr>
-<tr class="separator:a0f8a8a8541e8941b6b93c8825b3eebfc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad4c2d86bbcda64dac5f2241e8652679b"><td class="memItemLeft" align="right" valign="top">String&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00015.html#ad4c2d86bbcda64dac5f2241e8652679b">isValidCommand</a> (String cmnd, String parameters[], int parameterCount)</td></tr>
-<tr class="separator:ad4c2d86bbcda64dac5f2241e8652679b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6697b6497b0444d457ec6403412b94a9"><td class="memItemLeft" align="right" valign="top">String&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00015.html#a6697b6497b0444d457ec6403412b94a9">parseNextCommand</a> ()</td></tr>
-<tr class="separator:a6697b6497b0444d457ec6403412b94a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aaa4a697522bd10f75a9957de80344764"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00015.html#aaa4a697522bd10f75a9957de80344764">setMove</a> (double x, double y, double z, double goalSpeed)</td></tr>
-<tr class="separator:aaa4a697522bd10f75a9957de80344764"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae3ab31c9aa3085d09e96930a55a59145"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00015.html#ae3ab31c9aa3085d09e96930a55a59145">isTimeToMove</a> ()</td></tr>
-<tr class="separator:ae3ab31c9aa3085d09e96930a55a59145"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae64e3efcf50b63558f2a7d9be8ba33ee"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00015.html#ae64e3efcf50b63558f2a7d9be8ba33ee">moveStep</a> ()</td></tr>
-<tr class="separator:ae64e3efcf50b63558f2a7d9be8ba33ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a930cf5209ea71f73016cf8533eea6177"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00015.html#a930cf5209ea71f73016cf8533eea6177">calibration_start</a> ()</td></tr>
+<tr class="separator:a930cf5209ea71f73016cf8533eea6177"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a98a269b6bafeb709ff9011928007f63a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00015.html#a98a269b6bafeb709ff9011928007f63a">linear_calibration_servo</a> (byte servo_num)</td></tr>
+<tr class="separator:a98a269b6bafeb709ff9011928007f63a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a28a2ffbf228784fbb873e62dee4a7df1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00015.html#a28a2ffbf228784fbb873e62dee4a7df1">cleanEEPROM</a> ()</td></tr>
+<tr class="separator:a28a2ffbf228784fbb873e62dee4a7df1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac5667d6e33349078db98fa87e7170e83"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00015.html#ac5667d6e33349078db98fa87e7170e83">manual_calibration_section</a> ()</td></tr>
+<tr class="separator:ac5667d6e33349078db98fa87e7170e83"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6aeb26bc9733225f69b65f2390c6674b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00015.html#a6aeb26bc9733225f69b65f2390c6674b">save_manual_servo_offset</a> (byte servo_num, double offset)</td></tr>
+<tr class="separator:a6aeb26bc9733225f69b65f2390c6674b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa2d22b932b498060c273098d7a52c134"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00015.html#aa2d22b932b498060c273098d7a52c134">save_linear_servo_offset</a> (byte servo_num, double intercept_val, double slope_val)</td></tr>
+<tr class="separator:aa2d22b932b498060c273098d7a52c134"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="var-members"></a>
 Variables</h2></td></tr>
-<tr class="memitem:aa776889d7c765736d0ef8df36f4e1574"><td class="memItemLeft" align="right" valign="top">byte&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00015.html#aa776889d7c765736d0ef8df36f4e1574">currentStep</a> = 255</td></tr>
-<tr class="separator:aa776889d7c765736d0ef8df36f4e1574"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7f24b7c6cb12a703ab83cc454c5f419b"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00015.html#a7f24b7c6cb12a703ab83cc454c5f419b">tipPin</a> = 2</td></tr>
-<tr class="separator:a7f24b7c6cb12a703ab83cc454c5f419b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aecb21bb77eafd78503affe90d5c646be"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00015.html#aecb21bb77eafd78503affe90d5c646be">buzzerPin</a> = 3</td></tr>
-<tr class="separator:aecb21bb77eafd78503affe90d5c646be"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a68d9994b5de87e6b74f86ea71d4b1235"><td class="memItemLeft" align="right" valign="top">unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00015.html#a68d9994b5de87e6b74f86ea71d4b1235">INTERP_INTVLS</a></td></tr>
-<tr class="separator:a68d9994b5de87e6b74f86ea71d4b1235"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad82d4c3d60274a123e09a8b029444dd6"><td class="memItemLeft" align="right" valign="top">long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00015.html#ad82d4c3d60274a123e09a8b029444dd6">goalTime</a></td></tr>
-<tr class="separator:ad82d4c3d60274a123e09a8b029444dd6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abe4574649978940098bdcb1220c7fde5"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00015.html#abe4574649978940098bdcb1220c7fde5">goalTimeStep</a></td></tr>
-<tr class="separator:abe4574649978940098bdcb1220c7fde5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad8f739b670d0f419b1ced5f73ebf7be8"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00015.html#ad8f739b670d0f419b1ced5f73ebf7be8">x_array</a> [51]</td></tr>
-<tr class="separator:ad8f739b670d0f419b1ced5f73ebf7be8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a28c3e596a1eb1cdf2abf4547670252dd"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00015.html#a28c3e596a1eb1cdf2abf4547670252dd">y_array</a> [51]</td></tr>
-<tr class="separator:a28c3e596a1eb1cdf2abf4547670252dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6eaccd60e1a50799e6304a9aa199939c"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00015.html#a6eaccd60e1a50799e6304a9aa199939c">z_array</a> [51]</td></tr>
-<tr class="separator:a6eaccd60e1a50799e6304a9aa199939c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae2907ae42f334c7602f2ac09350ee545"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00015.html#ae2907ae42f334c7602f2ac09350ee545">currentHand</a> =90</td></tr>
-<tr class="separator:ae2907ae42f334c7602f2ac09350ee545"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0232fb914045b87f15f81543279c95b1"><td class="memItemLeft" align="right" valign="top">long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00015.html#a0232fb914045b87f15f81543279c95b1">buzzerStopTime</a> = -1</td></tr>
-<tr class="separator:a0232fb914045b87f15f81543279c95b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2836db0f8ae4563c70935b5e514bdc21"><td class="memItemLeft" align="right" valign="top">String&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00015.html#a2836db0f8ae4563c70935b5e514bdc21">message</a> = &quot;&quot;</td></tr>
-<tr class="separator:a2836db0f8ae4563c70935b5e514bdc21"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac4f474c82e82cbb89ca7c36dd52be0ed"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00015.html#ac4f474c82e82cbb89ca7c36dd52be0ed">value</a></td></tr>
+<tr class="separator:ac4f474c82e82cbb89ca7c36dd52be0ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Function Documentation</h2>
-<a class="anchor" id="a0f8a8a8541e8941b6b93c8825b3eebfc"></a>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Calibration Arduino Sketch. </p>
+<dl class="section author"><dt>Author</dt><dd>Joe Song  Alex Tan  GNU </dd></dl>
+<dl class="section copyright"><dt>Copyright</dt><dd>(c) 2016 UFactory Team. All right reserved </dd></dl>
+</div><h2 class="groupheader">Function Documentation</h2>
+<a class="anchor" id="a930cf5209ea71f73016cf8533eea6177"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void getCommandValues </td>
-          <td>(</td>
-          <td class="paramtype">String&#160;</td>
-          <td class="paramname"><em>cmnd</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">String&#160;</td>
-          <td class="paramname"><em>parameters</em>[], </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>parameterCount</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">float *&#160;</td>
-          <td class="paramname"><em>valueArray</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="ae3ab31c9aa3085d09e96930a55a59145"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool isTimeToMove </td>
+          <td class="memname">void calibration_start </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Start Calibration all section </p>
 
 </div>
 </div>
-<a class="anchor" id="ad4c2d86bbcda64dac5f2241e8652679b"></a>
+<a class="anchor" id="a28a2ffbf228784fbb873e62dee4a7df1"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">String isValidCommand </td>
+          <td class="memname">void cleanEEPROM </td>
           <td>(</td>
-          <td class="paramtype">String&#160;</td>
-          <td class="paramname"><em>cmnd</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
+          <td class="paramname"></td><td>)</td>
           <td></td>
-          <td class="paramtype">String&#160;</td>
-          <td class="paramname"><em>parameters</em>[], </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>parameterCount</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Clean EEPROM before calibration </p>
+
+</div>
+</div>
+<a class="anchor" id="a98a269b6bafeb709ff9011928007f63a"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void linear_calibration_servo </td>
+          <td>(</td>
+          <td class="paramtype">byte&#160;</td>
+          <td class="paramname"><em>servo_num</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Calibrate each servo for linear offset </p>
 
 </div>
 </div>
@@ -252,79 +199,43 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="ae64e3efcf50b63558f2a7d9be8ba33ee"></a>
+<a class="anchor" id="ac5667d6e33349078db98fa87e7170e83"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void moveStep </td>
+          <td class="memname">void manual_calibration_section </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Manual Calibration Section </p>
 
 </div>
 </div>
-<a class="anchor" id="a6697b6497b0444d457ec6403412b94a9"></a>
+<a class="anchor" id="aa2d22b932b498060c273098d7a52c134"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">String parseNextCommand </td>
+          <td class="memname">void save_linear_servo_offset </td>
           <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="ac672a8c0d9c99f9f6be8d1febed949fd"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">String runCommand </td>
-          <td>(</td>
-          <td class="paramtype">String&#160;</td>
-          <td class="paramname"><em>cmnd</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="aaa4a697522bd10f75a9957de80344764"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void setMove </td>
-          <td>(</td>
-          <td class="paramtype">double&#160;</td>
-          <td class="paramname"><em>x</em>, </td>
+          <td class="paramtype">byte&#160;</td>
+          <td class="paramname"><em>servo_num</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">double&#160;</td>
-          <td class="paramname"><em>y</em>, </td>
+          <td class="paramname"><em>intercept_val</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">double&#160;</td>
-          <td class="paramname"><em>z</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">double&#160;</td>
-          <td class="paramname"><em>goalSpeed</em>&#160;</td>
+          <td class="paramname"><em>slope_val</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -333,6 +244,34 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Save Linear <a class="el" href="a00011.html">Servo</a> Offset intercept &amp; slope </p>
+
+</div>
+</div>
+<a class="anchor" id="a6aeb26bc9733225f69b65f2390c6674b"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void save_manual_servo_offset </td>
+          <td>(</td>
+          <td class="paramtype">byte&#160;</td>
+          <td class="paramname"><em>servo_num</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>offset</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Save Manual <a class="el" href="a00011.html">Servo</a> Offset </p>
 
 </div>
 </div>
@@ -352,161 +291,17 @@ Variables</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Variable Documentation</h2>
-<a class="anchor" id="aecb21bb77eafd78503affe90d5c646be"></a>
+<a class="anchor" id="ac4f474c82e82cbb89ca7c36dd52be0ed"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">int buzzerPin = 3</td>
+          <td class="memname">int value</td>
         </tr>
       </table>
 </div><div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="a0232fb914045b87f15f81543279c95b1"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">long buzzerStopTime = -1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="ae2907ae42f334c7602f2ac09350ee545"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">double currentHand =90</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="aa776889d7c765736d0ef8df36f4e1574"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">byte currentStep = 255</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>This sketch is a communication protocol for uArm using Serial.</p>
-<p>All commands must be wrapped in brackets- [command] Any string of commands must end with an endline char '<br />
-' for the commands to be processed</p>
-<p>Commands: [moveX::Y::Z::S#] Where # is a double, This will move the robot to an XYZ position, in S is speed in centimeters / second from the current location to goal location Send Example: [moveX15Y-15Z20S25] Return Example: [OK moveX15Y-15Z20S2]</p>
-<p>[handV#] Where # is an angle between 0 and 180. This will set the angle of the robots hand Send Example: [handV90] Return Example: [OK handV90]</p>
-<p>[pumpV#] Where # is either 1 or 0. 1 means pump on, 0 means pump off. Send Example: [pumpV1] Return Example: [OK pumpV1]</p>
-<p>[attachS#] Attach servo #. Same as servo #'s in <a class="el" href="a00022.html" title="uarm library header ">uarm_library.h</a> Send Example: [attachS1] Return Example: [OK attachS1]</p>
-<p>[detachS#] Detach servo #. Same as servo #'s in <a class="el" href="a00022.html" title="uarm library header ">uarm_library.h</a> Send Example: [detachS1] Return Example: [OK detachS1]</p>
-<p>[buzzF::T#] Set the buzzer to F Frequency for T time Send Example: [buzzF261.63T1] Return Example: [OK buzzF261.63T1]</p>
-<p>[gcoords] Returns the XYZ position of the robot Send Example: [gcoords] Return Example: [coordsX::Y::Z#]</p>
-<p>[gAngleS#] Returns the angle of any particular servo. Send Example: [angleA1] Return Example: [angleA###.##]</p>
-<p>[gmoving] Returns whether or not the robot is currently moving. Returns either 1 or 0 if it is moving or not. Send Example: [gmoving] Return Example: [movingM1]</p>
-<p>[gtip] Returns whether or not the tip of the robot is currently pressed. Returns either 1 if the tip is pressed, 0 if not. Send Example: [gtip] Return Example: [tipV1] </p>
-
-</div>
-</div>
-<a class="anchor" id="ad82d4c3d60274a123e09a8b029444dd6"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">long goalTime</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="abe4574649978940098bdcb1220c7fde5"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">double goalTimeStep</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="a68d9994b5de87e6b74f86ea71d4b1235"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">unsigned int INTERP_INTVLS</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="a2836db0f8ae4563c70935b5e514bdc21"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">String message = &quot;&quot;</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="a7f24b7c6cb12a703ab83cc454c5f419b"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">int tipPin = 2</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="ad8f739b670d0f419b1ced5f73ebf7be8"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">double x_array[51]</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="a28c3e596a1eb1cdf2abf4547670252dd"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">double y_array[51]</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="a6eaccd60e1a50799e6304a9aa199939c"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">double z_array[51]</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
+<dl><dt><b>Examples: </b></dt><dd><a class="el" href="a00006.html#a61">UArmProtocol.ino</a>.</dd>
+</dl>
 </div>
 </div>
 </div><!-- contents -->

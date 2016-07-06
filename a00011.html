@@ -8,7 +8,7 @@
         <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
         <meta name="generator" content="Doxygen 1.8.11"/>
         <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
-        <title>UArm Arduino Library: servo_t Struct Reference</title>
+        <title>UArm Arduino Library: Servo Class Reference</title>
         <!--<link href="tabs.css" rel="stylesheet" type="text/css"/>-->
         <script type="text/javascript" src="dynsections.js"></script>
         <link href="search/search.css" rel="stylesheet" type="text/css"/>
@@ -92,49 +92,195 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!-- top -->
 <div class="header">
   <div class="summary">
-<a href="#pub-attribs">Public Attributes</a> &#124;
-<a href="a00028.html">List of all members</a>  </div>
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="a00029.html">List of all members</a>  </div>
   <div class="headertitle">
-<div class="title">servo_t Struct Reference</div>  </div>
+<div class="title">Servo Class Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
 
-<p><code>#include &lt;<a class="el" href="a00024_source.html">UFServo.h</a>&gt;</code></p>
+<p><code>#include &lt;<a class="el" href="a00026_source.html">UFServo.h</a>&gt;</code></p>
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
-Public Attributes</h2></td></tr>
-<tr class="memitem:a04bcc6cf13ea5cd2c4dabdc977e054cb"><td class="memItemLeft" align="right" valign="top"><a class="el" href="a00012.html">ServoPin_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00011.html#a04bcc6cf13ea5cd2c4dabdc977e054cb">Pin</a></td></tr>
-<tr class="separator:a04bcc6cf13ea5cd2c4dabdc977e054cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9405b5e5266318f889ef6ff95a97943b"><td class="memItemLeft" align="right" valign="top">volatile unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00011.html#a9405b5e5266318f889ef6ff95a97943b">ticks</a></td></tr>
-<tr class="separator:a9405b5e5266318f889ef6ff95a97943b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:a70b2b17657cf258cdcb57503bcf62cd2"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00011.html#a70b2b17657cf258cdcb57503bcf62cd2">Servo</a> ()</td></tr>
+<tr class="separator:a70b2b17657cf258cdcb57503bcf62cd2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeccd2077f07ebc45250da14e72a0c461"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00011.html#aeccd2077f07ebc45250da14e72a0c461">attach</a> (int pin)</td></tr>
+<tr class="separator:aeccd2077f07ebc45250da14e72a0c461"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a70076d9a77de97241badd1f377817219"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00011.html#a70076d9a77de97241badd1f377817219">attach</a> (int pin, int min, int max)</td></tr>
+<tr class="separator:a70076d9a77de97241badd1f377817219"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0b69ccc5c8b348ebaa84be91d973a362"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00011.html#a0b69ccc5c8b348ebaa84be91d973a362">detach</a> ()</td></tr>
+<tr class="separator:a0b69ccc5c8b348ebaa84be91d973a362"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afec5b56a516c6b1aecd7c04f9c5b2479"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00011.html#afec5b56a516c6b1aecd7c04f9c5b2479">write</a> (float <a class="el" href="a00001.html#ac4f474c82e82cbb89ca7c36dd52be0ed">value</a>)</td></tr>
+<tr class="separator:afec5b56a516c6b1aecd7c04f9c5b2479"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac7fe3d6d2ea285ead98814bcfc417029"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00011.html#ac7fe3d6d2ea285ead98814bcfc417029">writeMicroseconds</a> (int <a class="el" href="a00001.html#ac4f474c82e82cbb89ca7c36dd52be0ed">value</a>)</td></tr>
+<tr class="separator:ac7fe3d6d2ea285ead98814bcfc417029"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaca0af33ba7d7c87c8a785b8eabf95a7"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00011.html#aaca0af33ba7d7c87c8a785b8eabf95a7">read</a> ()</td></tr>
+<tr class="separator:aaca0af33ba7d7c87c8a785b8eabf95a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a43950424d146c1414460066483d9561b"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00011.html#a43950424d146c1414460066483d9561b">readMicroseconds</a> ()</td></tr>
+<tr class="separator:a43950424d146c1414460066483d9561b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a48607d47aa5678780b1b927102bd3b1b"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00011.html#a48607d47aa5678780b1b927102bd3b1b">attached</a> ()</td></tr>
+<tr class="separator:a48607d47aa5678780b1b927102bd3b1b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Member Data Documentation</h2>
-<a class="anchor" id="a04bcc6cf13ea5cd2c4dabdc977e054cb"></a>
+<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a class="anchor" id="a70b2b17657cf258cdcb57503bcf62cd2"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="a00012.html">ServoPin_t</a> servo_t::Pin</td>
+          <td class="memname">Servo::Servo </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
         </tr>
       </table>
 </div><div class="memdoc">
 
 </div>
 </div>
-<a class="anchor" id="a9405b5e5266318f889ef6ff95a97943b"></a>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a class="anchor" id="aeccd2077f07ebc45250da14e72a0c461"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">volatile unsigned int servo_t::ticks</td>
+          <td class="memname">uint8_t Servo::attach </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>pin</em></td><td>)</td>
+          <td></td>
         </tr>
       </table>
 </div><div class="memdoc">
 
 </div>
 </div>
-<hr/>The documentation for this struct was generated from the following file:<ul>
-<li>/Users/alex/Workspace/develop/uarm_metal/uarm4arduino/src/<a class="el" href="a00024_source.html">UFServo.h</a></li>
+<a class="anchor" id="a70076d9a77de97241badd1f377817219"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t Servo::attach </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>pin</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>min</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>max</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a48607d47aa5678780b1b927102bd3b1b"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool Servo::attached </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a0b69ccc5c8b348ebaa84be91d973a362"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Servo::detach </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="aaca0af33ba7d7c87c8a785b8eabf95a7"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int Servo::read </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a43950424d146c1414460066483d9561b"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int Servo::readMicroseconds </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="afec5b56a516c6b1aecd7c04f9c5b2479"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Servo::write </td>
+          <td>(</td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>value</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="ac7fe3d6d2ea285ead98814bcfc417029"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Servo::writeMicroseconds </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>value</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<hr/>The documentation for this class was generated from the following file:<ul>
+<li>/Users/alex/Workspace/develop/uarm_metal/uarm4arduino/src/<a class="el" href="a00026_source.html">UFServo.h</a></li>
 </ul>
 </div><!-- contents -->
 <!-- HTML footer for doxygen 1.8.8-->

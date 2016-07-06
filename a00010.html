@@ -8,7 +8,7 @@
         <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
         <meta name="generator" content="Doxygen 1.8.11"/>
         <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
-        <title>UArm Arduino Library: Servo Class Reference</title>
+        <title>UArm Arduino Library: LinearRegression Class Reference</title>
         <!--<link href="tabs.css" rel="stylesheet" type="text/css"/>-->
         <script type="text/javascript" src="dynsections.js"></script>
         <link href="search/search.css" rel="stylesheet" type="text/css"/>
@@ -93,89 +93,91 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
-<a href="a00027.html">List of all members</a>  </div>
+<a href="#pro-methods">Protected Member Functions</a> &#124;
+<a href="#pro-attribs">Protected Attributes</a> &#124;
+<a href="a00028.html">List of all members</a>  </div>
   <div class="headertitle">
-<div class="title">Servo Class Reference</div>  </div>
+<div class="title">LinearRegression Class Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
 
-<p><code>#include &lt;<a class="el" href="a00024_source.html">UFServo.h</a>&gt;</code></p>
+<p><code>#include &lt;<a class="el" href="a00021_source.html">linreg.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a70b2b17657cf258cdcb57503bcf62cd2"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00010.html#a70b2b17657cf258cdcb57503bcf62cd2">Servo</a> ()</td></tr>
-<tr class="separator:a70b2b17657cf258cdcb57503bcf62cd2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aeccd2077f07ebc45250da14e72a0c461"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00010.html#aeccd2077f07ebc45250da14e72a0c461">attach</a> (int pin)</td></tr>
-<tr class="separator:aeccd2077f07ebc45250da14e72a0c461"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a70076d9a77de97241badd1f377817219"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00010.html#a70076d9a77de97241badd1f377817219">attach</a> (int pin, int min, int max)</td></tr>
-<tr class="separator:a70076d9a77de97241badd1f377817219"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0b69ccc5c8b348ebaa84be91d973a362"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00010.html#a0b69ccc5c8b348ebaa84be91d973a362">detach</a> ()</td></tr>
-<tr class="separator:a0b69ccc5c8b348ebaa84be91d973a362"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afec5b56a516c6b1aecd7c04f9c5b2479"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00010.html#afec5b56a516c6b1aecd7c04f9c5b2479">write</a> (float <a class="el" href="a00001.html#ac4f474c82e82cbb89ca7c36dd52be0ed">value</a>)</td></tr>
-<tr class="separator:afec5b56a516c6b1aecd7c04f9c5b2479"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac7fe3d6d2ea285ead98814bcfc417029"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00010.html#ac7fe3d6d2ea285ead98814bcfc417029">writeMicroseconds</a> (int <a class="el" href="a00001.html#ac4f474c82e82cbb89ca7c36dd52be0ed">value</a>)</td></tr>
-<tr class="separator:ac7fe3d6d2ea285ead98814bcfc417029"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aaca0af33ba7d7c87c8a785b8eabf95a7"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00010.html#aaca0af33ba7d7c87c8a785b8eabf95a7">read</a> ()</td></tr>
-<tr class="separator:aaca0af33ba7d7c87c8a785b8eabf95a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a43950424d146c1414460066483d9561b"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00010.html#a43950424d146c1414460066483d9561b">readMicroseconds</a> ()</td></tr>
-<tr class="separator:a43950424d146c1414460066483d9561b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a48607d47aa5678780b1b927102bd3b1b"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00010.html#a48607d47aa5678780b1b927102bd3b1b">attached</a> ()</td></tr>
-<tr class="separator:a48607d47aa5678780b1b927102bd3b1b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a81a9c23a6ec45206dea79e2777064220"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00010.html#a81a9c23a6ec45206dea79e2777064220">LinearRegression</a> (double *x, double *y, long size=0)</td></tr>
+<tr class="separator:a81a9c23a6ec45206dea79e2777064220"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a83067c3cc623e855ad013ff18eaf8e42"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00010.html#a83067c3cc623e855ad013ff18eaf8e42">addXY</a> (const double &amp;x, const double &amp;y)</td></tr>
+<tr class="separator:a83067c3cc623e855ad013ff18eaf8e42"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1d0f8251bf0f498be7d75d842227deb0"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00010.html#a1d0f8251bf0f498be7d75d842227deb0">haveData</a> () const </td></tr>
+<tr class="separator:a1d0f8251bf0f498be7d75d842227deb0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2cd980cb4c43894d33de83b9ab95a691"><td class="memItemLeft" align="right" valign="top">long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00010.html#a2cd980cb4c43894d33de83b9ab95a691">items</a> () const </td></tr>
+<tr class="separator:a2cd980cb4c43894d33de83b9ab95a691"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2ee8884d79720f882492e829d6693744"><td class="memItemLeft" align="right" valign="top">virtual double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00010.html#a2ee8884d79720f882492e829d6693744">getA</a> () const </td></tr>
+<tr class="separator:a2ee8884d79720f882492e829d6693744"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a79f6b7a2c36f578886864c3f7af064d8"><td class="memItemLeft" align="right" valign="top">virtual double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00010.html#a79f6b7a2c36f578886864c3f7af064d8">getB</a> () const </td></tr>
+<tr class="separator:a79f6b7a2c36f578886864c3f7af064d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a931317e41dbdeca9a680da4d4d38f380"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00010.html#a931317e41dbdeca9a680da4d4d38f380">getCoefDeterm</a> () const </td></tr>
+<tr class="separator:a931317e41dbdeca9a680da4d4d38f380"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac439138bebdcfe2a4d8522d3a0feff2e"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00010.html#ac439138bebdcfe2a4d8522d3a0feff2e">getCoefCorrel</a> () const </td></tr>
+<tr class="separator:ac439138bebdcfe2a4d8522d3a0feff2e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af02b63f744bee8ecdc9172a98ff16606"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00010.html#af02b63f744bee8ecdc9172a98ff16606">getStdErrorEst</a> () const </td></tr>
+<tr class="separator:af02b63f744bee8ecdc9172a98ff16606"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a05d33bd38d68173cc1a35bf513a4f0d8"><td class="memItemLeft" align="right" valign="top">virtual double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00010.html#a05d33bd38d68173cc1a35bf513a4f0d8">estimateY</a> (double x) const </td></tr>
+<tr class="separator:a05d33bd38d68173cc1a35bf513a4f0d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-methods"></a>
+Protected Member Functions</h2></td></tr>
+<tr class="memitem:aa6eee3fb0703a1642467861cfb0cd610"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00010.html#aa6eee3fb0703a1642467861cfb0cd610">Calculate</a> ()</td></tr>
+<tr class="separator:aa6eee3fb0703a1642467861cfb0cd610"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-attribs"></a>
+Protected Attributes</h2></td></tr>
+<tr class="memitem:aa843365cc2b936809c5f60d52224c07f"><td class="memItemLeft" align="right" valign="top">long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00010.html#aa843365cc2b936809c5f60d52224c07f">n</a></td></tr>
+<tr class="separator:aa843365cc2b936809c5f60d52224c07f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2d137eb916f6e2f3cf552b3f1a12a4d0"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00010.html#a2d137eb916f6e2f3cf552b3f1a12a4d0">sumX</a></td></tr>
+<tr class="separator:a2d137eb916f6e2f3cf552b3f1a12a4d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae62507e4f1f97b8ab2faae5112ce97d3"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00010.html#ae62507e4f1f97b8ab2faae5112ce97d3">sumY</a></td></tr>
+<tr class="separator:ae62507e4f1f97b8ab2faae5112ce97d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2b06ee3c27a6bc1e6fc709c0224dd949"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00010.html#a2b06ee3c27a6bc1e6fc709c0224dd949">sumXsquared</a></td></tr>
+<tr class="separator:a2b06ee3c27a6bc1e6fc709c0224dd949"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aefdf526f61f6f62a24472ef3ce135d47"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00010.html#aefdf526f61f6f62a24472ef3ce135d47">sumYsquared</a></td></tr>
+<tr class="separator:aefdf526f61f6f62a24472ef3ce135d47"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af2744e010ca51a40db51b7e30b769390"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00010.html#af2744e010ca51a40db51b7e30b769390">sumXY</a></td></tr>
+<tr class="separator:af2744e010ca51a40db51b7e30b769390"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9afb5e0ec8d6cbb6ac46e5915afc57ec"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00010.html#a9afb5e0ec8d6cbb6ac46e5915afc57ec">a</a></td></tr>
+<tr class="separator:a9afb5e0ec8d6cbb6ac46e5915afc57ec"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa258a2c864179aaff99098dea9abf1cb"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00010.html#aa258a2c864179aaff99098dea9abf1cb">b</a></td></tr>
+<tr class="separator:aa258a2c864179aaff99098dea9abf1cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0f3377c655ca712c3e2c3d4e2125441c"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00010.html#a0f3377c655ca712c3e2c3d4e2125441c">coefD</a></td></tr>
+<tr class="separator:a0f3377c655ca712c3e2c3d4e2125441c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afdc67d71c93cea69b0a66693fa5cb276"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00010.html#afdc67d71c93cea69b0a66693fa5cb276">coefC</a></td></tr>
+<tr class="separator:afdc67d71c93cea69b0a66693fa5cb276"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0cdd5962a78b99b95c6a2bc7c9fbb6a6"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00010.html#a0cdd5962a78b99b95c6a2bc7c9fbb6a6">stdError</a></td></tr>
+<tr class="separator:a0cdd5962a78b99b95c6a2bc7c9fbb6a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a class="anchor" id="a70b2b17657cf258cdcb57503bcf62cd2"></a>
+<a class="anchor" id="a81a9c23a6ec45206dea79e2777064220"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">Servo::Servo </td>
+          <td class="memname">LinearRegression::LinearRegression </td>
           <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<h2 class="groupheader">Member Function Documentation</h2>
-<a class="anchor" id="aeccd2077f07ebc45250da14e72a0c461"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">uint8_t Servo::attach </td>
-          <td>(</td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>pin</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="a70076d9a77de97241badd1f377817219"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">uint8_t Servo::attach </td>
-          <td>(</td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>pin</em>, </td>
+          <td class="paramtype">double *&#160;</td>
+          <td class="paramname"><em>x</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>min</em>, </td>
+          <td class="paramtype">double *&#160;</td>
+          <td class="paramname"><em>y</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>max</em>&#160;</td>
+          <td class="paramtype">long&#160;</td>
+          <td class="paramname"><em>size</em> = <code>0</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -187,100 +189,473 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a48607d47aa5678780b1b927102bd3b1b"></a>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a class="anchor" id="a83067c3cc623e855ad013ff18eaf8e42"></a>
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">bool Servo::attached </td>
+          <td class="memname">void LinearRegression::addXY </td>
+          <td>(</td>
+          <td class="paramtype">const double &amp;&#160;</td>
+          <td class="paramname"><em>x</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double &amp;&#160;</td>
+          <td class="paramname"><em>y</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="aa6eee3fb0703a1642467861cfb0cd610"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void LinearRegression::Calculate </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 </div>
 </div>
-<a class="anchor" id="a0b69ccc5c8b348ebaa84be91d973a362"></a>
+<a class="anchor" id="a05d33bd38d68173cc1a35bf513a4f0d8"></a>
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void Servo::detach </td>
+          <td class="memname">virtual double LinearRegression::estimateY </td>
+          <td>(</td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>x</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a2ee8884d79720f882492e829d6693744"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual double LinearRegression::getA </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
-          <td></td>
+          <td> const</td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 </div>
 </div>
-<a class="anchor" id="aaca0af33ba7d7c87c8a785b8eabf95a7"></a>
+<a class="anchor" id="a79f6b7a2c36f578886864c3f7af064d8"></a>
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">int Servo::read </td>
+          <td class="memname">virtual double LinearRegression::getB </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
-          <td></td>
+          <td> const</td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 </div>
 </div>
-<a class="anchor" id="a43950424d146c1414460066483d9561b"></a>
+<a class="anchor" id="ac439138bebdcfe2a4d8522d3a0feff2e"></a>
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">int Servo::readMicroseconds </td>
+          <td class="memname">double LinearRegression::getCoefCorrel </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
-          <td></td>
+          <td> const</td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 </div>
 </div>
-<a class="anchor" id="afec5b56a516c6b1aecd7c04f9c5b2479"></a>
+<a class="anchor" id="a931317e41dbdeca9a680da4d4d38f380"></a>
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void Servo::write </td>
+          <td class="memname">double LinearRegression::getCoefDeterm </td>
           <td>(</td>
-          <td class="paramtype">float&#160;</td>
-          <td class="paramname"><em>value</em></td><td>)</td>
-          <td></td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 </div>
 </div>
-<a class="anchor" id="ac7fe3d6d2ea285ead98814bcfc417029"></a>
+<a class="anchor" id="af02b63f744bee8ecdc9172a98ff16606"></a>
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void Servo::writeMicroseconds </td>
+          <td class="memname">double LinearRegression::getStdErrorEst </td>
           <td>(</td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>value</em></td><td>)</td>
-          <td></td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 </div>
 </div>
-<hr/>The documentation for this class was generated from the following file:<ul>
-<li>/Users/alex/Workspace/develop/uarm_metal/uarm4arduino/src/<a class="el" href="a00024_source.html">UFServo.h</a></li>
+<a class="anchor" id="a1d0f8251bf0f498be7d75d842227deb0"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int LinearRegression::haveData </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a2cd980cb4c43894d33de83b9ab95a691"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">long LinearRegression::items </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a class="anchor" id="a9afb5e0ec8d6cbb6ac46e5915afc57ec"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double LinearRegression::a</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="aa258a2c864179aaff99098dea9abf1cb"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double LinearRegression::b</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="afdc67d71c93cea69b0a66693fa5cb276"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double LinearRegression::coefC</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a0f3377c655ca712c3e2c3d4e2125441c"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double LinearRegression::coefD</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="aa843365cc2b936809c5f60d52224c07f"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">long LinearRegression::n</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a0cdd5962a78b99b95c6a2bc7c9fbb6a6"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double LinearRegression::stdError</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a2d137eb916f6e2f3cf552b3f1a12a4d0"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double LinearRegression::sumX</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a2b06ee3c27a6bc1e6fc709c0224dd949"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double LinearRegression::sumXsquared</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="af2744e010ca51a40db51b7e30b769390"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double LinearRegression::sumXY</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="ae62507e4f1f97b8ab2faae5112ce97d3"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double LinearRegression::sumY</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="aefdf526f61f6f62a24472ef3ce135d47"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double LinearRegression::sumYsquared</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<hr/>The documentation for this class was generated from the following files:<ul>
+<li>/Users/alex/Workspace/develop/uarm_metal/uarm4arduino/src/<a class="el" href="a00021_source.html">linreg.h</a></li>
+<li>/Users/alex/Workspace/develop/uarm_metal/uarm4arduino/src/<a class="el" href="a00020.html">linreg.cpp</a></li>
 </ul>
 </div><!-- contents -->
 <!-- HTML footer for doxygen 1.8.8-->
