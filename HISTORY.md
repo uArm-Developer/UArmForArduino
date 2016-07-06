@@ -6,6 +6,7 @@
 - attach servo even not calibrate
 - rewrite set_servo_status replace attach_servo detach_servo
 - execute write_stretch_height event not calibrate
+- Doxygen Document Support
 
 ## [1.7.1] - 2016-06-28
 
