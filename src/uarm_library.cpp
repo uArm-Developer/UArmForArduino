@@ -542,6 +542,11 @@ void uArmClass::interpolate(double start_val, double end_val, double *interp_val
    \return SUCCESS, FAILED
  */
 int uArmClass::move_to(double x, double y, double z, double hand_angle, byte relative_flags, double time, byte path_type, byte ease_type, boolean enable_hand) {
+        if (EEPROM.read(CALIBRATION_LINEAR_FLAG) != CONFIRM_FLAG)
+        {
+            alert(50, 10, 10);
+            return FAILED;
+        }
         float limit = sqrt((x*x + y*y));
         if (limit > 32)
         {

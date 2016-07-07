@@ -104,6 +104,7 @@ REPORT_LIBRARY_VERSION | 0x23    | 0                                            
 
 ### Request READ_ANGLE Message
 
+
 Sequence | Type         | Command/Data | Bytes | Remark
 -------- | ------------ | ------------ | ----- | ------------------------------------------------------------------
 1        | START_SYSEX  | 0xF0         | 1     |
@@ -116,6 +117,7 @@ Sequence | Type         | Command/Data | Bytes | Remark
 
 ### Request WRITE_ANGLE Message
 
+
 Sequence | Type         | Command/Data               | Bytes | Remark
 -------- | ------------ | -------------------------- | ----- | ------------------------------------------------------------------
 1        | START_SYSEX  | 0xF0                       | 1     |
@@ -127,7 +129,9 @@ Sequence | Type         | Command/Data               | Bytes | Remark
 7        | END_SYSEX    | 0xF7                       | 1     |
 -------- | ------------ | ------------               | 9     | ------------------------------------------------------------------
 
+
 ### Request READ_COORDS Message
+
 
 Sequence | Type         | Command/Data | Bytes | Remark
 -------- | ------------ | ------------ | ----- | ------------------------------------------------------------------
@@ -138,6 +142,7 @@ Sequence | Type         | Command/Data | Bytes | Remark
 -------- | ------------ | ------------ | 4     | ------------------------------------------------------------------
 
 ### Request WRITE_COORDS Message
+
 
 Sequence | Type           | Command/Data                    | Bytes | Remark
 -------- | -------------- | ------------------------------- | ----- | ----------------------------------------------------------------------------------------------------
@@ -156,6 +161,7 @@ Sequence | Type           | Command/Data                    | Bytes | Remark
 -------- | ------------   | ------------                    | 27    | ------------------------------------------------------------------
 
 ### Request READ_DIGITAL Message
+
 
 Sequence | Type         | Command/Data | Bytes | Remark
 -------- | ------------ | ------------ | ----- | ------------------------------------------------------------------

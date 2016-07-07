@@ -320,6 +320,7 @@ boolean handleSysex(byte command, byte argc, byte *argv)
             for(byte i=0; i<14; i++){
                 EEPROM.write(SERIAL_NUMBER_ADDRESS+i+1, argv[i+1]);
             }
+            EEPROM.write(SERIAL_NUMBER_ADDRESS, CONFIRM_FLAG);
             return true;
         }
         //0X21 READ_SERIAL_NUMBER

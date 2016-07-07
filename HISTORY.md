@@ -1,5 +1,11 @@
 # uArm Arduino Library Release Note
 
+## [1.7.3] - 2016-07-07
+
+### Fix
+- Fix write serial number CONFIRM_FLAG
+- uArm won't move if no LINEAR Calibration
+
 ## [1.7.2] - 2016-06-30
 
 ### Fix
