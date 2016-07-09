@@ -28,6 +28,8 @@
 #define ROT_SERVO_OFFSET    0
 //#define DEBUG_MODE 
 
+#define current_ver         "0.9.1"  
+
 #define UARM_MAJOR_VERSION      1
 #define UARM_MINOR_VERSION      6
 #define UARM_BUGFIX             2
@@ -63,11 +65,11 @@
 #define LIMIT_SW                2    // LIMIT Switch Button
 #define PUMP_EN                 6    // HIGH = Valve OPEN
 #define VALVE_EN                5    // HIGH = Pump ON
-#define STOPPER                 2    // LOW = Pressed
 #define BUZZER                  3    // HIGH = ON
 #define BTN_D4                  4    // LOW = Pressed
 #define BTN_D7                  7    // LOW = Pressed
 #define GRIPPER                 9    // LOW = Catch
+
 
 #define MATH_PI 3.141592653589793238463
 #define MATH_TRANS  57.2958
@@ -77,8 +79,10 @@
 #define MATH_L4 160.2
 #define MATH_L43 MATH_L4/MATH_L3
 
-#define OUT_OF_RANGE  0
-#define IN_RANGE      1
+#define IN_RANGE             0
+#define OUT_OF_RANGE_IN_DST  1
+#define OUT_OF_RANGE_IN_PATH 2
+#define OUT_OF_RANGE         3
 
 #define RELATIVE 1
 #define ABSOLUTE 0
@@ -145,10 +149,10 @@ public:
                 return move_to(x, y, z, 0, ABSOLUTE, 1.0, INTERP_EASE_INOUT_CUBIC, false);
                 //return move_to(x, y, z, 0, ABSOLUTE, 1.0, INTERP_EASE_INOUT_CUBIC, false);
         }
-        /*void move_to(double x, double y,double z,double hand_angle) {
-                move_to(x, y, z, hand_angle, F_HAND_RELATIVE, 1.0, PATH_LINEAR, INTERP_EASE_INOUT_CUBIC, true);
+        unsigned char move_to(double x, double y,double z,double hand_angle) {
+                move_to(x, y, z, hand_angle, ABSOLUTE, 1.0, INTERP_EASE_INOUT_CUBIC, true);
         }
-        void move_to(double x, double y,double z,int relative, double time) {
+        /*void move_to(double x, double y,double z,int relative, double time) {
                 move_to(x, y, z, 0, F_HAND_RELATIVE | (relative ? F_POSN_RELATIVE : 0), time, PATH_LINEAR, INTERP_EASE_INOUT_CUBIC, false);
         }
         void move_to(double x, double y,double z,int relative, double time, double servo_4_angle) {
@@ -178,8 +182,8 @@ public:
                 return g_current_z;
         }
 
-        void get_current_xyz();
-
+        void get_current_xyz(double *cur_rot, double *cur_left, double *cur_right, double *g_current_x, double *g_current_y, double *g_current_z, bool for_movement );
+        void get_current_rotleftright();
         /*void angle_to_coordinate(double& x, double& y, double &z) {
                 get_current_xyz(); x = g_current_x; y = g_current_y; z = g_current_z;
         }
@@ -206,6 +210,9 @@ public:
         int write_servos_angle(double servo_rot_angle, double servo_left_angle, double servo_right_angle);
         void attach_all();
         void attach_servo(byte servo_num);
+        String runCommand(String cmnd);
+        void getCommandValues(String cmnd, String parameters[], int parameterCount, double *valueArray);
+        String isValidCommand(String cmnd, String parameters[], int parameterCount);
 
 private:
         void delay_us();
@@ -233,11 +240,12 @@ protected:
         unsigned int INTERP_INTVLS;
 
         unsigned char move_times = 255;//255 means no move
+        int buzzerStopTime=0;
         // the arrays to store the xyz coordinates first and then change to the rot left right angles
         double x_array[61];
         double y_array[61];
         double z_array[61];
-        double hand_array[61];
+        //double hand_array[16];//to save the memory
 
 };
 

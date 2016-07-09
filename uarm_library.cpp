@@ -35,6 +35,7 @@ bool uArmClass::available()
   {
     return false;
   }
+
   return true;
 }
 
@@ -44,7 +45,7 @@ bool uArmClass::available()
 */
 void uArmClass::arm_process_commands()
 {
-//for (byte i = 0; i < INTERP_INTVLS; i++)
+  //move_to
   if(sys_tick%40==0)
   {
     
@@ -55,29 +56,35 @@ void uArmClass::arm_process_commands()
       z_array[move_times] = z_array[move_times] - RIGHT_SERVO_OFFSET;//assembling offset
       read_servo_calibration_data(&x_array[move_times],&y_array[move_times],&z_array[move_times]);
 
-      //if(enable_hand)
-      write_servos_angle(x_array[move_times], y_array[move_times], z_array[move_times], hand_array[move_times]);
+      write_servos_angle(x_array[move_times], y_array[move_times], z_array[move_times]);
+      //hand rot
+
       move_times++;
       if(move_times > INTERP_INTVLS)
       {
         move_times = 255;//disable the move
       }
-      //delay(1000);
-      //else
-      //  write_servos_angle(rot, left, right);
-      //delay(time * 1000 / INTERP_INTVLS);
     }
+  }
+  //buzzer work
+  if(buzzerStopTime!=0)
+  {
+    buzzerStopTime--;
+  }
+  else
+  {
+    noTone(BUZZER);
   }
 }
 
 void uArmClass::arm_setup()
 {
-  TCNT2   = 0;
-  TCCR2A = (1 << WGM21); // Configure timer 2 for CTC mode
-  TCCR2B = (1 << CS22); // Start timer at Fcpu/64
-  TIMSK2 = (1 << OCIE2A); // Enable CTC interrupt
-  OCR2A   = 249; // Set CTC compare value with a prescaler of 64  2ms
-  pinMode(4,INPUT_PULLUP);
+  TCNT0   = 0;
+  TCCR0A = (1 << WGM01); // Configure timer 0 for CTC mode
+  TCCR0B = 0x03; // Start timer at Fcpu/64
+  TIMSK0 = (1 << OCIE0A); // Enable CTC interrupt
+  OCR0A   = 249; // Set CTC compare value with a prescaler of 64  1ms
+  pinMode(BTN_D4,INPUT_PULLUP);//special mode for calibration
   if(digitalRead(4)==LOW)
   {
     while(digitalRead(4)==LOW);
@@ -85,6 +92,8 @@ void uArmClass::arm_setup()
     write_servos_angle(90,90,0);
     while(1);
   }
+  pinMode(BTN_D7,INPUT_PULLUP);
+  pinMode(BUZZER,OUTPUT);
 }
 
 /*!
@@ -344,9 +353,9 @@ double uArmClass::analog_to_angle(int input_analog, byte servo_num)
 
   max_calibration_data = (data[2]<<8) + data[3];
   min_calibration_data = (data[0]<<8) + data[1];
-  /*Serial.println("++++++++++++++++++++++");
-  Serial.println(max_calibration_data,DEC);
-  Serial.println(min_calibration_data,DEC);*/
+  //Serial.println("++++++++++++++++++++++");
+  //Serial.println(max_calibration_data,DEC);
+  //Serial.println(min_calibration_data,DEC);
 
   angle_range_min = map(input_analog, min_calibration_data, max_calibration_data, 1, 180) - (DATA_LENGTH>>2);
   min_data_calibration_address = (angle_range_min * 2);
@@ -374,11 +383,14 @@ double uArmClass::analog_to_angle(int input_analog, byte servo_num)
 
   angle_range_min = angle_range_min + i_min;
   angle_range_max = angle_range_min + 1;
+  //Serial.println(angle_range_min,DEC);
+  //Serial.println(angle_range_max,DEC);
   if((((adc_calibration_data[i_min+i_min]<<8) + adc_calibration_data[1+i_min+i_min]) - input_analog) >= 0)//determine if the current value bigger than the input_analog
   {
     //angle_rang_min = map(input_analog, min_calibration_data, max_calibration_data, 0, 180) - (DATA_LENGTH>>2);
     max_calibration_data = (adc_calibration_data[i_min+i_min]<<8) + adc_calibration_data[i_min+i_min+1];
     min_calibration_data = (adc_calibration_data[i_min+i_min-2]<<8) + adc_calibration_data[i_min+i_min-1];
+
   }
   else
   {
@@ -387,7 +399,15 @@ double uArmClass::analog_to_angle(int input_analog, byte servo_num)
     max_calibration_data = (adc_calibration_data[i_min+i_min+2]<<8) + adc_calibration_data[i_min+i_min+3];
     min_calibration_data = (adc_calibration_data[i_min+i_min]<<8) + adc_calibration_data[i_min+i_min+1];
   }
-  
+ 
+  if(min_calibration_data < max_calibration_data)//return the angle
+  {
+    return ( 1.0 * (input_analog - min_calibration_data)/(max_calibration_data - min_calibration_data) + angle_range_min);
+  }
+  else
+  {
+    return (angle_range_min + angle_range_max) / 2.0;//angle from 1-180 but the address from 0-179
+  } 
 }
 
 
@@ -583,36 +603,87 @@ void uArmClass::write_stretch_height(double armStretch, double armHeight){
 }
 
 /*!
-   \brief Calculate X,Y,Z to g_current_x,g_current_y,g_current_z
+   \brief get the current rot left right angles
  */
-void uArmClass::get_current_xyz()
+void uArmClass::get_current_rotleftright()
 {
-  double theta_rot = uarm.analog_to_angle(analogRead(SERVO_ROT_ANALOG_PIN),SERVO_ROT_NUM);
-  double theta_left = uarm.analog_to_angle(analogRead(SERVO_LEFT_ANALOG_PIN),SERVO_LEFT_NUM);
-  double theta_right = uarm.analog_to_angle(analogRead(SERVO_RIGHT_ANALOG_PIN),SERVO_RIGHT_NUM);
-  //double theta_rot = uarm.analog_to_angle(257,SERVO_ROT_NUM);
-  //double theta_left = uarm.analog_to_angle(214,SERVO_LEFT_NUM);
-  //double theta_right = uarm.analog_to_angle(207,SERVO_RIGHT_NUM);
-  //get_current_xyz(theta_1, theta_2, theta_3);
-  
-/*Serial.println(analogRead(SERVO_ROT_ANALOG_PIN), DEC);
-Serial.println(analogRead(SERVO_LEFT_ANALOG_PIN), DEC);
-Serial.println(analogRead(SERVO_RIGHT_ANALOG_PIN), DEC);*/
-Serial.println(theta_rot, DEC);
-Serial.println(theta_left, DEC);
-Serial.println(theta_right, DEC);
-  //add the offset first
-  theta_left = theta_left + LEFT_SERVO_OFFSET;
-  theta_right = theta_right + RIGHT_SERVO_OFFSET;
+  unsigned int dat[8], temp;
+  unsigned char i=0,j=0;
+  for(i=0;i<8;i++){
+    dat[i] = analogRead(SERVO_ROT_ANALOG_PIN);
+  }
+  for(i=0;i<8;i++){
+    for(j=0;i+j<7;j++){
+      if(dat[j]>dat[j+1]){
+        temp = dat[j];
+        dat[j] = dat[j+1];
+        dat[j+1] = temp;
+      }
+    }
+  }
+  cur_rot = uarm.analog_to_angle((dat[2]+dat[3]+dat[4]+dat[5])/4,SERVO_ROT_NUM);
+  for(i=0;i<8;i++){
+    dat[i] = analogRead(SERVO_LEFT_ANALOG_PIN);
+  }
+  for(i=0;i<8;i++){
+    for(j=0;i+j<7;j++){
+      if(dat[j]>dat[j+1]){
+        temp = dat[j];
+        dat[j] = dat[j+1];
+        dat[j+1] = temp;
+      }
+    }
+  }
+  cur_left = uarm.analog_to_angle((dat[2]+dat[3]+dat[4]+dat[5])/4,SERVO_LEFT_NUM);
+  for(i=0;i<8;i++){
+    dat[i] = analogRead(SERVO_RIGHT_ANALOG_PIN);
+  }
+  for(i=0;i<8;i++){
+    for(j=0;i+j<7;j++){
+      if(dat[j]>dat[j+1]){
+        temp = dat[j];
+        dat[j] = dat[j+1];
+        dat[j+1] = temp;
+      }
+    }
+  }
+  cur_right = uarm.analog_to_angle((dat[2]+dat[3]+dat[4]+dat[5])/4,SERVO_RIGHT_NUM);
+  //cur_rot = uarm.analog_to_angle(257,SERVO_ROT_NUM);
+  //double cur_left = uarm.analog_to_angle(214,SERVO_LEFT_NUM);
+  //double cur_right = uarm.analog_to_angle(207,SERVO_RIGHT_NUM);
+Serial.println(cur_rot, DEC);
+Serial.println(cur_left, DEC);
+Serial.println(cur_right, DEC);
+}
 
-  double stretch = MATH_L3 * cos(theta_left / MATH_TRANS) + MATH_L4 * cos(theta_right / MATH_TRANS) + MATH_L2;
-  double height = MATH_L3 * sin(theta_left / MATH_TRANS) - MATH_L4 * sin(theta_right / MATH_TRANS) + MATH_L1;
-  g_current_x = stretch * cos(theta_rot / MATH_TRANS);
-  g_current_y = stretch * sin(theta_rot / MATH_TRANS);
-  g_current_z = height;
-Serial.println(g_current_x, DEC);
-Serial.println(g_current_y, DEC);
-Serial.println(g_current_z, DEC);
+/*!
+   \brief Calculate X,Y,Z to g_current_x,g_current_y,g_current_z
+   \param *cur_rot the address of value we want to caculate
+   \param *cur_left the address of value we want to caculate
+   \param *cur_right the address of value we want to caculate
+   \param *g_currnet_x the address of value we want to caculate
+   \param *g_current_y the address of value we want to caculate
+   \param *g_current_z the address of value we want to caculate
+   \param for movement is the flage to detect if we should get the real current angle of the uarm
+ */
+void uArmClass::get_current_xyz(double *cur_rot, double *cur_left, double *cur_right, double *g_current_x, double *g_current_y, double *g_current_z, bool for_movement )
+{
+  if(for_movement==true){
+    get_current_rotleftright();
+  }
+
+  //add the offset first
+  *cur_left = *cur_left + LEFT_SERVO_OFFSET;
+  *cur_right = *cur_right + RIGHT_SERVO_OFFSET;
+
+  double stretch = MATH_L3 * cos((*cur_left) / MATH_TRANS) + MATH_L4 * cos((*cur_right) / MATH_TRANS) + MATH_L2;
+  double height = MATH_L3 * sin((*cur_left) / MATH_TRANS) - MATH_L4 * sin((*cur_right) / MATH_TRANS) + MATH_L1;
+  *g_current_x = stretch * cos((*cur_rot) / MATH_TRANS);
+  *g_current_y = stretch * sin((*cur_rot) / MATH_TRANS);
+  *g_current_z = height;
+//Serial.println(*g_current_x, DEC);
+//Serial.println(*g_current_y, DEC);
+//Serial.println(*g_current_z, DEC);
 }
 
 /*!
@@ -698,7 +769,7 @@ unsigned char uArmClass::move_to(double x, double y, double z, double hand_angle
   //  detect if the xyz coordinate are in the range
   if(coordinate_to_angle(x, y, z, tgt_rot, tgt_left, tgt_right) == OUT_OF_RANGE)
   {
-    return OUT_OF_RANGE;
+    return OUT_OF_RANGE_IN_DST;
   }
 
   //calculate the length and use the longest to determine the numbers of interpolation
@@ -719,19 +790,20 @@ unsigned char uArmClass::move_to(double x, double y, double z, double hand_angle
     interpolate(g_current_x, x, x_array, ease_type);// /10 means to make sure the t*t*t is still in the range
     interpolate(g_current_y, y, y_array, ease_type);
     interpolate(g_current_z, z, z_array, ease_type);
-    interpolate(cur_hand, hand_angle, hand_array, ease_type);
+
+
     //give the final destination value to the array
     x_array[INTERP_INTVLS] = x;
     y_array[INTERP_INTVLS] = y;
     z_array[INTERP_INTVLS] = z;
-    hand_array[INTERP_INTVLS] = hand_angle;
+
     double rot, left, right;
     for (byte i = 0; i <= INTERP_INTVLS; i++)
     {
       
       if(coordinate_to_angle(x_array[i], y_array[i], z_array[i], rot, left, right) == OUT_OF_RANGE)//check if all the data in range
       {
-        return OUT_OF_RANGE;
+        return OUT_OF_RANGE_IN_PATH;
       }
       else
       {
@@ -741,6 +813,11 @@ unsigned char uArmClass::move_to(double x, double y, double z, double hand_angle
         z_array[i] = right;
       }
     }
+
+    //INTERP_INTVLS>>=2;
+    //interpolate(cur_hand, hand_angle, hand_array, ease_type);
+    //hand_array[INTERP_INTVLS] = hand_angle;
+
 g_current_x=x;
 g_current_y=y;
 g_current_z=z;
@@ -855,11 +932,349 @@ void uArmClass::pump_off()
   \brief systick
 */
 
-ISR(TIMER2_COMPA_vect) 
+ISR(TIMER0_COMPA_vect) 
 { 
   sys_tick++;
   PORTB ^= 0x01;
 }
+//*************************************uart communication**************************************//
+String uArmClass::runCommand(String cmnd){
+    
+    // To save memory, create the "[OK" and "]\n" right now, in flash memory
+    String ok    = F("[ok"); 
+    String endB  = F("]\n");
+
+    // sMove Command---------------------------------------------------------
+    if(cmnd.indexOf(F("sMove")) >= 0){
+      String moveParameters[] = {F("X"), F("Y"), F("Z"), F("S")};
+      String errorResponse    = isValidCommand(cmnd, moveParameters, 4);
+      if(errorResponse.length() > 0){return errorResponse;}
+      //  Create action and respond
+      double values[4];
+      getCommandValues(cmnd, moveParameters, 4, values);
+      if(move_to(values[0], values[1], values[2])!=IN_RANGE)
+      {
+        return F("[R2:fail]\n");
+      }
+      return F("[R1:succeed]\n");
+      
+    }else
+    //gSimuX#Y#Z#-------------------------------------------------------------
+    if(cmnd.indexOf(F("gSimu")) >= 0){
+      String moveParameters[] = {F("X"), F("Y"), F("Z")};
+      String errorResponse    = isValidCommand(cmnd, moveParameters, 3);
+      if(errorResponse.length() > 0){return errorResponse;}
+      //  Create action and respond
+      double values[3];
+      getCommandValues(cmnd, moveParameters, 3, values);
+      switch(move_to(values[0], values[1], values[2]))
+      {
+        case IN_RANGE             :move_times=255;//disable move
+                                  return F("[R1:in range]\n");
+                                  break;
+        case OUT_OF_RANGE_IN_PATH :move_times=255;//disable move
+                                  return F("[R2:fail in dst]\n");
+                                  break;
+        case OUT_OF_RANGE_IN_DST  :move_times=255;//disable move
+                                  return F("[R3:fail in path]\n");
+                                  break;
+        default:break;
+      }
+
+    }else
+
+    //gVer---------------------------------------------------------------------
+    if(cmnd.indexOf(F("gVer")) >= 0){
+      return "[Ver " + String(current_ver) + "]\n";
+
+    }else
+
+    // sServoN#V#--------------------------------------------------------------
+    if(cmnd.indexOf(F("sServo")) >= 0)
+    {
+       String servoSetParameters[] = {F("N"), F("V")};
+       String errorResponse        = isValidCommand(cmnd, servoSetParameters, 2);
+       if(errorResponse.length() > 0) {return errorResponse;}
+       
+       double values[2];
+       getCommandValues(cmnd, servoSetParameters, 2, values);
+       // Clamp the angle between 0 and 180
+       if(values[1] < 0)
+       {
+        values[1] = 0;
+       } 
+       else if(values[1] > 180) 
+       { 
+        values[1] = 180;
+       } 
+       switch((unsigned int)values[0])
+       {
+        case SERVO_ROT_NUM:   g_servo_rot.write(values[1]);
+                              break;
+        case SERVO_LEFT_NUM:  g_servo_left.write(values[1]);
+                              break;
+        case SERVO_RIGHT_NUM: g_servo_right.write(values[1]);
+                              break;
+        case SERVO_HAND_ROT_NUM: g_servo_hand_rot.write(values[1]);
+                                 break;
+        default: break;
+       }
+       return F("[ok]\n");
+    }else
+
+    //sPumpV#------------------------------------------------------------------
+    if(cmnd.indexOf(F("sPump")) >= 0){
+
+       String servoSetParameters[] = {F("V")};
+       String errorResponse        = isValidCommand(cmnd, servoSetParameters, 1);
+       if(errorResponse.length() > 0) {return errorResponse;}
+       
+       double values[1];
+       getCommandValues(cmnd, servoSetParameters, 1, values);
+       if(values[0]==0)//off
+       {
+        pump_off();
+       }else//on
+       {
+        pump_on();
+       }
+       return F("[ok]\n");
+    }else
+    
+    //gPump---------------------------------------------------------------------
+    if(cmnd.indexOf(F("sPump")) >= 0){
+      return F("[R1:sucking objs]");//return "[R2:sucking nothing]";return "[R1:off]";
+    }else
+
+    //sGripperV#----------------------------------------------------------------
+    if(cmnd.indexOf(F("sGripper")) >= 0){
+
+       String servoSetParameters[] = {F("V")};
+       String errorResponse        = isValidCommand(cmnd, servoSetParameters, 1);
+       if(errorResponse.length() > 0) {return errorResponse;}
+       
+       double values[1];
+       getCommandValues(cmnd, servoSetParameters, 1, values);
+       if(values[0]==0)//release
+       {
+        gripper_release();
+       }else//catch
+       {
+        gripper_catch();
+       }
+       return F("[ok]\n");
+    }else
+
+    //gGipper-------------------------------------------------------------------
+    if(cmnd.indexOf(F("gGripper")) >= 0){
+      return F("[R1:grabbing objs]");//return "[R2:grabbing nothing]";return "[R1:off]";
+    }else
+
+    // sAttachS#----------------------------------------------------------------
+    if(cmnd.indexOf(F("sAttach")) >= 0){
+      String attachParameters[] = {F("S")};
+      String errorResponse = isValidCommand(cmnd, attachParameters, 1);
+      if(errorResponse.length() > 0) {return errorResponse;}
+      double values[1];
+      getCommandValues(cmnd, attachParameters, 1, values);
+      if((values[0]>=0)&&(values[0]<=3)){
+        switch((unsigned int)values[0])
+        {
+          case SERVO_ROT_NUM:   attach_servo(SERVO_ROT_NUM);
+                                break;
+          case SERVO_LEFT_NUM:  attach_servo(SERVO_LEFT_NUM);
+                                break;
+          case SERVO_RIGHT_NUM: attach_servo(SERVO_RIGHT_NUM);
+                                break;
+          case SERVO_HAND_ROT_NUM: attach_servo(SERVO_HAND_ROT_NUM);
+                                  break;
+          default: break;
+        }
+        return F("[R1:ok]\n");
+      }else{
+        return F("[R2:wrong servo num]\n");
+      }
+       
+    }else
+
+    
+    // sDetachS#----------------------------------------------------------------
+    if(cmnd.indexOf(F("sDetach")) >= 0){
+      String detachParameters[] = {F("S")};
+      String errorResponse      = isValidCommand(cmnd, detachParameters, 1);
+      if(errorResponse.length() > 0) {return errorResponse;}
+      
+      double values[1];
+      getCommandValues(cmnd, detachParameters, 1, values);
+      if((values[0]>=0)&&(values[0]<=3)){
+        switch((unsigned int)values[0])
+        {
+          case SERVO_ROT_NUM:   g_servo_rot.detach();
+                                break;
+          case SERVO_LEFT_NUM:  g_servo_left.detach();
+                                break;
+          case SERVO_RIGHT_NUM: g_servo_right.detach();
+                                break;
+          case SERVO_HAND_ROT_NUM: g_servo_hand_rot.detach();
+                                  break;
+          default: break;
+        }  
+        return F("[R1:ok]\n");
+      }else{ 
+        return F("[R2:wrong servo num]\n");
+      }
+    }else
+
+    //gCrd---------------------------------------------------------------------
+    if(cmnd.indexOf(F("gCrd")) >= 0){
+      get_current_xyz(&cur_rot, &cur_left, &cur_right, &g_current_x, &g_current_y, &g_current_z, true);
+      return "[ok X" + String(g_current_x) + " Y" + String(g_current_y) + " Z" + String(g_current_z) + "]\n";
+    }else
+
+    //gAng---------------------------------------------------------------------
+    if(cmnd.indexOf(F("gAng")) >= 0){
+      get_current_rotleftright();
+      return "[ok rot" + String(cur_rot) + " left" + String(cur_left) + " right" + String(cur_right) + "]\n";
+    }else
+
+    //gIKX#Y#Z#----------------------------------------------------------------
+    if(cmnd.indexOf(F("gIK")) >= 0){
+       String IKParameters[] = {F("X"), F("Y"), F("Z")};
+       String errorResponse  = isValidCommand(cmnd, IKParameters, 3);
+       if(errorResponse.length() > 0) {return errorResponse;}
+       
+       double values[3];
+       getCommandValues(cmnd, IKParameters, 3, values);
+       double rot, left, right;
+       coordinate_to_angle(values[0], values[1], values[2] , rot, left, right);
+       
+       return "[ok rot" + String(rot) + " left" + String(left) + " right" + String(right) + "]\n";
+    }else
+
+    //gFKT#L#R#-----------------------------------------------------------------
+    // Get Forward Kinematics
+    if(cmnd.indexOf(F("gFK")) >= 0){
+       String IKParameters[] = {F("T"), F("L"), F("R")};
+       String errorResponse  = isValidCommand(cmnd, IKParameters, 3);
+       if(errorResponse.length() > 0) {return errorResponse;}
+       
+       double values[3];
+       getCommandValues(cmnd, IKParameters, 3, values);
+       double x, y, z;
+       get_current_xyz(&values[0], &values[1], &values[2], &x, &y, &z, false);
+       return "[ok X" + String(x) + " Y" + String(y) + " Z" + String(z) + "]\n";
+    }else
+
+    
+    //gMov-----------------------------------------------------------------------
+    if(cmnd.indexOf(F("gMov")) >= 0){
+      if(available()==false)
+      {
+        return F("[R1:running]\n");
+      }
+      else
+      {
+        return F("[R2:free]\n");
+      }
+
+    }else
+    
+    //gTip-----------------------------------------------------------------------
+    if(cmnd.indexOf(F("gTip")) >= 0){
+      if(digitalRead(LIMIT_SW)==HIGH)
+      {
+        return F("[R1:no trigger]\n");
+      }
+      else
+      {
+        return F("[R2:triggering]\n");
+      }
+    }else
+
+    //sBuzzF#T#-------------------------------------------------------------------
+    if(cmnd.indexOf(F("sBuzz")) >= 0){
+       String buzzerParameters[] = { F("F"),F("T")};
+       String errorResponse      = isValidCommand(cmnd, buzzerParameters, 2);
+       if(errorResponse.length() > 0) {return errorResponse;}
+       
+       double values[2];
+       getCommandValues(cmnd, buzzerParameters, 2, values);
+       if((values[0] < 0)||(values[1] < 0)){
+         return F("[R2:no negtive]\n");
+       }
+       tone(BUZZER, values[0]);
+       buzzerStopTime = values[1];
+       return F("[R1:OK]\n");
+    }
+    
+     
+    if(cmnd.length() > 0){
+      return "[ERROR: No such command: " + cmnd + endB;
+    }else{
+      return F("");
+    }
+}
+
+
+
+
+void uArmClass::getCommandValues(String cmnd, String parameters[], int parameterCount, double *valueArray){
+  unsigned char index[parameterCount],p;
+  for(p = 0; p < parameterCount; p++){
+    index[p] = cmnd.indexOf(parameters[p]);
+  } 
+  for(p = 0; p < parameterCount; p++){
+    if(p < parameterCount - 1){
+      
+      valueArray[p] = cmnd.substring(index[p] + 1, index[p + 1]).toFloat();
+    }else{
+      valueArray[p] = cmnd.substring(index[p] + 1).toFloat();
+    }
+  }
+}
+
+
+
+
+String uArmClass::isValidCommand(String cmnd, String parameters[], int parameterCount){
+  int index[parameterCount];
+  
+  String errorMissingParameter = F("[ERROR: Missing Parameter ");
+  String errorWrongOrder       = F("[ERROR: Incorrect Parameter order on parameter ");
+  String endingBracket         = F("]\n");
+  //  Get all indexes
+  for(int p = 0; p < parameterCount; p++){
+      index[p] = cmnd.indexOf(parameters[p]);
+      if(index[p] == -1){return errorMissingParameter + parameters[p] + F(" ") + cmnd + endingBracket;}
+  }
+  
+  //  Check that the commands are in the correct order
+  for(int p = 0; p < parameterCount; p++){
+    if(parameterCount == 1){break;}
+    
+    if(p < parameterCount - 1){
+      if(!(index[p] < index[p + 1])){
+        return errorWrongOrder + parameters[p] + endingBracket;
+      }
+    }else if(!(index[p] > index[p-1])){
+      return errorWrongOrder + parameters[p] + endingBracket;
+    }
+  }
+  
+  //  Check that there is something between each parameter (AKA, the value)
+  for(int p = 0; p < parameterCount; p++){   
+    if(p < parameterCount - 1){
+      if((index[p + 1] - index[p]) == 1){
+        return errorMissingParameter + parameters[p] + endingBracket;
+      }
+    }else if(index[p] == cmnd.length() - 1){
+      return errorMissingParameter + parameters[p] + endingBracket;
+    }
+  }
+  
+  return F("");
+}
+
 
 //*************************************private functions***************************************//
 //**just used by the 512k external eeprom**//
