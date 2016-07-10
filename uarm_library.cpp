@@ -54,9 +54,15 @@ void uArmClass::arm_process_commands()
       //Serial.println(move_times,DEC);
       y_array[move_times] = y_array[move_times] - LEFT_SERVO_OFFSET;//assembling offset
       z_array[move_times] = z_array[move_times] - RIGHT_SERVO_OFFSET;//assembling offset
+      if(move_times==INTERP_INTVLS)//get the ideal data
+      {
+        Serial.println(x_array[move_times],DEC);
+        Serial.println(y_array[move_times],DEC);
+        Serial.println(z_array[move_times],DEC);
+      }
       read_servo_calibration_data(&x_array[move_times],&y_array[move_times],&z_array[move_times]);
-
       write_servos_angle(x_array[move_times], y_array[move_times], z_array[move_times]);
+
       //hand rot
 
       move_times++;
@@ -122,24 +128,55 @@ void uArmClass::alert(byte times, byte runTime, byte stopTime)
 
 void uArmClass::read_servo_calibration_data(double *rot, double *left, double *right)// takes 1~2ms
 {
-  unsigned char calibration_data[DATA_LENGTH]; //get the calibration data around the data input
+  /*unsigned char calibration_data[DATA_LENGTH]; //get the calibration data around the data input
   unsigned int min_data_calibration_address;
+  double closest_data, another_closest_data;
+  unsigned int deltaA = 0xffff, deltaB = 0, i, i_min = 0;*/
 //rot calibration data
-  min_data_calibration_address = (((unsigned int)(*rot)  - (DATA_LENGTH >> 2)) * 2);
+  calibration_data_to_servo_angle(rot,ROT_SERVO_ADDRESS);
+  /*min_data_calibration_address = (((unsigned int)(*rot)  - (DATA_LENGTH >> 2)) * 2);
+    Serial.println(min_data_calibration_address,DEC);
   iic_readbuf(calibration_data, EXTERNAL_EEPROM_DEVICE_ADDRESS, ROT_SERVO_ADDRESS + min_data_calibration_address, DATA_LENGTH);
-  unsigned int deltaA = 0xffff, deltaB = 0, i, i_min = 0;
   for(i=0;i<(DATA_LENGTH >> 1);i++)
   {
       deltaB = abs ((calibration_data[i+i]<<8) + calibration_data[1+(i+i)] - (*rot) * 10);
+      Serial.println(deltaB,DEC);
       if(deltaA > deltaB)
       {
         i_min = i;
         deltaA = deltaB;
       } 
   }
-  *rot = ((calibration_data[i_min+i_min]<<8) + calibration_data[1+(i_min+i_min)])/10.0;
+
+  closest_data = ((calibration_data[i_min+i_min]<<8) + calibration_data[1+(i_min+i_min)])/10.0;//transfer the dat from ideal data to servo angles
+  if((*rot) >= closest_data)
+  {
+    another_closest_data = ((calibration_data[i_min+i_min+2]<<8) + calibration_data[3+i_min+i_min])/10.0;//bigger than closest
+    if(another_closest_data == closest_data)
+    {
+      *rot = min_data_calibration_address/2 + i_min + 1 + 0.5;
+    }
+    else
+    {
+      *rot = 1.0 * (*rot - closest_data) / (another_closest_data - closest_data) + min_data_calibration_address/2 + i_min + 1;
+    }
+  }
+  else
+  {
+    another_closest_data = ((calibration_data[i_min+i_min-2]<<8) + calibration_data[i_min+i_min-1])/10.0;//smaller than closest
+    if(another_closest_data == closest_data)
+    {
+      *rot = min_data_calibration_address/2 + i_min + 0.5;
+    }
+    else
+    {
+      *rot = 1.0 * (*rot - another_closest_data) / (closest_data - another_closest_data) + min_data_calibration_address/2 + i_min;
+    }
+  }
+  //*rot = ((calibration_data[i_min+i_min]<<8) + calibration_data[1+(i_min+i_min)])/10.0;*/
 //left calibration data
-  deltaA = 0xffff;
+  calibration_data_to_servo_angle(left,LEFT_SERVO_ADDRESS);
+  /*deltaA = 0xffff;
   deltaB = 0;
   min_data_calibration_address = (((unsigned int)(*left) - (DATA_LENGTH >> 2)) * 2);
   iic_readbuf(calibration_data, EXTERNAL_EEPROM_DEVICE_ADDRESS, LEFT_SERVO_ADDRESS + min_data_calibration_address, DATA_LENGTH);
@@ -152,9 +189,36 @@ void uArmClass::read_servo_calibration_data(double *rot, double *left, double *r
         deltaA = deltaB;
       } 
   }
-  *left = ((calibration_data[i_min+i_min]<<8) + calibration_data[1+(i_min+i_min)])/10.0;
+
+  closest_data = ((calibration_data[i_min+i_min]<<8) + calibration_data[1+(i_min+i_min)])/10.0;//transfer the dat from ideal data to servo angles
+  if((*left) >= closest_data)
+  {
+    another_closest_data = ((calibration_data[i_min+i_min+2]<<8) + calibration_data[3+i_min+i_min])/10.0;//bigger than closest
+    if(another_closest_data == closest_data)
+    {
+      *left = min_data_calibration_address/2 + i_min + 1 + 0.5;
+    }
+    else
+    {
+      *left = 1.0 * (*left - closest_data) / (another_closest_data - closest_data) + min_data_calibration_address/2 + i_min + 1;
+    }
+  }
+  else
+  {
+    another_closest_data = ((calibration_data[i_min+i_min-2]<<8) + calibration_data[i_min+i_min-1])/10.0;//smaller than closest
+    if(another_closest_data == closest_data)
+    {
+      *left = min_data_calibration_address/2 + i_min + 0.5;
+    }
+    else
+    {
+      *left = 1.0 * (*left - another_closest_data) / (closest_data - another_closest_data) + min_data_calibration_address/2 + i_min;
+    }
+  }
+  //*left = ((calibration_data[i_min+i_min]<<8) + calibration_data[1+(i_min+i_min)])/10.0;*/
 //right calibration data
-  deltaA = 0xffff;
+  calibration_data_to_servo_angle(right,RIGHT_SERVO_ADDRESS);
+  /*deltaA = 0xffff;
   deltaB = 0;
   min_data_calibration_address = (((unsigned int)(*right) - (DATA_LENGTH >> 2)) * 2);
   iic_readbuf(calibration_data, EXTERNAL_EEPROM_DEVICE_ADDRESS, RIGHT_SERVO_ADDRESS + min_data_calibration_address, DATA_LENGTH);
@@ -167,8 +231,86 @@ void uArmClass::read_servo_calibration_data(double *rot, double *left, double *r
         deltaA = deltaB;
       } 
   }
-  *right = ((calibration_data[i_min+i_min]<<8) + calibration_data[1+(i_min+i_min)])/10.0;
+
+  closest_data = ((calibration_data[i_min+i_min]<<8) + calibration_data[1+(i_min+i_min)])/10.0;//transfer the dat from ideal data to servo angles
+  if((*right) >= closest_data)
+  {
+    another_closest_data = ((calibration_data[i_min+i_min+2]<<8) + calibration_data[3+i_min+i_min])/10.0;//bigger than closest
+    if(another_closest_data == closest_data)
+    {
+      *right = min_data_calibration_address/2 + i_min + 1 + 0.5;
+    }
+    else
+    {
+      *right = 1.0 * (*right - closest_data) / (another_closest_data - closest_data) + min_data_calibration_address/2 + i_min + 1;
+    }
+  }
+  else
+  {
+    another_closest_data = ((calibration_data[i_min+i_min-2]<<8) + calibration_data[i_min+i_min-1])/10.0;//smaller than closest
+    if(another_closest_data == closest_data)
+    {
+      *right = min_data_calibration_address/2 + i_min + 0.5;
+    }
+    else
+    {
+      *right = 1.0 * (*right - another_closest_data) / (closest_data - another_closest_data) + min_data_calibration_address/2 + i_min;
+    }
+  }
+  //*right = ((calibration_data[i_min+i_min]<<8) + calibration_data[1+(i_min+i_min)])/10.0;*/
 } 
+
+/*!
+   \brief check the external eeprom and transfer the ideal data to real angle data
+   \param data the address of the variable
+   \param address the section starting address of the external eeprom 
+*/
+void uArmClass::calibration_data_to_servo_angle(double *data,unsigned int address)
+{
+  unsigned char calibration_data[DATA_LENGTH]; //get the calibration data around the data input
+  unsigned int min_data_calibration_address;
+  double closest_data, another_closest_data;
+  unsigned int deltaA = 0xffff, deltaB = 0, i, i_min = 0;
+  deltaA = 0xffff;
+  deltaB = 0;
+  min_data_calibration_address = (((unsigned int)(*data) - (DATA_LENGTH >> 2)) * 2);
+  iic_readbuf(calibration_data, EXTERNAL_EEPROM_DEVICE_ADDRESS, address + min_data_calibration_address, DATA_LENGTH);
+  for(i=0;i<(DATA_LENGTH >> 1);i++)
+  {
+      deltaB = abs ((calibration_data[i+i]<<8) + calibration_data[1+(i+i)] - (*data) * 10);
+      if(deltaA > deltaB)
+      {
+        i_min = i;
+        deltaA = deltaB;
+      } 
+  }
+
+  closest_data = ((calibration_data[i_min+i_min]<<8) + calibration_data[1+(i_min+i_min)])/10.0;//transfer the dat from ideal data to servo angles
+  if((*data) >= closest_data)
+  {
+    another_closest_data = ((calibration_data[i_min+i_min+2]<<8) + calibration_data[3+i_min+i_min])/10.0;//bigger than closest
+    if(another_closest_data == closest_data)
+    {
+      *data = min_data_calibration_address/2 + i_min + 1 + 0.5;
+    }
+    else
+    {
+      *data = 1.0 * (*data - closest_data) / (another_closest_data - closest_data) + min_data_calibration_address/2 + i_min + 1;
+    }
+  }
+  else
+  {
+    another_closest_data = ((calibration_data[i_min+i_min-2]<<8) + calibration_data[i_min+i_min-1])/10.0;//smaller than closest
+    if(another_closest_data == closest_data)
+    {
+      *data = min_data_calibration_address/2 + i_min + 0.5;
+    }
+    else
+    {
+      *data = 1.0 * (*data - another_closest_data) / (closest_data - another_closest_data) + min_data_calibration_address/2 + i_min;
+    }
+  }  
+}
 
 /*!
    \brief Write 4 Servo Angles, servo_rot, servo_left, servo_right, servo_hand_rot
@@ -410,44 +552,6 @@ double uArmClass::analog_to_angle(int input_analog, byte servo_num)
   } 
 }
 
-
-/*!
-   \brief read Angle by servo_num
-   \param servo_num SERVO_ROT_NUM, SERVO_LEFT_NUM, SERVO_RIGHT_NUM, SERVO_HAND_ROT_NUM
-   \param withOffset true, false
-   \return Return servo_num Angle
- */
-double uArmClass::read_servo_angle(byte servo_num)
-{
-        double angle = 0;
-        for (byte i = 0; i < 5; i++){
-            switch (servo_num)
-            {
-            case SERVO_ROT_NUM:
-                    angle += analog_to_angle(analogRead(SERVO_ROT_ANALOG_PIN),SERVO_ROT_NUM);
-                    break;
-
-            case SERVO_LEFT_NUM:
-                    angle += analog_to_angle(analogRead(SERVO_LEFT_ANALOG_PIN),SERVO_LEFT_NUM);
-                    break;
-
-            case SERVO_RIGHT_NUM:
-                    angle += analog_to_angle(analogRead(SERVO_RIGHT_ANALOG_PIN),SERVO_RIGHT_NUM);
-                    break;
-
-            case SERVO_HAND_ROT_NUM:
-                    angle += analog_to_angle(analogRead(SERVO_HAND_ROT_ANALOG_PIN),SERVO_HAND_ROT_NUM);
-                    break;
-
-            default:
-                    break;
-
-            }
-            delay(10);
-        }
-        return angle/5;
-}
-
 /** Calculate the angles from given coordinate x, y, z to theta_1, theta_2, theta_3
 **/
 /*!
@@ -607,7 +711,7 @@ void uArmClass::write_stretch_height(double armStretch, double armHeight){
  */
 void uArmClass::get_current_rotleftright()
 {
-  unsigned int dat[8], temp;
+ /* unsigned int dat[8], temp;
   unsigned char i=0,j=0;
   for(i=0;i<8;i++){
     dat[i] = analogRead(SERVO_ROT_ANALOG_PIN);
@@ -647,13 +751,56 @@ void uArmClass::get_current_rotleftright()
       }
     }
   }
-  cur_right = uarm.analog_to_angle((dat[2]+dat[3]+dat[4]+dat[5])/4,SERVO_RIGHT_NUM);
-  //cur_rot = uarm.analog_to_angle(257,SERVO_ROT_NUM);
-  //double cur_left = uarm.analog_to_angle(214,SERVO_LEFT_NUM);
-  //double cur_right = uarm.analog_to_angle(207,SERVO_RIGHT_NUM);
-Serial.println(cur_rot, DEC);
-Serial.println(cur_left, DEC);
-Serial.println(cur_right, DEC);
+  cur_right = uarm.analog_to_angle((dat[2]+dat[3]+dat[4]+dat[5])/4,SERVO_RIGHT_NUM);*/
+//check the calibration data and transfer the servo angle to the calibrated real angle
+servo_angle_to_calibration_data(&cur_rot, ROT_SERVO_ADDRESS);
+servo_angle_to_calibration_data(&cur_left, LEFT_SERVO_ADDRESS);
+servo_angle_to_calibration_data(&cur_right, RIGHT_SERVO_ADDRESS);
+//Serial.println(cur_rot, DEC);
+//Serial.println((unsigned int)cur_rot, DEC);
+/*iic_readbuf(ideal_angle, EXTERNAL_EEPROM_DEVICE_ADDRESS, ROT_SERVO_ADDRESS + (((unsigned int)cur_rot - 2) << 1), 4);
+cur_rot = (double)(((ideal_angle[2] << 8) + ideal_angle[3]) - ((ideal_angle[0] << 8) + ideal_angle[1])) * (cur_rot - (unsigned int)cur_rot) + ((ideal_angle[0] << 8) + ideal_angle[1]);
+cur_rot = cur_rot / 10.0;*/
+
+//Serial.println(cur_rot, DEC);
+//Serial.println(cur_left, DEC);
+//Serial.println(cur_right, DEC);
+}
+
+void uArmClass::servo_angle_to_calibration_data(double *data, unsigned int address)
+{
+  unsigned int dat[8], temp;
+  unsigned char i=0,j=0;
+  for(i=0;i<8;i++){
+    switch(address)
+    {
+      case ROT_SERVO_ADDRESS: dat[i] = analogRead(SERVO_ROT_ANALOG_PIN);break;
+      case LEFT_SERVO_ADDRESS: dat[i] = analogRead(SERVO_LEFT_ANALOG_PIN);break;
+      case RIGHT_SERVO_ADDRESS: dat[i] = analogRead(SERVO_RIGHT_ANALOG_PIN);break;
+      default:break;
+    }
+  }
+  for(i=0;i<8;i++){//BULB to get the most accuracy data
+    for(j=0;i+j<7;j++){
+      if(dat[j]>dat[j+1]){
+        temp = dat[j];
+        dat[j] = dat[j+1];
+        dat[j+1] = temp;
+      }
+    }
+  }
+  switch(address)
+  {
+    case ROT_SERVO_ADDRESS: (*data) = uarm.analog_to_angle((dat[2]+dat[3]+dat[4]+dat[5])/4,SERVO_ROT_NUM);break;
+    case LEFT_SERVO_ADDRESS: (*data) = uarm.analog_to_angle((dat[2]+dat[3]+dat[4]+dat[5])/4,SERVO_LEFT_NUM);break;
+    case RIGHT_SERVO_ADDRESS: (*data) = uarm.analog_to_angle((dat[2]+dat[3]+dat[4]+dat[5])/4,SERVO_RIGHT_NUM);break;
+    default:break;
+  }
+  //check the external eeprom and transfer the data to ideal angle
+  unsigned char ideal_angle[4];
+  iic_readbuf(ideal_angle, EXTERNAL_EEPROM_DEVICE_ADDRESS, address + (((unsigned int)(*data) - 1) << 1), 4);
+  (*data) = (double)(((ideal_angle[2] << 8) + ideal_angle[3]) - ((ideal_angle[0] << 8) + ideal_angle[1])) * ((*data) - (unsigned int)(*data)) + ((ideal_angle[0] << 8) + ideal_angle[1]);
+  (*data) = (*data) / 10.0;
 }
 
 /*!
@@ -666,7 +813,7 @@ Serial.println(cur_right, DEC);
    \param *g_current_z the address of value we want to caculate
    \param for movement is the flage to detect if we should get the real current angle of the uarm
  */
-void uArmClass::get_current_xyz(double *cur_rot, double *cur_left, double *cur_right, double *g_current_x, double *g_current_y, double *g_current_z, bool for_movement )
+void uArmClass::get_current_xyz(double *cur_rot, double *cur_left , double *cur_right, double *g_current_x, double *g_current_y, double *g_current_z, bool for_movement )
 {
   if(for_movement==true){
     get_current_rotleftright();
@@ -782,7 +929,7 @@ unsigned char uArmClass::move_to(double x, double y, double z, double hand_angle
 
   INTERP_INTVLS = (INTERP_INTVLS<60) ? INTERP_INTVLS : 60;
   INTERP_INTVLS = INTERP_INTVLS * time;// speed determine the number of interpolation
-  //INTERP_INTVLS = 0;
+  //INTERP_INTVLS = 1;
 
   //if (time > 0)
   //{
@@ -1147,7 +1294,8 @@ String uArmClass::runCommand(String cmnd){
        getCommandValues(cmnd, IKParameters, 3, values);
        double rot, left, right;
        coordinate_to_angle(values[0], values[1], values[2] , rot, left, right);
-       
+       left = left - LEFT_SERVO_OFFSET;//assembling offset
+       right = right - RIGHT_SERVO_OFFSET;//assembling offset
        return "[ok rot" + String(rot) + " left" + String(left) + " right" + String(right) + "]\n";
     }else
 
@@ -1161,6 +1309,8 @@ String uArmClass::runCommand(String cmnd){
        double values[3];
        getCommandValues(cmnd, IKParameters, 3, values);
        double x, y, z;
+       //values[1] += LEFT_SERVO_OFFSET;//add the offset
+       //values[2] += RIGHT_SERVO_OFFSET;
        get_current_xyz(&values[0], &values[1], &values[2], &x, &y, &z, false);
        return "[ok X" + String(x) + " Y" + String(y) + " Z" + String(z) + "]\n";
     }else

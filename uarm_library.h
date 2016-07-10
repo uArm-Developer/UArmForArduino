@@ -18,7 +18,7 @@
 
 // for the external eeprom 
 #define EXTERNAL_EEPROM_DEVICE_ADDRESS  0xA0
-#define DATA_LENGTH  0x16
+#define DATA_LENGTH  0x20
 #define LEFT_SERVO_ADDRESS   0x0000
 #define RIGHT_SERVO_ADDRESS  0x02D0
 #define ROT_SERVO_ADDRESS    0x05A0
@@ -28,7 +28,7 @@
 #define ROT_SERVO_OFFSET    0
 //#define DEBUG_MODE 
 
-#define current_ver         "0.9.1"  
+#define current_ver         "0.9.2"  
 
 #define UARM_MAJOR_VERSION      1
 #define UARM_MINOR_VERSION      6
@@ -184,6 +184,8 @@ public:
 
         void get_current_xyz(double *cur_rot, double *cur_left, double *cur_right, double *g_current_x, double *g_current_y, double *g_current_z, bool for_movement );
         void get_current_rotleftright();
+        void calibration_data_to_servo_angle(double *data,unsigned int address);
+        void servo_angle_to_calibration_data(double *data,unsigned int address);
         /*void angle_to_coordinate(double& x, double& y, double &z) {
                 get_current_xyz(); x = g_current_x; y = g_current_y; z = g_current_z;
         }
