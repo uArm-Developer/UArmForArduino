@@ -24,39 +24,33 @@
 
 #include "uarm_library.h"
 
-// define a uArm
-//uArmLibrary uArm;
 int value;        // value is the data recevied
 unsigned char i=0,dat[10];
 void setup() {
+      uarm.arm_setup();
 
-      pinMode(4,INPUT_PULLUP);
-      if(digitalRead(4)==LOW)
-      {
-        while(digitalRead(4)==LOW);
-        
-        uarm.write_servos_angle(90,90,0);
-        while(1);
-      }
-      //Wire.begin();        // join i2c bus (address optional for master)
-      Serial.begin(9600);  // start serial port at 9600 bps
-      Serial.println(uarm.move_to(0,200,100));
-      //Serial.println(uarm.iic_readbuf(dat,EXTERNAL_EEPROM_DEVICE_ADDRESS,0x0000,255));
+      Serial.begin(115200);  // start serial port at 9600 bps
+      Serial.println("start");
+      //Serial.println(uarm.move_to(100,150,100));
+      //uarm.get_current_xyz();
+      
 }
-
-
-double x=46,y=65,z=44;
+double x,y,z;
+String message = "";
 void loop() {
-//  x=34;
-//  y=76;
-//  z=110;
-//  uarm.read_servo_calibration_data(&x,&y,&z);delay(1000);
-//Serial.println(x,DEC);
-//Serial.println(y,DEC);
-//Serial.println(z,DEC);
+  uarm.arm_process_commands();
+  /*if(uarm.available()==true)
+  {
+    Serial.println("available!");
+
+  }*/
   if(Serial.available())
   {
-    char inChar = (char)Serial.read();
+
+   message = Serial.readStringUntil(']') + ']';
+    Serial.print(uarm.runCommand(message));         // Run the command and send back the response
+
+    /*char inChar = (char)Serial.read();
     dat[i]=inChar-48;
     if((dat[i]+48)=='e')
     {
@@ -68,6 +62,8 @@ void loop() {
       if(uarm.move_to(x,y,z)==IN_RANGE)
       {
         Serial.println("succeed");
+        delay(200);
+        //uarm.get_current_xyz();
       }
       else
       {
@@ -82,7 +78,7 @@ void loop() {
     else
     {
       i++;
-    }
+    }*/
 
   }
   
