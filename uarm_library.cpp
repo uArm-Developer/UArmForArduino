@@ -1143,7 +1143,7 @@ String uArmClass::runCommand(String cmnd){
     }else
 
     //sBuzzF#T#-------------------------------------------------------------------
-    if(cmnd.indexOf(F("sBuzz")) >= 0){
+    if(cmnd.indexOf(F("sBuz")) >= 0){
        String buzzerParameters[] = { F("F"),F("T")};
        String errorResponse      = isValidCommand(cmnd, buzzerParameters, 2);
        if(errorResponse.length() > 0) {return errorResponse;}
