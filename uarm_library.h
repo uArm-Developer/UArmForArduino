@@ -23,12 +23,12 @@
 #define RIGHT_SERVO_ADDRESS  0x02D0
 #define ROT_SERVO_ADDRESS    0x05A0
 
-#define LEFT_SERVO_OFFSET    13.3   //1.8degree
-#define RIGHT_SERVO_OFFSET   17.7   //2.6degree
-#define ROT_SERVO_OFFSET    0
+#define RIGHT_SERVO_OFFSET    14.5//-1liebao   //1.8Degree
+#define LEFT_SERVO_OFFSET     2.6//18.6liebao   //2.6Degree
+#define ROT_SERVO_OFFSET     -0//-7liebao
 //#define DEBUG_MODE 
 
-#define current_ver         "0.9.2"  
+#define current_ver         "0.9.4"
 
 #define UARM_MAJOR_VERSION      1
 #define UARM_MINOR_VERSION      6
@@ -52,9 +52,9 @@
 // Old Control method Stretch / Height
 
 #define ARM_STRETCH_MIN   0
-#define ARM_STRETCH_MAX   195
-#define ARM_HEIGHT_MIN   -150
-#define ARM_HEIGHT_MAX   160
+#define ARM_STRETCH_MAX   280
+#define ARM_HEIGHT_MIN   0
+#define ARM_HEIGHT_MAX   200
 #define L3_MAX_ANGLE     120
 #define L3_MIN_ANGLE     5
 #define L4_MAX_ANGLE     120
@@ -73,7 +73,7 @@
 
 #define MATH_PI 3.141592653589793238463
 #define MATH_TRANS  57.2958
-#define MATH_L1 (106.45+6)
+#define MATH_L1 90.00
 #define MATH_L2 21.17
 #define MATH_L3 148.25
 #define MATH_L4 160.2
@@ -237,6 +237,8 @@ protected:
         double g_current_x = 0;
         double g_current_y = 200;
         double g_current_z = 100;
+
+        boolean move_to_the_closest_point = false;
 
         boolean g_gripper_reset;
         unsigned int INTERP_INTVLS;
