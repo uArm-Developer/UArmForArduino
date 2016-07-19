@@ -426,28 +426,26 @@ double uArmClass::analog_to_angle(int input_analog, byte servo_num)
 **/
 /*!
    \brief Calculate the angles from given coordinate x, y, z to theta_1, theta_2, theta_3
-   \param x X axis
-   \param y Y axis
-   \param z Z axis
+   \param x X axis 
+   \param y Y axis 
+   \param z Z axis 
    \param theta_1 SERVO_ROT_NUM servo angles
    \param theta_2 SERVO_LEFT_NUM servo angles
    \param theta_3 SERVO_RIGHT_NUM servo angles
  */
-unsigned char uArmClass::coordinate_to_angle(double x, double y, double z, double& theta_1, double& theta_2, double& theta_3)//theta_1:rotation angle   theta_2:the angle of lower arm and horizon   theta_3:the angle of upper arm and horizon
+unsigned char uArmClass::coordinate_to_angle(double x, double y, double z, double *theta_1, double *theta_2, double *theta_3)//theta_1:rotation angle   theta_2:the angle of lower arm and horizon   theta_3:the angle of upper arm and horizon
 {
   double x_in = 0.0;
   double z_in = 0.0;
   double right_all = 0.0;
   double sqrt_z_x = 0.0;
   double phi = 0.0;
-  double theta_triangle = 0.0;
+
   z_in = (z - MATH_L1) / MATH_L3;
+
   //check the range of x
   if(y<0)
   {
-  #ifdef DEBUG_MODE
-    Serial.write("ERR0:coordinate_to_angle");
-  #endif
     return OUT_OF_RANGE;
   }
   //check the range of z
@@ -458,7 +456,7 @@ unsigned char uArmClass::coordinate_to_angle(double x, double y, double z, doubl
   // Calculate value of theta 1: the rotation angle
   if(x==0)
   {
-    theta_1 = 90;
+    (*theta_1) = 90;
   }
   else
   {
@@ -466,74 +464,71 @@ unsigned char uArmClass::coordinate_to_angle(double x, double y, double z, doubl
 
     if (x > 0)
     {
-      theta_1 = atan(y / x)*MATH_TRANS;//angle tranfer 0-180 CCW
-      //theta_1 = 180 - atan(y / x)*MATH_TRANS;//angle tranfer 0-180 CW
+      *theta_1 = atan(y / x)*MATH_TRANS;//angle tranfer 0-180 CCW
+
     }
     if (x < 0) 
     {
-      theta_1 = 180 + atan(y / x)*MATH_TRANS;//angle tranfer  0-180 CCW
-      //theta_1 = atan( (- y) / x)*MATH_TRANS;//angle tranfer  0-180 CW
+      (*theta_1) = 180 + atan(y / x)*MATH_TRANS;//angle tranfer  0-180 CCW
+
     }
 
   }
             
-  // Calculate value of theta 3
-  if(theta_1!=90)//x_in is the stretch
+  	// Calculate value of theta 3
+  if((*theta_1)!=90)//x_in is the stretch
   {
-    x_in = (x / cos(theta_1 / MATH_TRANS) - MATH_L2) / MATH_L3;
+    x_in = (x / cos((*theta_1) / MATH_TRANS) - MATH_L2) / MATH_L3;
   }
   else
   {
     x_in = (y - MATH_L2) / MATH_L3;
   }
 
+  /*if(write_stretch_height_rot(x_in,z_in,theta_1,theta_2,theta_3)==IN_RANGE)
+  {
+  	return IN_RANGE;
+  }
+  else
+  {
+  	return OUT_OF_RANGE;
+  }*/
   phi = atan(z_in / x_in)*MATH_TRANS;//phi is the angle of line (from joint 2 to joint 4) with the horizon
 
   sqrt_z_x = sqrt(z_in*z_in + x_in*x_in);
 
   right_all = (sqrt_z_x*sqrt_z_x + MATH_L43*MATH_L43 - 1) / (2 * MATH_L43 * sqrt_z_x);//cosin law
-  theta_3 = acos(right_all)*MATH_TRANS;//cosin law
+  (*theta_3) = acos(right_all)*MATH_TRANS;//cosin law
 
   // Calculate value of theta 2
   right_all = (sqrt_z_x*sqrt_z_x + 1 - MATH_L43*MATH_L43) / (2 * sqrt_z_x);//cosin law
-  theta_2 = acos(right_all)*MATH_TRANS;//cosin law
+  (*theta_2) = acos(right_all)*MATH_TRANS;//cosin law
 
-  //right_all = (MATH_L43*MATH_L43 + 1 - sqrt_z_x*sqrt_z_x) / (2 * MATH_L43);//cosin law
-  //theta_triangle = acos(right_all)*MATH_TRANS;//used to detect the if theta_2>90 or not
-
-  theta_2 = theta_2 + phi;
-  theta_3 = theta_3 - phi;
+  (*theta_2) = (*theta_2) + phi;
+  (*theta_3) = (*theta_3) - phi;
   //determine if the angle can be reached
-  if(isnan(theta_1)||isnan(theta_1)||isnan(theta_1))
+  if(isnan((*theta_1))||isnan((*theta_2))||isnan((*theta_3)))
+  {
+  	return OUT_OF_RANGE;
+  }
+  if((z_in <= ARM_HEIGHT_MIN) || (z_in >= (ARM_HEIGHT_MAX - MATH_L1) / MATH_L3))//check if height is in range
   {
   	return OUT_OF_RANGE;
   }
   if((x_in <= ARM_STRETCH_MIN) || (x_in >= (double)(ARM_STRETCH_MAX - MATH_L2) / MATH_L3)) //check if stretch is in range
   {
-  #ifdef DEBUG_MODE
-    Serial.write("ERR1:coordinate_to_angle");
-  #endif
     return OUT_OF_RANGE;
   }
-  if(((theta_2 - LEFT_SERVO_OFFSET) < L3_MIN_ANGLE)||((theta_2 - LEFT_SERVO_OFFSET) > L3_MAX_ANGLE))//check the theta_2 in range
+  if((((*theta_2) - LEFT_SERVO_OFFSET) < L3_MIN_ANGLE)||(((*theta_2) - LEFT_SERVO_OFFSET) > L3_MAX_ANGLE))//check the (*theta_2) in range
   {
-  #ifdef DEBUG_MODE
-    Serial.write("ERR2:coordinate_to_angle");
-  #endif
     return OUT_OF_RANGE;
   }
-  if(((theta_3 - RIGHT_SERVO_OFFSET) < L4_MIN_ANGLE)||((theta_3 - RIGHT_SERVO_OFFSET) > L4_MAX_ANGLE))//check the theta_3 in range
+  if((((*theta_3) - RIGHT_SERVO_OFFSET) < L4_MIN_ANGLE)||(((*theta_3) - RIGHT_SERVO_OFFSET) > L4_MAX_ANGLE))//check the (*theta_3) in range
   {
-   #ifdef DEBUG_MODE
-    Serial.write("ERR3:coordinate_to_angle");
-  #endif
     return OUT_OF_RANGE;
   }
-  if(((180 - theta_3 - theta_2)>L4L3_MAX_ANGLE)||((180 - theta_3 - theta_2)<L4L3_MIN_ANGLE))//check the angle of upper arm and lowe arm in range
+  if(((180 - (*theta_3) - (*theta_2))>L4L3_MAX_ANGLE)||((180 - (*theta_3) - (*theta_2))<L4L3_MIN_ANGLE))//check the angle of upper arm and lowe arm in range
   {
-  #ifdef DEBUG_MODE
-    Serial.write("ERR4:coordinate_to_angle");
-  #endif
     return OUT_OF_RANGE;
   }
 
@@ -545,28 +540,58 @@ unsigned char uArmClass::coordinate_to_angle(double x, double y, double z, doubl
    \description This is an old control method to uArm. Using uarm's Stretch and height, , Height from -180 to 150
    \param armStretch Stretch from 0 to 195
    \param armHeight Height from -150 to 150
+    \param theta_1 SERVO_ROT_NUM servo angles
+   \param theta_2 SERVO_LEFT_NUM servo angles
+   \param theta_3 SERVO_RIGHT_NUM servo angles
  */
-void uArmClass::write_stretch_height(double armStretch, double armHeight){
-/*        if(EEPROM.read(CALIBRATION_STRETCH_FLAG) != CONFIRM_FLAG) {
-                alert(3, 200, 200);
-                return;
-        }
-        double offsetL = 0;
-        double offsetR = 0;
+unsigned char uArmClass::write_stretch_height_rot(double armStretch, double armHeight, double *theta_1, double *theta_2, double *theta_3){
+ /* double right_all = 0.0;
+  double sqrt_z_x = 0.0;
+  double phi = 0.0;
 
-        EEPROM.get(OFFSET_STRETCH_START_ADDRESS, offsetL);
-        EEPROM.get(OFFSET_STRETCH_START_ADDRESS + 4, offsetR);
-        armStretch = constrain(armStretch, ARM_STRETCH_MIN, ARM_STRETCH_MAX) + 68;
-        armHeight  = constrain(armHeight, ARM_HEIGHT_MIN, ARM_HEIGHT_MAX);
-        double xx = armStretch*armStretch + armHeight*armHeight;
-        double xxx = ARM_B2 - ARM_A2 + xx;
-        double angleB = acos((armStretch*xxx+armHeight*sqrt(4.0*ARM_B2*xx-xxx*xxx))/(xx*2.0*ARM_B))* RAD_TO_DEG;
-        double yyy = ARM_A2-ARM_B2+xx;
-        double angleA =acos((armStretch*yyy-armHeight*sqrt(4.0*ARM_A2*xx-yyy*yyy))/(xx*2.0*ARM_A))* RAD_TO_DEG;
-        int angleR =(int)(angleB + offsetR - 4);//int angleR =angleB + 40 + offsetR;
-        int angleL =(int)(angleA + offsetL + 16);//int angleL =25 + angleA + offsetL;
-        angleL = constrain(angleL, 5 + offsetL, 145 + offsetL);
-        write_left_right_servo_angle(angleL,angleR,true);*/
+  phi = atan(armHeight / armStretch)*MATH_TRANS;//phi is the angle of line (from joint 2 to joint 4) with the horizon
+
+  sqrt_z_x = sqrt(armHeight*armHeight + armStretch*armStretch);
+
+  right_all = (sqrt_z_x*sqrt_z_x + MATH_L43*MATH_L43 - 1) / (2 * MATH_L43 * sqrt_z_x);//cosin law
+  (*theta_3) = acos(right_all)*MATH_TRANS;//cosin law
+
+  // Calculate value of theta 2
+  right_all = (sqrt_z_x*sqrt_z_x + 1 - MATH_L43*MATH_L43) / (2 * sqrt_z_x);//cosin law
+  (*theta_2) = acos(right_all)*MATH_TRANS;//cosin law
+
+  //right_all = (MATH_L43*MATH_L43 + 1 - sqrt_z_x*sqrt_z_x) / (2 * MATH_L43);//cosin law
+  //theta_triangle = acos(right_all)*MATH_TRANS;//used to detect the if theta_2>90 or not
+
+  (*theta_2) = (*theta_2) + phi;
+  (*theta_3) = (*theta_3) - phi;
+  //determine if the angle can be reached
+  if(isnan((*theta_1))||isnan((*theta_2))||isnan((*theta_3)))
+  {
+  	return OUT_OF_RANGE;
+  }
+  if((armHeight <= ARM_HEIGHT_MIN) || (armHeight >= (ARM_HEIGHT_MAX - MATH_L1) / MATH_L3))//check if height is in range
+  {
+  	return OUT_OF_RANGE;
+  }
+  if((armStretch <= ARM_STRETCH_MIN) || (armStretch >= (double)(ARM_STRETCH_MAX - MATH_L2) / MATH_L3)) //check if stretch is in range
+  {
+    return OUT_OF_RANGE;
+  }
+  if((((*theta_2) - LEFT_SERVO_OFFSET) < L3_MIN_ANGLE)||(((*theta_2) - LEFT_SERVO_OFFSET) > L3_MAX_ANGLE))//check the (*theta_2) in range
+  {
+    return OUT_OF_RANGE;
+  }
+  if((((*theta_3) - RIGHT_SERVO_OFFSET) < L4_MIN_ANGLE)||(((*theta_3) - RIGHT_SERVO_OFFSET) > L4_MAX_ANGLE))//check the (*theta_3) in range
+  {
+    return OUT_OF_RANGE;
+  }
+  if(((180 - (*theta_3) - (*theta_2))>L4L3_MAX_ANGLE)||((180 - (*theta_3) - (*theta_2))<L4L3_MIN_ANGLE))//check the angle of upper arm and lowe arm in range
+  {
+    return OUT_OF_RANGE;
+  }*/
+
+  return IN_RANGE;
 }
 
 /*!
@@ -702,15 +727,26 @@ void uArmClass::interpolate(double start_val, double end_val, double *interp_val
 
 /*!
    \brief Move To, Action Control Core Function
-   \param x X Axis Value
-   \param y Y Axis Value
-   \param z Z Axis Value
+   \param x X Axis Value if polar is true then x is the stretch
+   \param y Y Axis Value if polar is true then y is the rot angle
+   \param z Z Axis Value if polar is true then z is the height
    \param hand_angle Hand Axis
    \param relative_flags ABSOLUTE, RELATIVE
    \param enable_hand Enable Hand Axis
+   \param polar is xyz coordinates or stretch&height&rot
 */
 
-unsigned char uArmClass::move_to(double x, double y, double z, double hand_angle, byte relative_flags, double time, byte ease_type, boolean enable_hand) {
+unsigned char uArmClass::move_to(double x, double y, double z, double hand_angle, byte relative_flags, double time, byte ease_type, boolean enable_hand, bool polar) {
+  if(polar == true)
+  {
+  	double stretch = x;
+  	//Z and height is the same
+  	//transfer stretch to xy
+  	x = stretch * cos(y / MATH_TRANS);
+  	y = stretch * sin(y / MATH_TRANS);
+  }
+
+
   // get current angles of servos
 
 
@@ -730,7 +766,7 @@ unsigned char uArmClass::move_to(double x, double y, double z, double hand_angle
   //check if need to check the out_of_range
   if(move_to_the_closest_point==false){
   	//  detect if the xyz coordinate are in the range
-  	if(coordinate_to_angle(x, y, z, tgt_rot, tgt_left, tgt_right) == OUT_OF_RANGE)
+  	if(coordinate_to_angle(x, y, z, &tgt_rot, &tgt_left, &tgt_right) == OUT_OF_RANGE)
   	{
     	return OUT_OF_RANGE_IN_DST;
   	}
@@ -766,7 +802,7 @@ unsigned char uArmClass::move_to(double x, double y, double z, double hand_angle
     for (byte i = 0; i <= INTERP_INTVLS; i++)
     {
       //check if all the data in range and give the tlr angles to the xyz array
-      if(coordinate_to_angle(x_array[i], y_array[i], z_array[i], rot, left, right) == OUT_OF_RANGE)
+      if(coordinate_to_angle(x_array[i], y_array[i], z_array[i], &rot, &left, &right) == OUT_OF_RANGE)
       {
       	if(move_to_the_closest_point==false){
       		return OUT_OF_RANGE_IN_PATH;
@@ -888,7 +924,7 @@ String uArmClass::runCommand(String cmnd){
  	String F0  = F("[F0]\n");
  	String F1  = F("[F1]\n");
 
-    // sMove Command---------------------------------------------------------
+    // sMove Command----------------------------------------------------------
     if(cmnd.indexOf(F("sMov")) >= 0){
       String moveParameters[] = {F("X"), F("Y"), F("Z"), F("S")};
       String errorResponse    = isValidCommand(cmnd, moveParameters, 4);
@@ -897,7 +933,7 @@ String uArmClass::runCommand(String cmnd){
       move_to_the_closest_point = true; //make sure robot can get to the closest point
       double values[4];
       getCommandValues(cmnd, moveParameters, 4, values);
-      if(move_to(values[0], values[1], values[2])!=IN_RANGE)
+      if(move_to(values[0], values[1], values[2], false)!=IN_RANGE)
       {
       	move_to_the_closest_point = false; //disable the function
         return F;
@@ -906,16 +942,45 @@ String uArmClass::runCommand(String cmnd){
       return S;
       
     }else
-    //gSimuX#Y#Z#-------------------------------------------------------------
-    if(cmnd.indexOf(F("gSim")) >= 0){
-      String moveParameters[] = {F("X"), F("Y"), F("Z")};
+    //sPolS#H#R#--------------------------------------------------------------
+    if(cmnd.indexOf(F("sPol")) >= 0){
+      String moveParameters[] = {F("S"), F("R"), F("H")};
       String errorResponse    = isValidCommand(cmnd, moveParameters, 3);
       if(errorResponse.length() > 0){return errorResponse;}
       //  Create action and respond
-      move_to_the_closest_point = false;//make sure move_to_the_closest_point is false so that we can get the out_of_range feedback
+      move_to_the_closest_point = true; //make sure robot can get to the closest point
       double values[3];
       getCommandValues(cmnd, moveParameters, 3, values);
-      switch(move_to(values[0], values[1], values[2]))
+      if(move_to(values[0], values[1], values[2], true)!=IN_RANGE)
+      {
+      	move_to_the_closest_point = false; //disable the function
+        return F;
+      }
+      move_to_the_closest_point = false; //disable the function
+      return S;
+    }else
+    //gPolS#R#H#--------------------------------------------------------------
+    if(cmnd.indexOf(F("gPol")) >= 0){
+      get_current_xyz(&cur_rot, &cur_left, &cur_right, &g_current_x, &g_current_y, &g_current_z, true);
+      double stretch;
+      stretch = sqrt(g_current_x * g_current_x + g_current_y * g_current_y);
+      return "[SS" + String(stretch) + " R" + String(cur_rot) + " H" + String(g_current_z) + "]\n";
+    }else
+    //gSimuX#Y#Z#-------------------------------------------------------------
+    if(cmnd.indexOf(F("gSim")) >= 0){
+      String moveParameters[] = {F("X"), F("Y"), F("Z"), F("V")};
+      String errorResponse    = isValidCommand(cmnd, moveParameters, 4);
+      if(errorResponse.length() > 0){return errorResponse;}
+      //  Create action and respond
+      move_to_the_closest_point = false;//make sure move_to_the_closest_point is false so that we can get the out_of_range feedback
+      double values[4];
+      bool polar;
+      getCommandValues(cmnd, moveParameters, 4, values);
+      if(values[3]==1)
+      	polar = true;
+      else
+      	polar = false;
+      switch(move_to(values[0], values[1], values[2], polar))
       {
         case IN_RANGE             :move_times=255;//disable move
                                   return S0;
@@ -995,7 +1060,7 @@ String uArmClass::runCommand(String cmnd){
     }else
 
     //sGripperV#----------------------------------------------------------------
-    if(cmnd.indexOf(F("sGrip")) >= 0){
+    if(cmnd.indexOf(F("sGri")) >= 0){
 
        String servoSetParameters[] = {F("V")};
        String errorResponse        = isValidCommand(cmnd, servoSetParameters, 1);
@@ -1014,7 +1079,7 @@ String uArmClass::runCommand(String cmnd){
     }else
 
     //gGipper-------------------------------------------------------------------
-    if(cmnd.indexOf(F("gGrip")) >= 0){
+    if(cmnd.indexOf(F("gGri")) >= 0){
       return S0;//return S1;return S2;
     }else
 
@@ -1094,7 +1159,7 @@ String uArmClass::runCommand(String cmnd){
        double values[3];
        getCommandValues(cmnd, IKParameters, 3, values);
        double rot, left, right;
-       coordinate_to_angle(values[0], values[1], values[2] , rot, left, right);
+       coordinate_to_angle(values[0], values[1], values[2] , &rot, &left, &right);
        left = left - LEFT_SERVO_OFFSET;//assembling offset
        right = right - RIGHT_SERVO_OFFSET;//assembling offset
        return "[ST" + String(rot) + " L" + String(left) + " R" + String(right) + "]\n";

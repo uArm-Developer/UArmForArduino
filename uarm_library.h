@@ -23,12 +23,12 @@
 #define RIGHT_SERVO_ADDRESS  0x02D0
 #define ROT_SERVO_ADDRESS    0x05A0
 
-#define RIGHT_SERVO_OFFSET    14.5//-1liebao   //1.8Degree
-#define LEFT_SERVO_OFFSET     2.6//18.6liebao   //2.6Degree
-#define ROT_SERVO_OFFSET     -0//-7liebao
+#define RIGHT_SERVO_OFFSET    14.5//12.5ALEX//14.5mine//-1liebao   //1.8Degree
+#define LEFT_SERVO_OFFSET     2.6//3.8ALEX//2.6mine//18.6liebao   //2.6Degree
+#define ROT_SERVO_OFFSET     0//7ALEX//-0mine//-7liebao
 //#define DEBUG_MODE 
 
-#define current_ver         "0.9.4"
+#define current_ver         "0.9.5"
 
 #define UARM_MAJOR_VERSION      1
 #define UARM_MINOR_VERSION      6
@@ -144,13 +144,13 @@ public:
         void arm_process_commands();
         bool available();
 
-        unsigned char move_to(double x, double y, double z, double hand_angle, byte relative_flags, double time, byte ease_type, boolean enable_hand);
-        unsigned char move_to(double x, double y,double z) {
-                return move_to(x, y, z, 0, ABSOLUTE, 1.0, INTERP_EASE_INOUT_CUBIC, false);
+        unsigned char move_to(double x, double y, double z, double hand_angle, byte relative_flags, double time, byte ease_type, boolean enable_hand, bool polar);
+        unsigned char move_to(double x, double y,double z, bool polar) {
+                return move_to(x, y, z, 0, ABSOLUTE, 1.0, INTERP_EASE_INOUT_CUBIC, false, polar);
                 //return move_to(x, y, z, 0, ABSOLUTE, 1.0, INTERP_EASE_INOUT_CUBIC, false);
         }
         unsigned char move_to(double x, double y,double z,double hand_angle) {
-                move_to(x, y, z, hand_angle, ABSOLUTE, 1.0, INTERP_EASE_INOUT_CUBIC, true);
+                move_to(x, y, z, hand_angle, ABSOLUTE, 1.0, INTERP_EASE_INOUT_CUBIC, true, false);
         }
         /*void move_to(double x, double y,double z,int relative, double time) {
                 move_to(x, y, z, 0, F_HAND_RELATIVE | (relative ? F_POSN_RELATIVE : 0), time, PATH_LINEAR, INTERP_EASE_INOUT_CUBIC, false);
@@ -169,7 +169,7 @@ public:
                 move_to(x, y, z, servo_4_angle, relative ? F_POSN_RELATIVE : 0, 0.0, PATH_LINEAR, INTERP_LINEAR, true);
         }*/
 
-        void write_stretch_height(double stretch, double height);
+        unsigned char write_stretch_height_rot(double armStretch, double armHeight, double *theta_1, double *theta_2, double *theta_3);
 
 
         double get_current_x() {
@@ -192,7 +192,7 @@ public:
         void angle_to_coordinate(double theta_1, double theta_2, double theta_3, double& x, double& y, double &z) {
                 get_current_xyz(theta_1, theta_2, theta_3); x = g_current_x; y = g_current_y; z = g_current_z;
         }*/
-        unsigned char coordinate_to_angle(double x, double y, double z, double& theta_1, double& theta_2, double& theta_3);
+        unsigned char coordinate_to_angle(double x, double y, double z, double *theta_1, double *theta_2, double *theta_3);
 
 
         void gripper_catch();

@@ -3,9 +3,17 @@ Commands:
                   Send Example:   [sMovX15Y15Z20S25]\n   //y is positive  xyz are in mm 
                   Return Example: [S]\n or [F]  S:SUCCEED F:OUT OF RANGE(but will go to the closest point)
 
-  [gSimX#Y#Z#]    Where # is a double, This will caculate if the robot can arrive the XYZ position
-		  Send Example:   [gSimX0Y120Z100]\n
-		  Return Example: [S0]\n or [F0]\n or [F1]\n    F1:FAIL IN THE PATH   F0:FAIL IN THE DESTINATION   S0:SUCCEED
+  [sPolS#R#H#]    Set the polar coordinates
+                  Send Example:   [sPolS100R50H100]\n  S&H MEANS STRETCH AND HEIGHT(in mm),R MEANS ROT(in degree)
+		  Return Example: [S] or [F]
+
+  [gPol]          Get the polar coordinates
+                  Send Example:   [gPol]\n  
+		  Return Example: [SS100R50H100]\n   S&H MEANS STRETCH AND HEIGHT(in mm),R MEANS ROT(in degree)
+
+  [gSimX#Y#Z#V#]  Where # is a double, This will caculate if the robot can arrive the XYZ position
+		  Send Example:   [gSimX0Y120Z100V0]\n          V1 MEANS THE POLAR COORDINATES TRUE(stretch height and rot)
+  		  Return Example: [S0]\n or [F0]\n or [F1]\n    F1:FAIL IN THE PATH   F0:FAIL IN THE DESTINATION   S0:SUCCEED
 
   [gVer]          Return the version of the firmware
                   Send Example:   [gVer]\n
