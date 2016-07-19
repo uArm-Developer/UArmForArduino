@@ -51,7 +51,7 @@ void uArmClass::arm_process_commands()
     
     if(move_times <= INTERP_INTVLS)
     {
-      //Serial.println(move_times,DEC);
+
       y_array[move_times] = y_array[move_times] - LEFT_SERVO_OFFSET;//assembling offset
       z_array[move_times] = z_array[move_times] - RIGHT_SERVO_OFFSET;//assembling offset
       x_array[move_times] = x_array[move_times] - ROT_SERVO_OFFSET;//rot offset
@@ -59,11 +59,17 @@ void uArmClass::arm_process_commands()
       read_servo_calibration_data(&x_array[move_times],&y_array[move_times],&z_array[move_times]);
       write_servos_angle(x_array[move_times], y_array[move_times], z_array[move_times]);
 
-      //hand rot
+      //hand rot as hand rot do not have the smooth array
+      if(move_times == (INTERP_INTVLS / 4))
+      {
+		write_servo_angle(SERVO_HAND_ROT_NUM,hand_rot);
+      }
+      
       move_times++;
       if(move_times > INTERP_INTVLS)
       {
         move_times = 255;//disable the move
+
       }
     }
   }
@@ -194,7 +200,7 @@ int uArmClass::write_servos_angle(double servo_rot_angle, double servo_left_angl
 {
         attach_all();
         write_servos_angle(servo_rot_angle, servo_left_angle, servo_right_angle);
-        write_servo_angle(SERVO_HAND_ROT_NUM,servo_hand_rot_angle,true);
+        write_servo_angle(SERVO_HAND_ROT_NUM,servo_hand_rot_angle);
 }
 
 /*!
@@ -207,9 +213,9 @@ int uArmClass::write_servos_angle(double servo_rot_angle, double servo_left_angl
 int uArmClass::write_servos_angle(double servo_rot_angle, double servo_left_angle, double servo_right_angle)
 {
 
-        write_servo_angle(SERVO_ROT_NUM,servo_rot_angle,true);
-        write_servo_angle(SERVO_LEFT_NUM,servo_left_angle,true);
-        write_servo_angle(SERVO_RIGHT_NUM,servo_right_angle,true);
+        write_servo_angle(SERVO_ROT_NUM,servo_rot_angle);
+        write_servo_angle(SERVO_LEFT_NUM,servo_left_angle);
+        write_servo_angle(SERVO_RIGHT_NUM,servo_right_angle);
 
         // refresh logical servo angle cache
         //cur_rot = servo_rot_angle;
@@ -223,7 +229,7 @@ int uArmClass::write_servos_angle(double servo_rot_angle, double servo_left_angl
    \param servo_angle Servo target angle, 0.00 - 180.00
    \param writeWithoffset True: with Offset, False: without Offset
  */
-void uArmClass::write_servo_angle(byte servo_number, double servo_angle, boolean writeWithoffset)
+void uArmClass::write_servo_angle(byte servo_number, double servo_angle)
 {
         attach_servo(servo_number);
         //servo_angle = writeWithoffset ? (servo_angle + read_servo_offset(servo_number)) : servo_angle;
@@ -239,10 +245,11 @@ void uArmClass::write_servo_angle(byte servo_number, double servo_angle, boolean
         case SERVO_RIGHT_NUM:     g_servo_right.write(servo_angle);
                 cur_right = servo_angle;
                 break;
-        case SERVO_HAND_ROT_NUM:  g_servo_hand_rot.write(servo_angle);
+        case SERVO_HAND_ROT_NUM:  //servo_angle = constrain(servo_angle, 5, 180);
+        		//g_servo_hand_rot.write(servo_angle,hand_speed*60);//set the hand speed
                 cur_hand = servo_angle;
                 break;
-        default:                  break;
+        default:break;
         }
 }
 
@@ -536,65 +543,6 @@ unsigned char uArmClass::coordinate_to_angle(double x, double y, double z, doubl
 }
 
 /*!
-   \brief Write Sretch & Height.
-   \description This is an old control method to uArm. Using uarm's Stretch and height, , Height from -180 to 150
-   \param armStretch Stretch from 0 to 195
-   \param armHeight Height from -150 to 150
-    \param theta_1 SERVO_ROT_NUM servo angles
-   \param theta_2 SERVO_LEFT_NUM servo angles
-   \param theta_3 SERVO_RIGHT_NUM servo angles
- */
-unsigned char uArmClass::write_stretch_height_rot(double armStretch, double armHeight, double *theta_1, double *theta_2, double *theta_3){
- /* double right_all = 0.0;
-  double sqrt_z_x = 0.0;
-  double phi = 0.0;
-
-  phi = atan(armHeight / armStretch)*MATH_TRANS;//phi is the angle of line (from joint 2 to joint 4) with the horizon
-
-  sqrt_z_x = sqrt(armHeight*armHeight + armStretch*armStretch);
-
-  right_all = (sqrt_z_x*sqrt_z_x + MATH_L43*MATH_L43 - 1) / (2 * MATH_L43 * sqrt_z_x);//cosin law
-  (*theta_3) = acos(right_all)*MATH_TRANS;//cosin law
-
-  // Calculate value of theta 2
-  right_all = (sqrt_z_x*sqrt_z_x + 1 - MATH_L43*MATH_L43) / (2 * sqrt_z_x);//cosin law
-  (*theta_2) = acos(right_all)*MATH_TRANS;//cosin law
-
-  //right_all = (MATH_L43*MATH_L43 + 1 - sqrt_z_x*sqrt_z_x) / (2 * MATH_L43);//cosin law
-  //theta_triangle = acos(right_all)*MATH_TRANS;//used to detect the if theta_2>90 or not
-
-  (*theta_2) = (*theta_2) + phi;
-  (*theta_3) = (*theta_3) - phi;
-  //determine if the angle can be reached
-  if(isnan((*theta_1))||isnan((*theta_2))||isnan((*theta_3)))
-  {
-  	return OUT_OF_RANGE;
-  }
-  if((armHeight <= ARM_HEIGHT_MIN) || (armHeight >= (ARM_HEIGHT_MAX - MATH_L1) / MATH_L3))//check if height is in range
-  {
-  	return OUT_OF_RANGE;
-  }
-  if((armStretch <= ARM_STRETCH_MIN) || (armStretch >= (double)(ARM_STRETCH_MAX - MATH_L2) / MATH_L3)) //check if stretch is in range
-  {
-    return OUT_OF_RANGE;
-  }
-  if((((*theta_2) - LEFT_SERVO_OFFSET) < L3_MIN_ANGLE)||(((*theta_2) - LEFT_SERVO_OFFSET) > L3_MAX_ANGLE))//check the (*theta_2) in range
-  {
-    return OUT_OF_RANGE;
-  }
-  if((((*theta_3) - RIGHT_SERVO_OFFSET) < L4_MIN_ANGLE)||(((*theta_3) - RIGHT_SERVO_OFFSET) > L4_MAX_ANGLE))//check the (*theta_3) in range
-  {
-    return OUT_OF_RANGE;
-  }
-  if(((180 - (*theta_3) - (*theta_2))>L4L3_MAX_ANGLE)||((180 - (*theta_3) - (*theta_2))<L4L3_MIN_ANGLE))//check the angle of upper arm and lowe arm in range
-  {
-    return OUT_OF_RANGE;
-  }*/
-
-  return IN_RANGE;
-}
-
-/*!
    \brief get the current rot left right angles
  */
 void uArmClass::get_current_rotleftright()
@@ -736,8 +684,8 @@ void uArmClass::interpolate(double start_val, double end_val, double *interp_val
    \param polar is xyz coordinates or stretch&height&rot
 */
 
-unsigned char uArmClass::move_to(double x, double y, double z, double hand_angle, byte relative_flags, double time, byte ease_type, boolean enable_hand, bool polar) {
-  if(polar == true)
+unsigned char uArmClass::move_to(double x, double y, double z, double hand_angle, byte relative_flags, double times, byte ease_type, boolean enable_hand, bool polar) {
+  if(polar == true)//change the stretch rot and height to xyz coordinates
   {
   	double stretch = x;
   	//Z and height is the same
@@ -748,7 +696,6 @@ unsigned char uArmClass::move_to(double x, double y, double z, double hand_angle
 
 
   // get current angles of servos
-
 
   // deal with relative xyz positioning
   if(relative_flags == RELATIVE)
@@ -781,7 +728,8 @@ unsigned char uArmClass::move_to(double x, double y, double z, double hand_angle
   INTERP_INTVLS = max(INTERP_INTVLS,delta_right);
 
   INTERP_INTVLS = (INTERP_INTVLS<60) ? INTERP_INTVLS : 60;
-  //INTERP_INTVLS = INTERP_INTVLS * time;// speed determine the number of interpolation
+  INTERP_INTVLS = INTERP_INTVLS * times;// speed determine the number of interpolation
+  hand_speed = times;//set the had rot speed
   //INTERP_INTVLS = 1;
 
   //if (time > 0)
@@ -831,13 +779,15 @@ unsigned char uArmClass::move_to(double x, double y, double z, double hand_angle
       }
     }
     //Serial.println(x,DEC);Serial.println(y,DEC);Serial.println(z,DEC);
-	g_current_x=x;
-	g_current_y=y;
-	g_current_z=z;
-	cur_rot=rot;
-	cur_left=left;
-	cur_right=right;
-    move_times=0;//start to caculate the movement
+	g_current_x = x;
+	g_current_y = y;
+	g_current_z = z;
+	cur_rot = rot;
+	cur_left = left;
+	cur_right = right;
+	cur_hand = hand_angle;
+	hand_rot = hand_angle;
+    move_times = 0;//start to caculate the movement
   return IN_RANGE;
 }
 
@@ -933,7 +883,7 @@ String uArmClass::runCommand(String cmnd){
       move_to_the_closest_point = true; //make sure robot can get to the closest point
       double values[4];
       getCommandValues(cmnd, moveParameters, 4, values);
-      if(move_to(values[0], values[1], values[2], false)!=IN_RANGE)
+      if(move_to(values[0], values[1], values[2], values[3], false)!=IN_RANGE)
       {
       	move_to_the_closest_point = false; //disable the function
         return F;
