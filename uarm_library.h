@@ -23,12 +23,12 @@
 #define RIGHT_SERVO_ADDRESS  0x02D0
 #define ROT_SERVO_ADDRESS    0x05A0
 
-#define RIGHT_SERVO_OFFSET    14.5//12.5ALEX//14.5mine//-1liebao   //1.8Degree
-#define LEFT_SERVO_OFFSET     2.6//3.8ALEX//2.6mine//18.6liebao   //2.6Degree
+#define RIGHT_SERVO_OFFSET    12.5//12.5ALEX//14.5mine//-1liebao   //1.8Degree
+#define LEFT_SERVO_OFFSET     3.8//3.8ALEX//2.6mine//18.6liebao   //2.6Degree
 #define ROT_SERVO_OFFSET     0//7ALEX//-0mine//-7liebao
 //#define DEBUG_MODE 
 
-#define current_ver         "0.9.5a"
+#define current_ver         "0.9.6"
 
 #define UARM_MAJOR_VERSION      1
 #define UARM_MINOR_VERSION      6

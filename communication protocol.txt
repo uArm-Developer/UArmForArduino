@@ -1,10 +1,10 @@
 Commands:
-  [sMovX#Y#Z#S#]  Where # is a double, This will move the robot to an XYZ position, in S is speed in centimeters / second from the current location to goal location
-                  Send Example:   [sMovX15Y15Z20S25]\n   //y is positive  xyz are in mm 
+  [sMovX#Y#Z#V#]  Where # is a double, This will move the robot to an XYZ position, in S is speed in centimeters / second from the current location to goal location
+                  Send Example:   [sMovX15Y15Z20V1]\n   //y is positive  xyz are in mm 
                   Return Example: [S]\n or [F]  S:SUCCEED F:OUT OF RANGE(but will go to the closest point)
 
-  [sPolS#R#H#]    Set the polar coordinates
-                  Send Example:   [sPolS100R50H100]\n  S&H MEANS STRETCH AND HEIGHT(in mm),R MEANS ROT(in degree)
+  [sPolS#R#H#V#]  Set the polar coordinates
+                  Send Example:   [sPolS100R50H100V1]\n  S&H MEANS STRETCH AND HEIGHT(in mm),R MEANS ROT(in degree)
 		  Return Example: [S] or [F]
 
   [gPol]          Get the polar coordinates

@@ -11,7 +11,7 @@
 uArmClass uarm;
 
 unsigned int sys_tick;
-
+String message = "";
 uArmClass::uArmClass()
 {
   /*TCNT2   = 0;
@@ -31,10 +31,6 @@ bool uArmClass::available()
   {
     return false;
   }
-  if (Serial.available())
-  {
-    return false;
-  }
 
   return true;
 }
@@ -45,6 +41,15 @@ bool uArmClass::available()
 */
 void uArmClass::arm_process_commands()
 {
+
+  if(uarm.available())
+  {
+    if(Serial.available())
+    {
+      message = Serial.readStringUntil(']') + ']';
+      Serial.println(runCommand(message));         // Run the command and send back the response
+    }
+  }
   //move_to
   if(sys_tick%40==0)
   {
@@ -449,16 +454,18 @@ unsigned char uArmClass::coordinate_to_angle(double x, double y, double z, doubl
   double phi = 0.0;
 
   z_in = (z - MATH_L1) / MATH_L3;
-
-  //check the range of x
-  if(y<0)
+  if(move_to_the_closest_point == false)//if need the move to closest point we have to jump over the return function
   {
-    return OUT_OF_RANGE;
-  }
-  //check the range of z
-  if((z<ARM_HEIGHT_MIN)||(z>ARM_HEIGHT_MAX))
-  {
-  	return OUT_OF_RANGE;
+  	//check the range of x
+  	if(y<0)
+  	{
+    	return OUT_OF_RANGE;
+  	}
+  	//check the range of z
+  	if((z<ARM_HEIGHT_MIN)||(z>ARM_HEIGHT_MAX))
+  	{
+  		return OUT_OF_RANGE;
+  	}
   }
   // Calculate value of theta 1: the rotation angle
   if(x==0)
@@ -710,11 +717,12 @@ unsigned char uArmClass::move_to(double x, double y, double z, double hand_angle
   double tgt_rot;
   double tgt_left;
   double tgt_right;
-  //check if need to check the out_of_range
-  if(move_to_the_closest_point==false){
-  	//  detect if the xyz coordinate are in the range
-  	if(coordinate_to_angle(x, y, z, &tgt_rot, &tgt_left, &tgt_right) == OUT_OF_RANGE)
-  	{
+
+  //  detect if the xyz coordinate are in the range
+  if(coordinate_to_angle(x, y, z, &tgt_rot, &tgt_left, &tgt_right) == OUT_OF_RANGE)
+  {
+  	//check if need to check the out_of_range
+  	if(move_to_the_closest_point==false){
     	return OUT_OF_RANGE_IN_DST;
   	}
   }
@@ -730,10 +738,6 @@ unsigned char uArmClass::move_to(double x, double y, double z, double hand_angle
   INTERP_INTVLS = (INTERP_INTVLS<60) ? INTERP_INTVLS : 60;
   INTERP_INTVLS = INTERP_INTVLS * times;// speed determine the number of interpolation
   hand_speed = times;//set the had rot speed
-  //INTERP_INTVLS = 1;
-
-  //if (time > 0)
-  //{
 
     interpolate(g_current_x, x, x_array, ease_type);// /10 means to make sure the t*t*t is still in the range
     interpolate(g_current_y, y, y_array, ease_type);
@@ -876,13 +880,16 @@ String uArmClass::runCommand(String cmnd){
 
     // sMove Command----------------------------------------------------------
     if(cmnd.indexOf(F("sMov")) >= 0){
-      String moveParameters[] = {F("X"), F("Y"), F("Z"), F("S")};
+      String moveParameters[] = {F("X"), F("Y"), F("Z"), F("V")};
       String errorResponse    = isValidCommand(cmnd, moveParameters, 4);
       if(errorResponse.length() > 0){return errorResponse;}
       //  Create action and respond
       move_to_the_closest_point = true; //make sure robot can get to the closest point
       double values[4];
       getCommandValues(cmnd, moveParameters, 4, values);
+      //limit the speed
+      if(values[3] <= 0){values[3] = 0.1;}
+      if(values[3] >= 1){values[3] = 1;}
       if(move_to(values[0], values[1], values[2], values[3], false)!=IN_RANGE)
       {
       	move_to_the_closest_point = false; //disable the function
@@ -894,14 +901,17 @@ String uArmClass::runCommand(String cmnd){
     }else
     //sPolS#H#R#--------------------------------------------------------------
     if(cmnd.indexOf(F("sPol")) >= 0){
-      String moveParameters[] = {F("S"), F("R"), F("H")};
-      String errorResponse    = isValidCommand(cmnd, moveParameters, 3);
+      String moveParameters[] = {F("S"), F("R"), F("H"), F("V")};
+      String errorResponse    = isValidCommand(cmnd, moveParameters, 4);
       if(errorResponse.length() > 0){return errorResponse;}
       //  Create action and respond
       move_to_the_closest_point = true; //make sure robot can get to the closest point
-      double values[3];
-      getCommandValues(cmnd, moveParameters, 3, values);
-      if(move_to(values[0], values[1], values[2], true)!=IN_RANGE)
+      double values[4];
+      getCommandValues(cmnd, moveParameters, 4, values);
+      //limit the speed
+      if(values[3] <= 0){values[3] = 0.1;}
+      if(values[3] >= 1){values[3] = 1;}
+      if(move_to(values[0], values[1], values[2], values[3], true)!=IN_RANGE)
       {
       	move_to_the_closest_point = false; //disable the function
         return F;
