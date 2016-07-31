@@ -1,76 +1,76 @@
 Commands:
   [sMovX#Y#Z#V#]  Where # is a double, This will move the robot to an XYZ position, in S is speed in centimeters / second from the current location to goal location
-                  Send Example:   [sMovX15Y15Z20V1]\n   //y is positive  xyz are in mm 
-                  Return Example: [S]\n or [F]  S:SUCCEED F:OUT OF RANGE(but will go to the closest point)
+                  Send Example:   [sMovX150Y150Z100V1]   //y is positive  xyz are in mm 
+                  Return Example: [S] or [F]  S:SUCCEED F:OUT OF RANGE(but will go to the closest point)
 
   [sPolS#R#H#V#]  Set the polar coordinates
-                  Send Example:   [sPolS100R50H100V1]\n  S&H MEANS STRETCH AND HEIGHT(in mm),R MEANS ROT(in degree)
+                  Send Example:   [sPolS100R50H100V1]  S&H MEANS STRETCH AND HEIGHT(in mm),R MEANS ROT(in degree)
 		  Return Example: [S] or [F]
 
   [gPol]          Get the polar coordinates
-                  Send Example:   [gPol]\n  
-		  Return Example: [SS100R50H100]\n   S&H MEANS STRETCH AND HEIGHT(in mm),R MEANS ROT(in degree)
+                  Send Example:   [gPol]  
+		  Return Example: [SS100R50H100]   S&H MEANS STRETCH AND HEIGHT(in mm),R MEANS ROT(in degree)
 
-  [gSimX#Y#Z#V#]  Where # is a double, This will caculate if the robot can arrive the XYZ position
-		  Send Example:   [gSimX0Y120Z100V0]\n          V1 MEANS THE POLAR COORDINATES TRUE(stretch height and rot)
-  		  Return Example: [S0]\n or [F0]\n or [F1]\n    F1:FAIL IN THE PATH   F0:FAIL IN THE DESTINATION   S0:SUCCEED
+  [gSimX#Y#Z#]    Where # is a double, This will caculate if the robot can arrive the XYZ position
+		  Send Example:   [gSimX0Y120Z100]          V1 MEANS THE POLAR COORDINATES TRUE(stretch height and rot)
+  		  Return Example: [S0] or [F0] or [F1]    F1:FAIL IN THE PATH   F0:FAIL IN THE DESTINATION   S0:SUCCEED
 
   [gVer]          Return the version of the firmware
-                  Send Example:   [gVer]\n
-		  Return Example: [S1.3.4]\n
+                  Send Example:   [gVer]
+		  Return Example: [S1.3.4]
   
   [sSerN#V#]      Where S# is the servo number and V# is an angle between 0 and 180. This will set the angle of that particular servo
-                  Send Example:   [sSerN1V1]\n 
+                  Send Example:   [sSerN1V100] 
                   Return Example: [S]
                   
   [sPumV#]        Where # is either 1 or 0. 1 means pump on, 0 means pump off.
-                  Send Example:   [sPumV1]\n
+                  Send Example:   [sPumV1]
                   Return Example: [S]
 
   [gPum]	  Get back the status of the pump
-                  Send Example:   [gPum]\n
-                  Return Example: [S0]\n or [S1]\n or [S2]\n   S0:GRAB THE THINGS   S1:PUMP ON   S2:PUMP OFF
+                  Send Example:   [gPum]
+                  Return Example: [S0] or [S1] or [S2]   S0:GRAB THE THINGS   S1:PUMP ON   S2:PUMP OFF
 
   [sGriV#]        Where # is either 1 or 0. 1 means gripper on, 0 means gripper off.
-                  Send Example:   [sGriV1]\n
+                  Send Example:   [sGriV1]
                   Return Example: [S]
 
   [gGri]	  Get back the status of the gripper
-                  Send Example:   [gGri]\n
-                  Return Example: [S0]\n or [S1]\n or [S2]\n   S0:GRAB THE THINGS   S1:GRIPPER ON   S2:GRIPPER OFF 
+                  Send Example:   [gGri]
+                  Return Example: [S0] or [S1] or [S2]   S0:GRAB THE THINGS   S1:GRIPPER ON   S2:GRIPPER OFF 
                 
   [sAttS#]        Attach servo #. Same as servo #'s in uarm_library.h
-                  Send Example:   [sAttS1]\n
-                  Return Example: [S]\n or [F]\n  S:SUCCESS   F:WRONG NUMBER
+                  Send Example:   [sAttS1]
+                  Return Example: [S] or [F]  S:SUCCESS   F:WRONG NUMBER
                   
   [sDetS#]      Detach servo #. Same as servo #'s in uarm_library.h
-                  Send Example:   [sDetS1]\n
-                  Return Example: [S]\n or [F]\n   S:SUCCESS   F:WRONG NUMBER
+                  Send Example:   [sDetS1]
+                  Return Example: [S] or [F]   S:SUCCESS   F:WRONG NUMBER
                   
   [gCrd]          Returns the XYZ coordinate position of the robot
-                  Send Example:   [gCrd]\n
+                  Send Example:   [gCrd]
                   Return Example: [SX#Y#Z#]
                   
   [gAng]          Returns the analog read angle of all the servos in the robot and returns them as angleA#B#C#D# where ABCD are servos 0,1,2,3 respectively
-                  Send Example:   [gAng]\n
+                  Send Example:   [gAng]
                   Return Example: [ST#L#R#]
                   
   [gIKX#Y#Z#]     Returns the inverse kinematics for XYZ point in the form A#B#C# where ABC are servos 0,1,2 respectively
-                  Send Example:   [gIKX0Y-15Z15]\n
+                  Send Example:   [gIKX0Y-15Z15]
                   Return Example: [ST90L15R80]
                   
   [gFKA#B#C#]     Returns the forward kinematics for ABC servo angles in the form X#Y#Z# where ABC are servos 0,1,2 respectively
-                  Send Example:   [gFKT90L15R80]\n
+                  Send Example:   [gFKT90L15R80]
                   Return Example: [SX0Y-15Z15] 
                   
   [gMov]          Returns whether or not the robot is currently moving. Returns either 1 or 0 if it is moving or not.
-                  Send Example: [gMov]\n
+                  Send Example: [gMov]
                   Return Example: [S] or [F]  S:PROCESSING F:FREE
   
   [gTip]          Returns whether or not the tip of the robot is currently pressed. Returns either 1 if the tip is pressed, 0 if not.
-                  Send Example: [gTip]\n
+                  Send Example: [gTip]
                   Return Example: [S0] or [S1]  S0:OFF S1:ON
 
   [sBuzF#T#]      Set the buzzer to F Frequency for T time
-                  Send Example:   [sBuzzF261.63T1]\n
+                  Send Example:   [sBuzzF261.63T1]
                   Return Example: [S] or [F]  S:SUCCESS  F:WRONG NUMBER

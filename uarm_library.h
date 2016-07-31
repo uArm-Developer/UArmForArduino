@@ -23,12 +23,12 @@
 #define RIGHT_SERVO_ADDRESS  0x02D0
 #define ROT_SERVO_ADDRESS    0x05A0
 
-#define RIGHT_SERVO_OFFSET    12.5//12.5ALEX//14.5mine//-1liebao   //1.8Degree
-#define LEFT_SERVO_OFFSET     3.8//3.8ALEX//2.6mine//18.6liebao   //2.6Degree
-#define ROT_SERVO_OFFSET     0//7ALEX//-0mine//-7liebao
+#define RIGHT_SERVO_OFFSET    5.6//12.5ALEX//5.6mine//-1liebao   //1.8Degree
+#define LEFT_SERVO_OFFSET     1//3.8ALEX//1mine//18.6liebao   //2.6Degree
+#define ROT_SERVO_OFFSET      0//7ALEX//0mine//-7liebao
 //#define DEBUG_MODE 
 
-#define current_ver         "0.9.6"
+#define current_ver         "0.9.7"
 
 #define UARM_MAJOR_VERSION      1
 #define UARM_MINOR_VERSION      6
@@ -138,7 +138,6 @@ public:
         void alert(byte times, byte runt_time, byte stop_time);
         void detach_all_servos();
         void write_servo_angle(byte servo_num, double servo_angle);
-        double read_servo_angle(byte servo_num);
         double analog_to_angle(int input_angle, byte servo_num);
 
         void arm_process_commands();
@@ -182,7 +181,7 @@ public:
         void get_current_xyz(double *cur_rot, double *cur_left, double *cur_right, double *g_current_x, double *g_current_y, double *g_current_z, bool for_movement );
         void get_current_rotleftright();
         void calibration_data_to_servo_angle(double *data,unsigned int address);
-        void servo_angle_to_calibration_data(double *data,unsigned int address);
+        void read_servo_angle(byte servo_number);
         /*void angle_to_coordinate(double& x, double& y, double &z) {
                 get_current_xyz(); x = g_current_x; y = g_current_y; z = g_current_z;
         }
@@ -202,7 +201,6 @@ public:
         Servo g_servo_left;
         Servo g_servo_right;
         Servo g_servo_hand_rot;
-        Servo g_servo_hand;
 
         int write_servos_angle(byte servo_rot_angle, byte servo_left_angle, byte servo_right_angle, byte servo_hand_rot_angle, byte trigger);
         int write_servos_angle(double servo_rot_angle, double servo_left_angle, double servo_right_angle, double servo_hand_rot_angle);
@@ -212,6 +210,7 @@ public:
         String runCommand(String cmnd);
         void getCommandValues(String cmnd, String parameters[], int parameterCount, double *valueArray);
         String isValidCommand(String cmnd, String parameters[], int parameterCount);
+        String getValues(String cmnd, String parameters[], int parameterCount, double *valueArray);
 
 private:
         void delay_us();
