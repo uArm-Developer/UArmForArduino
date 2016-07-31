@@ -28,7 +28,7 @@
 #define ROT_SERVO_OFFSET      0//7ALEX//0mine//-7liebao
 //#define DEBUG_MODE 
 
-#define current_ver         "0.9.7"
+#define current_ver         "0.9.7a"
 
 #define UARM_MAJOR_VERSION      1
 #define UARM_MINOR_VERSION      6
@@ -53,14 +53,14 @@
 
 #define ARM_STRETCH_MIN   0
 #define ARM_STRETCH_MAX   280
-#define ARM_HEIGHT_MIN   0
-#define ARM_HEIGHT_MAX   200
-#define L3_MAX_ANGLE     120
-#define L3_MIN_ANGLE     5
-#define L4_MAX_ANGLE     120
-#define L4_MIN_ANGLE     5
-#define L4L3_MAX_ANGLE     150
-#define L4L3_MIN_ANGLE     30
+#define ARM_HEIGHT_MIN    -50
+#define ARM_HEIGHT_MAX    200
+#define L3_MAX_ANGLE      120
+#define L3_MIN_ANGLE      5
+#define L4_MAX_ANGLE      120
+#define L4_MIN_ANGLE      5
+#define L4L3_MAX_ANGLE    150
+#define L4L3_MIN_ANGLE    30
 
 #define LIMIT_SW                2    // LIMIT Switch Button
 #define PUMP_EN                 6    // HIGH = Valve OPEN
@@ -178,7 +178,7 @@ public:
                 return g_current_z;
         }
 
-        void get_current_xyz(double *cur_rot, double *cur_left, double *cur_right, double *g_current_x, double *g_current_y, double *g_current_z, bool for_movement );
+        unsigned char get_current_xyz(double *cur_rot, double *cur_left, double *cur_right, double *g_current_x, double *g_current_y, double *g_current_z, bool for_movement );
         void get_current_rotleftright();
         void calibration_data_to_servo_angle(double *data,unsigned int address);
         void read_servo_angle(byte servo_number);
@@ -241,12 +241,14 @@ protected:
         unsigned int INTERP_INTVLS;
 
         unsigned char move_times = 255;//255 means no move
-        int buzzerStopTime=0;
+        unsigned long buzzerStopTime=0;
+        unsigned long moveStartTime=0;
+        unsigned int microMoveTime=0;
         // the arrays to store the xyz coordinates first and then change to the rot left right angles
         double x_array[61];
         double y_array[61];
         double z_array[61];
-        double hand_speed;//to save the memory
+        double hand_speed=10;//to save the memory
 
 };
 
