@@ -59,7 +59,7 @@ Commands:
                   Send Example:   [gIKX0Y-15Z15]\n
                   Return Example: [ST90L15R80]
                   
-  [gFKA#B#C#]     Returns the forward kinematics for ABC servo angles in the form X#Y#Z# where ABC are servos 0,1,2 respectively
+  [gFKT#L#R#]     Returns the forward kinematics for TLR servo angles in the form X#Y#Z# where TLR are servos 0,1,2 respectively
                   Send Example:   [gFKT90L15R80]\n
                   Return Example: [SX0Y-15Z15] 
                   
@@ -74,3 +74,12 @@ Commands:
   [sBuzF#T#]      Set the buzzer to F Frequency for T time
                   Send Example:   [sBuzzF261.63T1]\n
                   Return Example: [S] or [F]  S:SUCCESS  F:WRONG NUMBER
+
+
+
+ERRORS:
+  [ERR1]          Your command was missing a parameter
+
+  [ERR2]          Your command was missing a value for a parameter
+  
+  [ERR3]	  The command does not exist

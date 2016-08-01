@@ -76,9 +76,9 @@ void uArmClass::arm_process_commands()
   }
 
   //buzzer work
-  if(millis() >= buzzerStopTime)
+  if(buzzerStopTime != 0)
   {
-    if(buzzerStopTime != 0)
+    if(millis() >= buzzerStopTime)
     {
       noTone(BUZZER);
       buzzerStopTime = 0;
@@ -356,12 +356,12 @@ void uArmClass::detach_servo(byte servo_number)
    \param servo_num SERVO_ROT_NUM, SERVO_LEFT_NUM, SERVO_RIGHT_NUM, SERVO_HAND_ROT_NUM
    \return Return servo offset
  */
-double uArmClass::read_servo_offset(byte servo_num)
+/*double uArmClass::read_servo_offset(byte servo_num)
 {
         double manual_servo_offset = 0.0f;
         EEPROM.get(MANUAL_OFFSET_ADDRESS + servo_num * sizeof(manual_servo_offset), manual_servo_offset);
         return manual_servo_offset;
-}
+}*/
 
 /*!
    \brief Convert the Analog to Servo Angle, by this formatter, angle = intercept + slope * analog
@@ -1122,13 +1122,13 @@ String uArmClass::runCommand(String cmnd){
     //gCrd---------------------------------------------------------------------
     if(cmnd.indexOf(F("gCrd")) >= 0){
       get_current_xyz(&cur_rot, &cur_left, &cur_right, &g_current_x, &g_current_y, &g_current_z, true);
-      return "[SX" + String(g_current_x) + " Y" + String(g_current_y) + " Z" + String(g_current_z) + "]";
+      return "[SX" + String(g_current_x) + "Y" + String(g_current_y) + "Z" + String(g_current_z) + "]";
     }else
 
     //gAng---------------------------------------------------------------------
     if(cmnd.indexOf(F("gAng")) >= 0){
       get_current_rotleftright();
-      return "[ST" + String(cur_rot) + " L" + String(cur_left) + " R" + String(cur_right) + "]";
+      return "[ST" + String(cur_rot) + "L" + String(cur_left) + "R" + String(cur_right) + "]";
     }else
 
     //gIKX#Y#Z#----------------------------------------------------------------
@@ -1150,7 +1150,7 @@ String uArmClass::runCommand(String cmnd){
         left = left - LEFT_SERVO_OFFSET;//assembling offset
         right = right - RIGHT_SERVO_OFFSET;//assembling offset
       }
-      return  letter + "T" + String(rot) + " L" + String(left) + " R" + String(right) + "]";
+      return  letter + "T" + String(rot) + "L" + String(left) + "R" + String(right) + "]";
     }else
 
     //gFKT#L#R#-----------------------------------------------------------------
@@ -1170,7 +1170,7 @@ String uArmClass::runCommand(String cmnd){
       else{
         letter = F("[S");
       }
-      return letter + "X" + String(x) + " Y" + String(y) + " Z" + String(z) + "]";
+      return letter + "X" + String(x) + "Y" + String(y) + "Z" + String(z) + "]";
     }else
 
     

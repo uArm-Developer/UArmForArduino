@@ -28,7 +28,7 @@
 #define ROT_SERVO_OFFSET      0//7ALEX//0mine//-7liebao
 //#define DEBUG_MODE 
 
-#define current_ver         "0.9.7a"
+#define current_ver         "0.9.7b"
 
 #define UARM_MAJOR_VERSION      1
 #define UARM_MINOR_VERSION      6
@@ -52,9 +52,9 @@
 // Old Control method Stretch / Height
 
 #define ARM_STRETCH_MIN   0
-#define ARM_STRETCH_MAX   280
-#define ARM_HEIGHT_MIN    -50
-#define ARM_HEIGHT_MAX    200
+#define ARM_STRETCH_MAX   300
+#define ARM_HEIGHT_MIN    -100
+#define ARM_HEIGHT_MAX    250
 #define L3_MAX_ANGLE      120
 #define L3_MIN_ANGLE      5
 #define L4_MAX_ANGLE      120
