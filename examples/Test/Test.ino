@@ -1,8 +1,8 @@
 #include "uarm_library.h"
 
 void setup() {
-  uarm.arm_setup();
   Serial.begin(115200);  // start serial port at 115200 bps
+  uarm.arm_setup();
   uarm.move_to(0,200,100,10,false);
 }
 

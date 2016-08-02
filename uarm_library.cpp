@@ -40,22 +40,23 @@ bool uArmClass::available()
 */
 void uArmClass::arm_process_commands()
 {
+  //get the uart command
   if(Serial.available())
   {
     message = Serial.readStringUntil(']') + ']';
     Serial.println(runCommand(message));         // Run the command and send back the response
   }
 
-  //move_to
+  //movement function
   if(move_times!=255)
   {
     
     //if(move_times <= INTERP_INTVLS)
     if((millis() - moveStartTime) >= (move_times * microMoveTime))// detect if it's time to move
     {
-     y_array[move_times] = y_array[move_times] - LEFT_SERVO_OFFSET;  //assembling offset
-     z_array[move_times] = z_array[move_times] - RIGHT_SERVO_OFFSET; //assembling offset
-     x_array[move_times] = x_array[move_times] - ROT_SERVO_OFFSET;   //rot offset
+      y_array[move_times] = y_array[move_times] - LEFT_SERVO_OFFSET;  //assembling offset
+      z_array[move_times] = z_array[move_times] - RIGHT_SERVO_OFFSET; //assembling offset
+      x_array[move_times] = x_array[move_times] - ROT_SERVO_OFFSET;   //rot offset
 
       read_servo_calibration_data(&x_array[move_times], &y_array[move_times], &z_array[move_times]);
       write_servos_angle(x_array[move_times], y_array[move_times], z_array[move_times]);
@@ -70,7 +71,6 @@ void uArmClass::arm_process_commands()
       if(move_times > INTERP_INTVLS)
       {
         move_times = 255;//disable the move
-
       }
     }
   }
@@ -85,6 +85,91 @@ void uArmClass::arm_process_commands()
     }
   }
 
+#ifdef LATEST_HARDWARE
+
+  if((digitalRead(BT_DETEC)==HIGH)&&(sys_status = NORMAL_MODE))//do it here
+  {
+    sys_status = NORMAL_BT_CONNECTED_MODE;
+  }
+  //check the button status
+  if(digitalRead(BTN_D4)==LOW)//check the D4 button
+  {
+    delay(50);
+    if(digitalRead(BTN_D4)==LOW)
+    {
+      switch(sys_status)
+      {
+        case NORMAL_MODE:
+        case NORMAL_BT_CONNECTED_MODE:
+          sys_status = LEARNING_MODE;
+          break;
+        case LEARNING_MODE:
+          sys_status = NORMAL_MODE;//do not detec if BT is connected here, will do it seperatly
+          break;
+        default: break;
+      }
+    }
+    while(digitalRead(BTN_D7)==LOW);// make sure button is released
+  }
+  if(digitalRead(BTN_D7)==LOW)//check the D7 button
+  {
+    delay(50);
+    if(digitalRead(BTN_D7)==LOW)
+    {
+      switch(sys_status)
+      {
+        case NORMAL_MODE:
+        case NORMAL_BT_CONNECTED_MODE:
+          delay(1000);
+          if(digitalRead(BTN_D7)==LOW)
+            sys_status = LOOP_PLAY_MODE;
+          else
+            sys_status = SINGLE_PLAY_MODE;
+          break;
+        case SINGLE_PLAY_MODE:
+        case LOOP_PLAY_MODE:
+          sys_status = NORMAL_MODE;//do not detec if BT is connected here, will do it seperatly
+          break;
+        case LEARNING_MODE:
+          if(digitalRead(PUMP_GRI_EN) == HIGH)//detec the status of pump and gri and do the opposite
+            digitalWrite(PUMP_GRI_EN,LOW);
+          else
+            digitalWrite(PUMP_GRI_EN,HIGH);
+          break;
+      }
+    }
+    while(digitalRead(BTN_D7)==LOW);// make sure button is released
+  }
+  //sys led function detec every 0.5s
+  if(time_0_5s != millis()%125)
+  {
+    time_0_5s = millis()%125;
+    if(time_0_5s == 0)
+    {
+      switch(sys_status)
+      {
+        case NORMAL_MODE:
+            if(time_ticks % 20 == 0) digitalWrite(SYS_LED,LOW);
+            else digitalWrite(SYS_LED,HIGH);
+            break;
+        case NORMAL_BT_CONNECTED_MODE:
+            digitalWrite(SYS_LED,LOW);
+            break;
+        case LEARNING_MODE:
+            if(time_ticks % 2 == 0) digitalWrite(SYS_LED,LOW);
+            else digitalWrite(SYS_LED,HIGH);
+            break;          
+        case SINGLE_PLAY_MODE:
+        case LOOP_PLAY_MODE:
+            if(time_ticks % 16< 8) digitalWrite(SYS_LED,LOW);
+            else digitalWrite(SYS_LED,HIGH);
+            break;
+      }
+      time_ticks++;
+      Serial.println(sys_status,DEC);
+    }
+  }
+#endif
 }
 
 void uArmClass::arm_setup()
@@ -95,6 +180,7 @@ void uArmClass::arm_setup()
   TIMSK0 = (1 << OCIE0A); // Enable CTC interrupt
   OCR0A   = 249; // Set CTC compare value with a prescaler of 64  1ms*/
   pinMode(BTN_D4,INPUT_PULLUP);//special mode for calibration
+  pinMode(BUZZER,OUTPUT);
   if(digitalRead(4)==LOW)
   {
     while(digitalRead(4)==LOW);
@@ -105,7 +191,31 @@ void uArmClass::arm_setup()
 
   pinMode(LIMIT_SW, INPUT_PULLUP);
   pinMode(BTN_D7, INPUT_PULLUP);
-  pinMode(BUZZER, OUTPUT);
+
+#ifdef LATEST_HARDWARE
+  pinMode(PUMP_GRI_EN,OUTPUT);
+  pinMode(SYS_LED,OUTPUT);
+  digitalWrite(PUMP_GRI_EN,HIGH);//keep the pump off
+#else
+  pinMode(PUMP_EN,OUTPUT);
+  pinMode(VALVE_EN,OUTPUT);
+  pinMode(GRIPPER,OUTPUT);
+#endif
+  unsigned char strings[6];
+  //TEST
+  /*strings[0]=0;
+  strings[1]=10;
+  strings[2]=0;
+  strings[3]=56;
+  strings[4]=0;
+  strings[5]=0;
+  iic_writebuf(strings, EXTERNAL_EEPROM_DEVICE_ADDRESS, 0x870, 6);
+  delay(500);*/
+  //get the offset of assembling(address:0x870 *sequence[L R T]* each data 2 bytes) and the data is 10 times greater than the real in order to store easier
+  iic_readbuf(strings, EXTERNAL_EEPROM_DEVICE_ADDRESS, 0x870, 6);
+  LEFT_SERVO_OFFSET = ((strings[0]<<8) + strings[1])/10.0;
+  RIGHT_SERVO_OFFSET = ((strings[2]<<8) + strings[3])/10.0;
+  ROT_SERVO_OFFSET = ((strings[4]<<8) + strings[5])/10.0;
 }
 
 /*!
@@ -312,7 +422,7 @@ void uArmClass::attach_servo(byte servo_number)
         //Serial.println("Angle: " + String(cur_hand));
         g_servo_hand_rot.attach(SERVO_HAND_PIN);
 
-        write_servo_angle(SERVO_HAND_ROT_NUM, angleBefore);
+        //write_servo_angle(SERVO_HAND_ROT_NUM, angleBefore);
       }
       break;
   }
@@ -751,8 +861,6 @@ unsigned char uArmClass::move_to(double x, double y, double z, double hand_angle
   	x = stretch * cos(y / MATH_TRANS);
   	y = stretch * sin(y / MATH_TRANS);
   }
-
-
   // get current angles of servos
 
   // deal with relative xyz positioning
@@ -787,7 +895,7 @@ unsigned char uArmClass::move_to(double x, double y, double z, double hand_angle
   INTERP_INTVLS = max(INTERP_INTVLS,delta_right);
 
   INTERP_INTVLS = (INTERP_INTVLS<60) ? INTERP_INTVLS : 60;
-  //INTERP_INTVLS = INTERP_INTVLS * (10 / times);// speed determine the number of interpolation
+  //INTERP_INTVLS =1;// INTERP_INTVLS * (10 / times);// speed determine the number of interpolation
   times = constrain(times, 100, 1000);
   hand_speed = times;//set the had rot speed
 
@@ -838,7 +946,6 @@ unsigned char uArmClass::move_to(double x, double y, double z, double hand_angle
   double distance = pow(pow(x-g_current_x, 2) + pow(y-g_current_y, 2) + pow(z-g_current_z, 2), 0.5);
   moveStartTime = millis();// Speed of the robot in mm/s
   microMoveTime = distance / times * 1000.0 / INTERP_INTVLS;//the time for every step
-  //Serial.println(microMoveTime,DEC);
 
 	g_current_x = x;
 	g_current_y = y;
@@ -853,76 +960,102 @@ unsigned char uArmClass::move_to(double x, double y, double z, double hand_angle
 }
 
 /*!
-   \brief Calculate Y
-   \param theta_1
-   \param theta_2
-   \param theta_3
-   \return Y Axis Value
+   \brief Gripper catch
 */
-double uArmClass::angle_to_coordinate_y(double theta_1, double theta_2, double theta_3)
+void uArmClass::gripper_catch(bool value)
 {
-        double l5_2 = (MATH_L2 + MATH_L3*cos(theta_2 / MATH_TRANS) + MATH_L4*cos(theta_3 / MATH_TRANS));
+#ifdef LATEST_HARDWARE
+  if(value)
+  {
+    digitalWrite(PUMP_GRI_EN, LOW);  // gripper and pump catch
+  }
+  else
+  {
+    digitalWrite(PUMP_GRI_EN, HIGH);  //gripper and pump off
+  }
+#else
+  if(value)
+  {
+    digitalWrite(GRIPPER, LOW);  // gripper and pump catch
+  }
+  else
+  {
+    digitalWrite(GRIPPER, HIGH);  // gripper and pump off
+  }
+#endif
+}
+/*!
+   \brief Pump catch
+*/
+void uArmClass::pump_catch(bool value)
+{
+#ifdef LATEST_HARDWARE
+  gripper_catch(value);
+#else
+  if(value)
+  {
+    digitalWrite(PUMP_EN, HIGH);  // pump catch
+    digitalWrite(VALVE_EN, LOW);
+  }
+  else
+  {
+    digitalWrite(PUMP_EN, LOW);  // pump catch
+    digitalWrite(VALVE_EN, HIGH);
+  }
+#endif
+}
+/*!
+   \brief Get Gripper Status
+*/
+unsigned char uArmClass::gripper_status()
+{
+#ifdef LATEST_HARDWARE
+  if(digitalRead(PUMP_GRI_EN) == HIGH)
+  {
+    return STOP;//NOT WORKING
+  }
+  else
+  {
+    if(digitalRead(PUMP_GRI_STATUS) == HIGH)
+    {
+      return GRABBING;
+    }
+    else
+    {
+      return WORKING;
+    }
+  }
+#else
 
-        return -sin(abs(theta_1 / MATH_TRANS))*l5_2;
+#endif
 }
 
 /*!
-   \brief Close Gripper
+   \brief Get Pump Status
 */
-void uArmClass::gripper_catch()
+unsigned char uArmClass::pump_status()
 {
-        pinMode(GRIPPER, OUTPUT);
-        digitalWrite(GRIPPER, LOW); // gripper catch
-        g_gripper_reset = true;
+#ifdef LATEST_HARDWARE
+  if(digitalRead(PUMP_GRI_EN) == HIGH)
+  {
+    return STOP;//NOT WORKING
+  }
+  else
+  {
+    if(analogRead(PUMP_GRI_STATUS) >= PUMP_GRABBING_CURRENT)
+    {
+      return GRABBING;
+    }
+    else
+    {
+      return WORKING;
+    }
+  }
+#else
+
+#endif
+
 }
-
-/*!
-   \brief Release Gripper
-*/
-void uArmClass::gripper_release()
-{
-        if(g_gripper_reset)
-        {
-                pinMode(GRIPPER, OUTPUT);
-                digitalWrite(GRIPPER, HIGH); // gripper release
-                g_gripper_reset= false;
-        }
-}
-
-/*!
-   \brief Turn on Pump
-*/
-void uArmClass::pump_on()
-{
-
-        pinMode(PUMP_EN, OUTPUT);
-        pinMode(VALVE_EN, OUTPUT);
-        digitalWrite(VALVE_EN, LOW);
-        digitalWrite(PUMP_EN, HIGH);
-}
-
-/*!
-   \brief Turn off Pump
-*/
-void uArmClass::pump_off()
-{
-        pinMode(PUMP_EN, OUTPUT);
-        pinMode(VALVE_EN, OUTPUT);
-        digitalWrite(VALVE_EN, HIGH);
-        digitalWrite(PUMP_EN, LOW);
-        delay(50);
-        digitalWrite(VALVE_EN,LOW);
-}
-
-/*!
-  \brief systick
-*/
-
-/*ISR(TIMER0_COMPA_vect) 
-{ 
-  sys_tick++;
-  PORTB ^= 0x01;
-}*/
 
 //*************************************uart communication**************************************//
 String uArmClass::runCommand(String cmnd){
@@ -1061,17 +1194,25 @@ String uArmClass::runCommand(String cmnd){
 
        if(values[0]==0)//off
        {
-        pump_off();
+        pump_catch(false);
        }else//on
        {
-        pump_on();
+        pump_catch(true);
        }
        return S;
     }else
     
     //gPump---------------------------------------------------------------------
     if(cmnd.indexOf(F("gPum")) >= 0){
-      return S0;//return S1;return S2;
+      switch(pump_status())
+      {
+        case GRABBING:return S0;
+                       break;
+        case WORKING: return S1;
+                       break;
+        case STOP:    return S2;
+                       break;
+      }
     }else
 
     //sGripperV#----------------------------------------------------------------
@@ -1083,17 +1224,25 @@ String uArmClass::runCommand(String cmnd){
 
        if(values[0]==0)//release
        {
-        gripper_release();
+        gripper_catch(false);
        }else//catch
        {
-        gripper_catch();
+        gripper_catch(true);
        }
        return S;
     }else
 
     //gGipper-------------------------------------------------------------------
     if(cmnd.indexOf(F("gGri")) >= 0){
-      return S0;//return S1;return S2;
+      switch(gripper_status())
+      {
+        case GRABBING:return S0;
+                       break;
+        case WORKING: return S1;
+                       break;
+        case STOP:    return S2;
+                       break;
+      }
     }else
 
     // sAttachS#----------------------------------------------------------------
@@ -1246,7 +1395,6 @@ String uArmClass::getValues(String cmnd, String parameters[], int parameterCount
       }
       valueArray[p] = cmnd.substring(index[p] + 1).toFloat();
     }
-    
   }
   
   return F("");
@@ -1260,26 +1408,48 @@ void uArmClass::delay_us(){}
 
 void uArmClass::iic_start()
 {
+#ifdef LATEST_HARDWARE
+  PORTB |= 0x01;// SCL=1
+  delay_us();
+  PORTB |= 0x02;// SDA=1
+  delay_us();
+  PORTB &= 0xFD;// SDA=0
+  delay_us();
+  PORTB &= 0xFE;// SCL=0
+  delay_us();
+#else
   PORTC |= 0x20;//  SCL=1
   delay_us();
-  PORTC |= 0x10;//  SDA = 1;
+  PORTC |= 0x10;//  SDA=1
   delay_us();
-  PORTC &= 0xEF;//  SDA = 0;
+  PORTC &= 0xEF;//  SDA=0
   delay_us();
   PORTC &= 0xDF;//  SCL=0
   delay_us();
+#endif
 }
 
 void uArmClass::iic_stop()
 {
+#ifdef LATEST_HARDWARE
+  PORTB &= 0xFE;// SCL=0
+  delay_us();
+  PORTB &= 0xFD;// SDA=0
+  delay_us();
+  PORTB |= 0x01;// SCL=1
+  delay_us();
+  PORTB |= 0x02;// SDA=1
+  delay_us();
+#else
   PORTC &= 0xDF;//  SCL=0
   delay_us();
-  PORTC &= 0xEF;//  SDA = 0;
+  PORTC &= 0xEF;//  SDA=0
   delay_us();
   PORTC |= 0x20;//  SCL=1
   delay_us();
-  PORTC |= 0x10;//  SDA = 1;
+  PORTC |= 0x10;//  SDA=1
   delay_us();
+#endif
 }
 
 //return 0:ACK=0
@@ -1287,6 +1457,25 @@ void uArmClass::iic_stop()
 unsigned char uArmClass::read_ack()
 {
   unsigned char old_state;
+#ifdef LATEST_HARDWARE
+  old_state = DDRB;
+  DDRB = DDRB & 0xFD;//SDA INPUT
+  PORTB |= 0x02;// SDA=1
+  delay_us();
+  PORTB |= 0x01;// SCL=1
+  delay_us();
+  if((PINB&0x02) == 0x02) // if(SDA)
+  {
+    PORTB &= 0xFE;// SCL=0
+    iic_stop();
+    return 1; 
+  }
+  else{
+    PORTB &= 0xFE;// SCL=0
+    DDRB = old_state;
+    return 0;
+  }
+#else
   old_state = DDRC;
   DDRC = DDRC & 0xEF;//SDA INPUT
   PORTC |= 0x10;//  SDA = 1;
@@ -1299,14 +1488,12 @@ unsigned char uArmClass::read_ack()
     iic_stop();
     return 1; 
   }
-  else
-  {
-    PORTC &= 0xDF;//  SCL=0
-    
+  else{
+    PORTC &= 0xDF;//  SCL=0 
     DDRC = old_state;
-    
     return 0;
   }
+#endif
 }
 
 //ack=0:send ack
@@ -1314,17 +1501,31 @@ unsigned char uArmClass::read_ack()
 void uArmClass::send_ack()
 {
   unsigned char old_state;
+#ifdef LATEST_HARDWARE
+  old_state = DDRB;
+  DDRB = DDRB | 0x02;//SDA OUTPUT
+  PORTB &= 0xFD;// SDA=0 
+  delay_us();
+  PORTB |= 0x01;// SCL=1
+  delay_us();
+  PORTB &= 0xFE;// SCL=0
+  delay_us();
+  DDRB = old_state;
+  PORTB |= 0x02;// SDA=1
+  delay_us();
+#else
   old_state = DDRC;
   DDRC = DDRC | 0x10;//SDA OUTPUT
-  PORTC &= 0xEF;//  SDA = 0;  
+  PORTC &= 0xEF;//  SDA=0 
   delay_us();
   PORTC |= 0x20;//  SCL=1
   delay_us();
   PORTC &= 0xDF;//  SCL=0
   delay_us();
   DDRC = old_state;
-  PORTC |= 0x10;//  SDA = 1;
+  PORTC |= 0x10;//  SDA=1 
   delay_us();
+#endif
 }
 
 void uArmClass::iic_sendbyte(unsigned char dat)
@@ -1332,6 +1533,17 @@ void uArmClass::iic_sendbyte(unsigned char dat)
   unsigned char i;
   for(i = 0;i < 8;i++)
   {
+#ifdef LATEST_HARDWARE
+    if(dat & 0x80)
+      PORTB |= 0x02;// SDA=1
+    else
+      PORTB &= 0xFD;// SDA=0 
+    dat <<= 1;
+    delay_us();
+    PORTB |= 0x01;// SCL=1
+    delay_us();
+    PORTB &= 0xFE;// SCL=0
+#else
     if(dat & 0x80)
       PORTC |= 0x10;//  SDA = 1;
     else
@@ -1341,6 +1553,7 @@ void uArmClass::iic_sendbyte(unsigned char dat)
     PORTC |= 0x20;//  SCL=1
     delay_us();
     PORTC &= 0xDF;//  SCL=0
+#endif
   }
 }
 
@@ -1348,10 +1561,26 @@ unsigned char uArmClass::iic_receivebyte()
 {
   unsigned char i,byte = 0;
   unsigned char old_state;
+#ifdef LATEST_HARDWARE
+  old_state = DDRB;
+  DDRB = DDRB & 0xFD;//SDA INPUT
+#else  
   old_state = DDRC;
   DDRC = DDRC & 0xEF;//SDA INPUT
+#endif
   for(i = 0;i < 8;i++)
   {
+#ifdef LATEST_HARDWARE
+    PORTB |= 0x01;// SCL=1
+    delay_us();
+    byte <<= 1;
+    if((PINB&0x02) == 0x02) // if(SDA)
+      byte |= 0x01;
+    delay_us();
+    PORTB &= 0xFE;// SCL=0
+    DDRB = old_state;
+    delay_us();
+#else
     PORTC |= 0x20;//  SCL=1
     delay_us();
     byte <<= 1;
@@ -1361,14 +1590,20 @@ unsigned char uArmClass::iic_receivebyte()
     PORTC &= 0xDF;//  SCL=0
     DDRC = old_state;
     delay_us();
+#endif
   }
   return byte;
 }
 
 unsigned char uArmClass::iic_writebuf(unsigned char *buf,unsigned char device_addr,unsigned int addr,unsigned char len)
 {
+#ifdef LATEST_HARDWARE
+  DDRB = DDRB | 0x03;
+  PORTB = PORTB | 0x03;
+#else
   DDRC = DDRC | 0x30;
   PORTC = PORTC | 0x30;
+#endif
   unsigned char length_of_data=0;//page write
   length_of_data = len;
   iic_start();
@@ -1392,8 +1627,13 @@ unsigned char uArmClass::iic_writebuf(unsigned char *buf,unsigned char device_ad
 
 unsigned char uArmClass::iic_readbuf(unsigned char *buf,unsigned char device_addr,unsigned int addr,unsigned char len)
 {
+#ifdef LATEST_HARDWARE
+  DDRB = DDRB | 0x03;
+  PORTB = PORTB | 0x03;
+#else
   DDRC = DDRC | 0x30;
   PORTC = PORTC | 0x30;
+#endif
   unsigned char length_of_data=0;
   length_of_data = len;
   iic_start();
