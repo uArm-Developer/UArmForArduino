@@ -23,23 +23,22 @@
 #define SINGLE_PLAY_MODE            3
 #define LOOP_PLAY_MODE              4
 
+#define LEARNING_MODE_STOP          5 //for the record() function to stop recording
+
 #define LATEST_HARDWARE
 // for the external eeprom 
 #ifdef LATEST_HARDWARE
-   #define EXTERNAL_EEPROM_DEVICE_ADDRESS 0xA2
+   #define EXTERNAL_EEPROM_SYS_ADDRESS 0xA2
+   #define EXTERNAL_EEPROM_USER_ADDRESS 0xA0
 #else
-   #define EXTERNAL_EEPROM_DEVICE_ADDRESS  0xA0
+   #define EXTERNAL_EEPROM_SYS_ADDRESS  0xA0
 #endif
 #define DATA_LENGTH  0x20
 #define LEFT_SERVO_ADDRESS   0x0000
 #define RIGHT_SERVO_ADDRESS  0x02D0
 #define ROT_SERVO_ADDRESS    0x05A0
 
-#define current_ver         "0.9.8"
-
-#define UARM_MAJOR_VERSION      1
-#define UARM_MINOR_VERSION      6
-#define UARM_BUGFIX             2
+#define current_ver         "0.9.8a"
 
 #define SERVO_ROT_NUM           0
 #define SERVO_LEFT_NUM          1
@@ -171,7 +170,11 @@ public:
     unsigned char get_current_xyz(double *cur_rot, double *cur_left, double *cur_right, double *g_current_x, double *g_current_y, double *g_current_z, bool for_movement );
     void get_current_rotleftright();
     void calibration_data_to_servo_angle(double *data,unsigned int address);
-    void read_servo_angle(byte servo_number);
+    void read_servo_angle(byte servo_number, bool original_data);
+    void read_servo_angle(byte servo_number)
+    {
+        read_servo_angle(servo_number, false);
+    }
 
     unsigned char coordinate_to_angle(double x, double y, double z, double *theta_1, double *theta_2, double *theta_3);
 
@@ -208,12 +211,15 @@ private:
     unsigned char iic_writebuf(unsigned char *buf,unsigned char device_addr,unsigned int addr,unsigned char len);
     unsigned char iic_readbuf(unsigned char *buf,unsigned char device_addr,unsigned int addr,unsigned char len);
 
+    bool record();
+    bool play();
+    void recording_write(unsigned int address, unsigned char * data_array, int num);
+    void recording_read(unsigned int address, unsigned char * data_array, int num);
 protected:
     double cur_rot = 90;
     double cur_left = 90;
     double cur_right = 90;
     double cur_hand = 90;
-    double hand_rot = 0;
 
     double g_current_x = 0;
     double g_current_y = 200;
@@ -240,8 +246,11 @@ protected:
 
     //sys status
     unsigned char sys_status = NORMAL_MODE;
-    unsigned char time_0_5s = 0;//used to change the led blink time
+    unsigned char time_50ms = 0;//used to change the led blink time
     unsigned char time_ticks = 0;
+
+    //learning mode
+    unsigned int addr = 0;
 
 };
 

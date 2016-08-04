@@ -13,11 +13,7 @@ uArmClass uarm;
 String message = "";
 uArmClass::uArmClass()
 {
-  /*TCNT2   = 0;
-  TCCR2A = (1 << WGM21); // Configure timer 2 for CTC mode
-  TCCR2B = (1 << CS22); // Start timer at Fcpu/64
-  TIMSK2 = (1 << OCIE2A); // Enable CTC interrupt
-  OCR2A   = 249; // Set CTC compare value with a prescaler of 64  2ms*/
+
 }
 
 /*!
@@ -51,7 +47,7 @@ void uArmClass::arm_process_commands()
   if(move_times!=255)
   {
     
-    //if(move_times <= INTERP_INTVLS)
+    //if(move_times <= INTERP_INTVLS)--------------------------------------------------------------
     if((millis() - moveStartTime) >= (move_times * microMoveTime))// detect if it's time to move
     {
       y_array[move_times] = y_array[move_times] - LEFT_SERVO_OFFSET;  //assembling offset
@@ -64,7 +60,7 @@ void uArmClass::arm_process_commands()
       //hand rot as hand rot do not have the smooth array
       if(move_times == (INTERP_INTVLS / 4))
       {
-		    write_servo_angle(SERVO_HAND_ROT_NUM, hand_rot);
+		    write_servo_angle(SERVO_HAND_ROT_NUM, cur_hand);
       }
       
       move_times++;
@@ -75,7 +71,7 @@ void uArmClass::arm_process_commands()
     }
   }
 
-  //buzzer work
+  //buzzer work------------------------------------------------------------------------------------
   if(buzzerStopTime != 0)
   {
     if(millis() >= buzzerStopTime)
@@ -86,12 +82,12 @@ void uArmClass::arm_process_commands()
   }
 
 #ifdef LATEST_HARDWARE
-
+  //check the button status
   if((digitalRead(BT_DETEC)==HIGH)&&(sys_status = NORMAL_MODE))//do it here
   {
     sys_status = NORMAL_BT_CONNECTED_MODE;
   }
-  //check the button status
+  //check the button4 status------------------------------------------------------------------------
   if(digitalRead(BTN_D4)==LOW)//check the D4 button
   {
     delay(50);
@@ -102,15 +98,20 @@ void uArmClass::arm_process_commands()
         case NORMAL_MODE:
         case NORMAL_BT_CONNECTED_MODE:
           sys_status = LEARNING_MODE;
+          addr = 0;//recording/playing address
+          detach_all_servos();
           break;
         case LEARNING_MODE:
-          sys_status = NORMAL_MODE;//do not detec if BT is connected here, will do it seperatly
+          //LEARNING_MODE_STOP is just used to notificate record() function to stop, once record() get it then change the sys_status to normal_mode
+          sys_status = LEARNING_MODE_STOP;//do not detec if BT is connected here, will do it seperatly
           break;
         default: break;
       }
     }
-    while(digitalRead(BTN_D7)==LOW);// make sure button is released
+    while(digitalRead(BTN_D4)==LOW);// make sure button is released
   }
+
+  //check the button7 status-------------------------------------------------------------------------
   if(digitalRead(BTN_D7)==LOW)//check the D7 button
   {
     delay(50);
@@ -121,6 +122,7 @@ void uArmClass::arm_process_commands()
         case NORMAL_MODE:
         case NORMAL_BT_CONNECTED_MODE:
           delay(1000);
+          addr = 0;//recording/playing address
           if(digitalRead(BTN_D7)==LOW)
             sys_status = LOOP_PLAY_MODE;
           else
@@ -128,7 +130,7 @@ void uArmClass::arm_process_commands()
           break;
         case SINGLE_PLAY_MODE:
         case LOOP_PLAY_MODE:
-          sys_status = NORMAL_MODE;//do not detec if BT is connected here, will do it seperatly
+          sys_status = NORMAL_MODE;
           break;
         case LEARNING_MODE:
           if(digitalRead(PUMP_GRI_EN) == HIGH)//detec the status of pump and gri and do the opposite
@@ -140,33 +142,62 @@ void uArmClass::arm_process_commands()
     }
     while(digitalRead(BTN_D7)==LOW);// make sure button is released
   }
-  //sys led function detec every 0.5s
-  if(time_0_5s != millis()%125)
+
+  //sys led function detec every 0.05s-----------------------------------------------------------------
+  if(time_50ms != millis()%50)
   {
-    time_0_5s = millis()%125;
-    if(time_0_5s == 0)
+    time_50ms = millis()%50;
+    if(time_50ms == 0)
     {
       switch(sys_status)
       {
         case NORMAL_MODE:
-            if(time_ticks % 20 == 0) digitalWrite(SYS_LED,LOW);
+            if(time_ticks % 40 == 0) digitalWrite(SYS_LED,LOW);
             else digitalWrite(SYS_LED,HIGH);
             break;
         case NORMAL_BT_CONNECTED_MODE:
             digitalWrite(SYS_LED,LOW);
             break;
         case LEARNING_MODE:
-            if(time_ticks % 2 == 0) digitalWrite(SYS_LED,LOW);
+            if(time_ticks % 4 < 2) digitalWrite(SYS_LED,LOW);
             else digitalWrite(SYS_LED,HIGH);
             break;          
         case SINGLE_PLAY_MODE:
         case LOOP_PLAY_MODE:
-            if(time_ticks % 16< 8) digitalWrite(SYS_LED,LOW);
+            if(time_ticks % 40< 20) digitalWrite(SYS_LED,LOW);
             else digitalWrite(SYS_LED,HIGH);
             break;
       }
       time_ticks++;
-      Serial.println(sys_status,DEC);
+
+      //learning&playing mode function****************
+      switch(sys_status)//every 0.125s per point
+      {
+        case SINGLE_PLAY_MODE:
+          if(play() == false)
+          {
+            sys_status = NORMAL_MODE;
+            addr = 0;
+          }
+          break;
+        case LOOP_PLAY_MODE:
+          if(play() == false)
+          {
+            //sys_status = LOOP_PLAY_MODE;
+            addr = 0;
+          }
+          break;
+        case LEARNING_MODE:
+        case LEARNING_MODE_STOP:
+          if(record() == false)
+          {
+            sys_status = NORMAL_MODE;
+            addr = 0;
+          }
+          break;
+        default: break;
+      }
+      //learning mode function end*******************
     }
   }
 #endif
@@ -174,11 +205,6 @@ void uArmClass::arm_process_commands()
 
 void uArmClass::arm_setup()
 {
-  /*TCNT0   = 0;
-  TCCR0A = (1 << WGM01); // Configure timer 0 for CTC mode
-  TCCR0B = 0x03; // Start timer at Fcpu/64
-  TIMSK0 = (1 << OCIE0A); // Enable CTC interrupt
-  OCR0A   = 249; // Set CTC compare value with a prescaler of 64  1ms*/
   pinMode(BTN_D4,INPUT_PULLUP);//special mode for calibration
   pinMode(BUZZER,OUTPUT);
   if(digitalRead(4)==LOW)
@@ -209,10 +235,10 @@ void uArmClass::arm_setup()
   strings[3]=56;
   strings[4]=0;
   strings[5]=0;
-  iic_writebuf(strings, EXTERNAL_EEPROM_DEVICE_ADDRESS, 0x870, 6);
+  iic_writebuf(strings, EXTERNAL_EEPROM_SYS_ADDRESS, 0x870, 6);
   delay(500);*/
   //get the offset of assembling(address:0x870 *sequence[L R T]* each data 2 bytes) and the data is 10 times greater than the real in order to store easier
-  iic_readbuf(strings, EXTERNAL_EEPROM_DEVICE_ADDRESS, 0x870, 6);
+  iic_readbuf(strings, EXTERNAL_EEPROM_SYS_ADDRESS, 0x870, 6);
   LEFT_SERVO_OFFSET = ((strings[0]<<8) + strings[1])/10.0;
   RIGHT_SERVO_OFFSET = ((strings[2]<<8) + strings[3])/10.0;
   ROT_SERVO_OFFSET = ((strings[4]<<8) + strings[5])/10.0;
@@ -242,7 +268,7 @@ void uArmClass::alert(byte times, byte runTime, byte stopTime)
    \param right the calibration data of right
  */
 
-void uArmClass::read_servo_calibration_data(double *rot, double *left, double *right)// takes 1~2ms
+void uArmClass::read_servo_calibration_data(double *rot, double *left, double *right)
 {
 
   calibration_data_to_servo_angle(rot,ROT_SERVO_ADDRESS);
@@ -265,7 +291,7 @@ void uArmClass::calibration_data_to_servo_angle(double *data,unsigned int addres
   deltaA = 0xffff;
   deltaB = 0;
   min_data_calibration_address = (((unsigned int)(*data) - (DATA_LENGTH >> 2)) * 2);
-  iic_readbuf(calibration_data, EXTERNAL_EEPROM_DEVICE_ADDRESS, address + min_data_calibration_address, DATA_LENGTH);
+  iic_readbuf(calibration_data, EXTERNAL_EEPROM_SYS_ADDRESS, address + min_data_calibration_address, DATA_LENGTH);
   for(i=0;i<(DATA_LENGTH >> 1);i++)
   {
       deltaB = abs ((calibration_data[i+i]<<8) + calibration_data[1+(i+i)] - (*data) * 10);
@@ -389,38 +415,33 @@ void uArmClass::attach_all()
  */
 void uArmClass::attach_servo(byte servo_number)
 {
-  double angleBefore;
   switch(servo_number) {
     case SERVO_ROT_NUM:
       if(!g_servo_rot.attached()) {
-        read_servo_angle(SERVO_ROT_NUM);
-        angleBefore = cur_rot;
+        read_servo_angle(SERVO_ROT_NUM,true);
         g_servo_rot.attach(SERVO_ROT_PIN);
-        write_servo_angle(SERVO_ROT_NUM, angleBefore);
+        g_servo_rot.write(cur_rot);
       }
       break;
     case SERVO_LEFT_NUM:
       if (!g_servo_left.attached()) {
-        read_servo_angle(SERVO_LEFT_NUM);
-        angleBefore = cur_left;
+        read_servo_angle(SERVO_LEFT_NUM,true);
         g_servo_left.attach(SERVO_LEFT_PIN);
-        write_servo_angle(SERVO_LEFT_NUM, angleBefore);
+        g_servo_left.write(cur_left);
       }
       break;
     case SERVO_RIGHT_NUM:
       if (!g_servo_right.attached()) {
-        read_servo_angle(SERVO_RIGHT_NUM);
-        angleBefore = cur_right;
+        read_servo_angle(SERVO_RIGHT_NUM,true);
+
         g_servo_right.attach(SERVO_RIGHT_PIN);
-        write_servo_angle(SERVO_RIGHT_NUM, angleBefore);
+        g_servo_right.write(cur_right);
       }
       break;
     case SERVO_HAND_ROT_NUM:
       if (!g_servo_hand_rot.attached()) {
-        read_servo_angle(SERVO_HAND_ROT_NUM);
-        angleBefore = cur_hand;
-        //Serial.println("Angle: " + String(cur_hand));
-        g_servo_hand_rot.attach(SERVO_HAND_PIN);
+        read_servo_angle(SERVO_HAND_ROT_NUM,true);
+        g_servo_hand_rot.attach(cur_hand);
 
         //write_servo_angle(SERVO_HAND_ROT_NUM, angleBefore);
       }
@@ -462,18 +483,6 @@ void uArmClass::detach_servo(byte servo_number)
 }
 
 /*!
-   \brief Read Servo Offset from EEPROM. From OFFSET_START_ADDRESS, each offset occupy 4 bytes in rom
-   \param servo_num SERVO_ROT_NUM, SERVO_LEFT_NUM, SERVO_RIGHT_NUM, SERVO_HAND_ROT_NUM
-   \return Return servo offset
- */
-/*double uArmClass::read_servo_offset(byte servo_num)
-{
-        double manual_servo_offset = 0.0f;
-        EEPROM.get(MANUAL_OFFSET_ADDRESS + servo_num * sizeof(manual_servo_offset), manual_servo_offset);
-        return manual_servo_offset;
-}*/
-
-/*!
    \brief Convert the Analog to Servo Angle, by this formatter, angle = intercept + slope * analog
    \param input_analog Analog Value
    \param servo_num SERVO_ROT_NUM, SERVO_LEFT_NUM, SERVO_RIGHT_NUM, SERVO_HAND_ROT_NUM
@@ -487,33 +496,30 @@ double uArmClass::analog_to_angle(int input_analog, byte servo_num)
   unsigned int angle_range_min, angle_range_max;
   switch(servo_num)
   {
-    case  SERVO_ROT_NUM:      iic_readbuf(&data[0], EXTERNAL_EEPROM_DEVICE_ADDRESS, ROT_SERVO_ADDRESS + 360, 2);//get the min adc calibration data for the map() function
-                              iic_readbuf(&data[2], EXTERNAL_EEPROM_DEVICE_ADDRESS, ROT_SERVO_ADDRESS + 360 + 358, 2);//get the max adc calibraiton data for the map() function
+    case  SERVO_ROT_NUM:      iic_readbuf(&data[0], EXTERNAL_EEPROM_SYS_ADDRESS, ROT_SERVO_ADDRESS + 360, 2);//get the min adc calibration data for the map() function
+                              iic_readbuf(&data[2], EXTERNAL_EEPROM_SYS_ADDRESS, ROT_SERVO_ADDRESS + 360 + 358, 2);//get the max adc calibraiton data for the map() function
                               break;
-    case  SERVO_LEFT_NUM:     iic_readbuf(&data[0], EXTERNAL_EEPROM_DEVICE_ADDRESS, LEFT_SERVO_ADDRESS + 360, 2);//get the min adc calibration data for the map() function
-                              iic_readbuf(&data[2], EXTERNAL_EEPROM_DEVICE_ADDRESS, LEFT_SERVO_ADDRESS + 360 + 358, 2);//get the max adc calibraiton data for the map() function
+    case  SERVO_LEFT_NUM:     iic_readbuf(&data[0], EXTERNAL_EEPROM_SYS_ADDRESS, LEFT_SERVO_ADDRESS + 360, 2);//get the min adc calibration data for the map() function
+                              iic_readbuf(&data[2], EXTERNAL_EEPROM_SYS_ADDRESS, LEFT_SERVO_ADDRESS + 360 + 358, 2);//get the max adc calibraiton data for the map() function
                               break;
-    case  SERVO_RIGHT_NUM:    iic_readbuf(&data[0], EXTERNAL_EEPROM_DEVICE_ADDRESS, RIGHT_SERVO_ADDRESS + 360, 2);//get the min adc calibration data for the map() function
-                              iic_readbuf(&data[2], EXTERNAL_EEPROM_DEVICE_ADDRESS, RIGHT_SERVO_ADDRESS + 360 + 358, 2);//get the max adc calibraiton data for the map() function
+    case  SERVO_RIGHT_NUM:    iic_readbuf(&data[0], EXTERNAL_EEPROM_SYS_ADDRESS, RIGHT_SERVO_ADDRESS + 360, 2);//get the min adc calibration data for the map() function
+                              iic_readbuf(&data[2], EXTERNAL_EEPROM_SYS_ADDRESS, RIGHT_SERVO_ADDRESS + 360 + 358, 2);//get the max adc calibraiton data for the map() function
                               break;
     default:                  break;
   }
 
   max_calibration_data = (data[2]<<8) + data[3];
   min_calibration_data = (data[0]<<8) + data[1];
-  //Serial.println("++++++++++++++++++++++");
-  //Serial.println(max_calibration_data,DEC);
-  //Serial.println(min_calibration_data,DEC);
 
   angle_range_min = map(input_analog, min_calibration_data, max_calibration_data, 1, 180) - (DATA_LENGTH>>2);
   min_data_calibration_address = (angle_range_min * 2);
   switch(servo_num)
   {
-    case  SERVO_ROT_NUM:      iic_readbuf(adc_calibration_data, EXTERNAL_EEPROM_DEVICE_ADDRESS, ROT_SERVO_ADDRESS + min_data_calibration_address + 360, DATA_LENGTH);//360 means the adc calibration data offset
+    case  SERVO_ROT_NUM:      iic_readbuf(adc_calibration_data, EXTERNAL_EEPROM_SYS_ADDRESS, ROT_SERVO_ADDRESS + min_data_calibration_address + 360, DATA_LENGTH);//360 means the adc calibration data offset
                               break;
-    case  SERVO_LEFT_NUM:     iic_readbuf(adc_calibration_data, EXTERNAL_EEPROM_DEVICE_ADDRESS, LEFT_SERVO_ADDRESS + min_data_calibration_address + 360, DATA_LENGTH);//360 means the adc calibration data offset
+    case  SERVO_LEFT_NUM:     iic_readbuf(adc_calibration_data, EXTERNAL_EEPROM_SYS_ADDRESS, LEFT_SERVO_ADDRESS + min_data_calibration_address + 360, DATA_LENGTH);//360 means the adc calibration data offset
                               break;
-    case  SERVO_RIGHT_NUM:    iic_readbuf(adc_calibration_data, EXTERNAL_EEPROM_DEVICE_ADDRESS, RIGHT_SERVO_ADDRESS + min_data_calibration_address + 360, DATA_LENGTH);//360 means the adc calibration data offset
+    case  SERVO_RIGHT_NUM:    iic_readbuf(adc_calibration_data, EXTERNAL_EEPROM_SYS_ADDRESS, RIGHT_SERVO_ADDRESS + min_data_calibration_address + 360, DATA_LENGTH);//360 means the adc calibration data offset
                               break;
     default:                  break;    
   }
@@ -531,8 +537,7 @@ double uArmClass::analog_to_angle(int input_analog, byte servo_num)
 
   angle_range_min = angle_range_min + i_min;
   angle_range_max = angle_range_min + 1;
-  //Serial.println(angle_range_min,DEC);
-  //Serial.println(angle_range_max,DEC);
+
   if((((adc_calibration_data[i_min+i_min]<<8) + adc_calibration_data[1+i_min+i_min]) - input_analog) >= 0)//determine if the current value bigger than the input_analog
   {
     //angle_rang_min = map(input_analog, min_calibration_data, max_calibration_data, 0, 180) - (DATA_LENGTH>>2);
@@ -683,7 +688,7 @@ read_servo_angle(SERVO_LEFT_NUM);
 read_servo_angle(SERVO_RIGHT_NUM);
 }
 
-void uArmClass::read_servo_angle(byte servo_number) //double *data, unsigned int address)
+void uArmClass::read_servo_angle(byte servo_number, bool original_data)
 {
   double angle = 0;
   unsigned int address;
@@ -708,10 +713,10 @@ void uArmClass::read_servo_angle(byte servo_number) //double *data, unsigned int
       break;
   }
 
-
   unsigned int dat[8], temp;
   unsigned char i=0,j=0;
-  for(i=0;i<8;i++){
+  for(i=0;i<8;i++)
+  {
     switch(address)
     {
       case ROT_SERVO_ADDRESS: dat[i] = analogRead(SERVO_ROT_ANALOG_PIN);break;
@@ -736,11 +741,14 @@ void uArmClass::read_servo_angle(byte servo_number) //double *data, unsigned int
     case RIGHT_SERVO_ADDRESS: (*data) = uarm.analog_to_angle((dat[2]+dat[3]+dat[4]+dat[5])/4,SERVO_RIGHT_NUM);break;
     default:break;
   }
-  //check the external eeprom and transfer the data to ideal angle
-  unsigned char ideal_angle[4];
-  iic_readbuf(ideal_angle, EXTERNAL_EEPROM_DEVICE_ADDRESS, address + (((unsigned int)(*data) - 1) << 1), 4);
-  (*data) = (double)(((ideal_angle[2] << 8) + ideal_angle[3]) - ((ideal_angle[0] << 8) + ideal_angle[1])) * ((*data) - (unsigned int)(*data)) + ((ideal_angle[0] << 8) + ideal_angle[1]);
-  (*data) = (*data) / 10.0;
+  if(original_data == false)
+  {
+    //check the external eeprom and transfer the real angle to ideal angle
+    unsigned char ideal_angle[4];
+    iic_readbuf(ideal_angle, EXTERNAL_EEPROM_SYS_ADDRESS, address + (((unsigned int)(*data) - 1) << 1), 4);
+    (*data) = (double)(((ideal_angle[2] << 8) + ideal_angle[3]) - ((ideal_angle[0] << 8) + ideal_angle[1])) * ((*data) - (unsigned int)(*data)) + ((ideal_angle[0] << 8) + ideal_angle[1]);
+    (*data) = (*data) / 10.0;
+  }
 }
 
 /*!
@@ -954,8 +962,7 @@ unsigned char uArmClass::move_to(double x, double y, double z, double hand_angle
 	cur_left = left;
 	cur_right = right;
 	cur_hand = hand_angle;
-	hand_rot = hand_angle;
-    move_times = 0;//start to caculate the movement
+  move_times = 0;//start to caculate the movement
   return IN_RANGE;
 }
 
@@ -1357,7 +1364,7 @@ String uArmClass::runCommand(String cmnd){
 
       tone(BUZZER, values[0]);
       buzzerStopTime = millis() + int(values[1] * 1000.0); //sys_tick + values[1];
-      //Serial.println(buzzerStopTime);
+
       return S;
     }
     
@@ -1650,7 +1657,7 @@ unsigned char uArmClass::iic_readbuf(unsigned char *buf,unsigned char device_add
   while(len != 0)
   {
     *(buf + length_of_data - len) = iic_receivebyte();
-    //Serial.println(*(buf + length_of_data - len),DEC);
+
     len--;
     if(len != 0){
       send_ack();
@@ -1659,4 +1666,98 @@ unsigned char uArmClass::iic_readbuf(unsigned char *buf,unsigned char device_add
   iic_stop();
   return 0;
 }
+
+#ifdef LATEST_HARDWARE
+bool uArmClass::play()
+{
+  unsigned char data[5];  // 0: L  1: R  2: Rotation 3: hand rotation 4:gripper
+  recording_read(addr, data, 5);
+  if(data[0]!=255)
+  {
+    write_servos_angle((double)data[2], (double)data[0], (double)data[1]);
+  }
+  else
+  {
+    return false;
+  }
+
+  addr += 5;
+  return true;
+}
+
+bool uArmClass::record()
+{
+  if(addr <= 65530)
+  {
+    unsigned char data[5];  // 0: L  1: R  2: Rotation 3: hand rotation 4:gripper
+    if((addr != 65530)&&(sys_status != LEARNING_MODE_STOP))
+    {
+      read_servo_angle(SERVO_ROT_NUM, true);
+      read_servo_angle(SERVO_LEFT_NUM, true);
+      read_servo_angle(SERVO_RIGHT_NUM, true);
+      data[0] = (unsigned char)cur_left;
+      data[1] = (unsigned char)cur_right;
+      data[2] = (unsigned char)cur_rot;
+      //data[3] = (unsigned char)cur_hand;
+      data[4] = (digitalRead(PUMP_GRI_EN) == LOW) ? 0x00 : 0x01;//get the gri and pump status
+    }
+    else
+    {
+      data[0] = 255;//255 is the ending flag
+      recording_write(addr, data, 5);
+      /*if(sys_status == LEARNING_MODE_STOP)//LEARNING_MODE_STOP is just used to notificate record() function to stop, once record() get it then change the sys_status to normal_mode
+      {
+        sys_status = NORMAL_MODE;
+      }*/
+      return false;
+    }  
+    recording_write(addr, data, 5);
+    addr += 5;
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+
+}
+
+void uArmClass::recording_write(unsigned int address, unsigned char * data_array, int num)
+{
+  unsigned char i=0;
+  i=(address%128);
+  // Since the eeprom's sector is 128 byte, if we want to write 5 bytes per cycle we need to care about when there's less than 5 bytes left
+  if((i>=124)&&(num==5))
+  {
+    i=128-i;
+    iic_writebuf(data_array, EXTERNAL_EEPROM_USER_ADDRESS, address, i);// write data
+    delay(5);
+    iic_writebuf(data_array + i, EXTERNAL_EEPROM_USER_ADDRESS, address + i, num - i);// write data
+  }
+  //if the left bytes are greater than 5, just do it
+  else
+  {
+    iic_writebuf(data_array, EXTERNAL_EEPROM_USER_ADDRESS, address, num);// write data
+  }
+}
+
+void uArmClass::recording_read(unsigned int address, unsigned char * data_array, int num)
+{
+  unsigned char i=0;
+  i=(address%128);
+  // Since the eeprom's sector is 128 byte, if we want to write 5 bytes per cycle we need to care about when there's less than 5 bytes left
+  if((i>=124)&&(num==5))
+  {
+    i=128-i;
+    iic_readbuf(data_array, EXTERNAL_EEPROM_USER_ADDRESS, address, i);// write data
+    delay(5);
+    iic_readbuf(data_array + i, EXTERNAL_EEPROM_USER_ADDRESS, address + i, num - i);// write data
+  }
+  //if the left bytes are greater than 5, just do it
+  else
+  {
+    iic_readbuf(data_array, EXTERNAL_EEPROM_USER_ADDRESS, address, num);// write data
+  }
+}
+#endif
 //*************************************end***************************************//
