@@ -24,8 +24,9 @@
 #define LOOP_PLAY_MODE              4
 
 #define LEARNING_MODE_STOP          5 //for the record() function to stop recording
-
+//for the different version of hardware
 #define LATEST_HARDWARE
+
 // for the external eeprom 
 #ifdef LATEST_HARDWARE
    #define EXTERNAL_EEPROM_SYS_ADDRESS 0xA2
@@ -38,7 +39,7 @@
 #define RIGHT_SERVO_ADDRESS  0x02D0
 #define ROT_SERVO_ADDRESS    0x05A0
 
-#define current_ver         "0.9.8a"
+#define current_ver         "0.9.8b"
 
 #define SERVO_ROT_NUM           0
 #define SERVO_LEFT_NUM          1
@@ -105,22 +106,9 @@
 #define WORKING         1
 #define STOP            2
 #define PUMP_GRABBING_CURRENT 55
-// Calibration Flag & OFFSET EEPROM ADDRESS
-#define CALIBRATION_FLAG                    10
-#define CALIBRATION_LINEAR_FLAG             11
-#define CALIBRATION_MANUAL_FLAG             12
-#define CALIBRATION_STRETCH_FLAG            13
-
-#define LINEAR_INTERCEPT_START_ADDRESS      70
-#define LINEAR_SLOPE_START_ADDRESS          50
-#define MANUAL_OFFSET_ADDRESS               30
-#define OFFSET_STRETCH_START_ADDRESS        20
-#define SERIAL_NUMBER_ADDRESS               100
-
-#define A
-
-#define CONFIRM_FLAG                        0x80
-
+//ADC value of the front 9g servo
+#define SERVO_9G_MAX    605
+#define SERVO_9G_MIN    80
 // movement path types
 #define PATH_LINEAR     0   // path based on linear interpolation
 #define PATH_ANGLES     1   // path based on interpolation of servo angles

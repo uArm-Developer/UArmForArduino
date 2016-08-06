@@ -53,7 +53,7 @@ Commands:
                   
   [gAng]          Returns the analog read angle of all the servos in the robot and returns them as angleA#B#C#D# where ABCD are servos 0,1,2,3 respectively
                   Send Example:   [gAng]\n
-                  Return Example: [ST#L#R#]
+                  Return Example: [ST#L#R#F#]
                   
   [gIKX#Y#Z#]     Returns the inverse kinematics for XYZ point in the form A#B#C# where ABC are servos 0,1,2 respectively
                   Send Example:   [gIKX0Y-15Z15]\n
@@ -75,7 +75,13 @@ Commands:
                   Send Example:   [sBuzzF261.63T1]\n
                   Return Example: [S] or [F]  S:SUCCESS  F:WRONG NUMBER
 
+  [sStp]          Stop the movement immediately
+                  Send Example:   [sStp]\n
+                  Return Example: [S]
 
+  [gPow]          Get the status of power connection
+                  Send Example:   [gPow]\n
+                  Return Example: [S] or [F]
 
 ERRORS:
   [ERR1]          Your command was missing a parameter

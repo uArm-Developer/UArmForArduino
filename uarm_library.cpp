@@ -82,11 +82,18 @@ void uArmClass::arm_process_commands()
   }
 
 #ifdef LATEST_HARDWARE
-  //check the button status
-  if((digitalRead(BT_DETEC)==HIGH)&&(sys_status = NORMAL_MODE))//do it here
+  //check the BT status------------------------------------------------------------------------
+  digitalWrite(BT_DETEC,HIGH);//
+  pinMode(BT_DETEC, INPUT);
+  if(digitalRead(BT_DETEC)==HIGH)//do it here
   {
     sys_status = NORMAL_BT_CONNECTED_MODE;
   }
+  else
+  {
+    sys_status = NORMAL_MODE;   
+  }
+  pinMode(BT_DETEC,OUTPUT);
   //check the button4 status------------------------------------------------------------------------
   if(digitalRead(BTN_D4)==LOW)//check the D4 button
   {
@@ -171,7 +178,7 @@ void uArmClass::arm_process_commands()
       time_ticks++;
 
       //learning&playing mode function****************
-      switch(sys_status)//every 0.125s per point
+      switch(sys_status)//every 0.05s per point
       {
         case SINGLE_PLAY_MODE:
           if(play() == false)
@@ -708,7 +715,7 @@ void uArmClass::read_servo_angle(byte servo_number, bool original_data)
       data = &cur_right;
       break;
     case SERVO_HAND_ROT_NUM:
-      cur_hand = uarm.analog_to_angle(analogRead(SERVO_HAND_ROT_ANALOG_PIN), SERVO_HAND_ROT_NUM); //g_servo_hand_rot.read();  // SERVO_HAND_ROT_ANALOG_PIN),SERVO_HAND_ROT_NUM);
+      cur_hand = map(analogRead(SERVO_HAND_ROT_ANALOG_PIN), SERVO_9G_MIN, SERVO_9G_MAX, 0, 180); //g_servo_hand_rot.read();  // SERVO_HAND_ROT_ANALOG_PIN),SERVO_HAND_ROT_NUM);
       return;
       break;
   }
@@ -741,13 +748,27 @@ void uArmClass::read_servo_angle(byte servo_number, bool original_data)
     case RIGHT_SERVO_ADDRESS: (*data) = uarm.analog_to_angle((dat[2]+dat[3]+dat[4]+dat[5])/4,SERVO_RIGHT_NUM);break;
     default:break;
   }
-  if(original_data == false)
+  if((original_data == false)&&(servo_number != SERVO_HAND_ROT_NUM))//servo hand do not have the calibration data, jump over!
   {
     //check the external eeprom and transfer the real angle to ideal angle
     unsigned char ideal_angle[4];
     iic_readbuf(ideal_angle, EXTERNAL_EEPROM_SYS_ADDRESS, address + (((unsigned int)(*data) - 1) << 1), 4);
     (*data) = (double)(((ideal_angle[2] << 8) + ideal_angle[3]) - ((ideal_angle[0] << 8) + ideal_angle[1])) * ((*data) - (unsigned int)(*data)) + ((ideal_angle[0] << 8) + ideal_angle[1]);
     (*data) = (*data) / 10.0;
+    //add the TLR offset
+    switch(servo_number) {
+      case SERVO_ROT_NUM:
+          (*data) += ROT_SERVO_OFFSET;
+          break;
+      case SERVO_LEFT_NUM:
+          (*data) += LEFT_SERVO_OFFSET;
+          break;
+      case SERVO_RIGHT_NUM:
+          (*data) += RIGHT_SERVO_OFFSET;
+          break;
+      default:
+          break;
+    }
   }
 }
 
@@ -766,10 +787,6 @@ unsigned char uArmClass::get_current_xyz(double *cur_rot, double *cur_left , dou
   if(for_movement==true){
     get_current_rotleftright();
   }
-
-  //add the offset first
-  *cur_left = *cur_left + LEFT_SERVO_OFFSET;
-  *cur_right = *cur_right + RIGHT_SERVO_OFFSET;
 
   double stretch = MATH_L3 * cos((*cur_left) / MATH_TRANS) + MATH_L4 * cos((*cur_right) / MATH_TRANS) + MATH_L2;
   double height = MATH_L3 * sin((*cur_left) / MATH_TRANS) - MATH_L4 * sin((*cur_right) / MATH_TRANS) + MATH_L1;
@@ -870,7 +887,6 @@ unsigned char uArmClass::move_to(double x, double y, double z, double hand_angle
   	y = stretch * sin(y / MATH_TRANS);
   }
   // get current angles of servos
-
   // deal with relative xyz positioning
   if(relative_flags == RELATIVE)
   {
@@ -1117,48 +1133,26 @@ String uArmClass::runCommand(String cmnd){
 
     }else
 
-    //gPolS#R#H#--------------------------------------------------------------
-    if(cmnd.indexOf(F("gPol")) >= 0){
-      get_current_xyz(&cur_rot, &cur_left, &cur_right, &g_current_x, &g_current_y, &g_current_z, true);
-      double stretch;
-      stretch = sqrt(g_current_x * g_current_x + g_current_y * g_current_y);
-      return "[SS" + String(stretch) + " R" + String(cur_rot) + " H" + String(g_current_z) + "]";
-
-    }else
-
-    //gSimuX#Y#Z#-------------------------------------------------------------
-    if(cmnd.indexOf(F("gSim")) >= 0){
-      String parameters[] = {F("X"), F("Y"), F("Z")};
-      double values[3];
-      String errorResponse = getValues(cmnd, parameters, 3, values);
+    // sAttachS#----------------------------------------------------------------
+    if(cmnd.indexOf(F("sAtt")) >= 0){
+      String parameters[] = {F("S")};
+      double values[1];
+      String errorResponse        = getValues(cmnd, parameters, 1, values);
       if(errorResponse.length() > 0) {return errorResponse;}
 
-      bool polar;
-      move_to_the_closest_point = false;//make sure move_to_the_closest_point is false so that we can get the out_of_range feedback
-      if(values[3]==1)
-      	polar = true;
-      else
-      	polar = false;
-      switch(move_to(values[0], values[1], values[2], polar))
-      {
-        case IN_RANGE             :move_times=255;//disable move
-                                  return S0;
-                                  break;
-        case OUT_OF_RANGE_IN_PATH :move_times=255;//disable move
-                                  return F0;
-                                  break;
-        case OUT_OF_RANGE_IN_DST  :move_times=255;//disable move
-                                  return F1;
-                                  break;
-        default:break;
-      }
-
+      attach_servo(values[0]);
+      return S;
     }else
 
-    //gVer---------------------------------------------------------------------
-    if(cmnd.indexOf(F("gVer")) >= 0){
-      return "[S" + String(current_ver) + "]";
+    // sDetachS#----------------------------------------------------------------
+    if(cmnd.indexOf(F("sDet")) >= 0){
+      String parameters[] = {F("S")};
+      double values[1];
+      String errorResponse        = getValues(cmnd, parameters, 1, values);
+      if(errorResponse.length() > 0) {return errorResponse;}
 
+      detach_servo(values[0]);
+      return S;
     }else
 
     // sServoN#V#--------------------------------------------------------------
@@ -1209,19 +1203,6 @@ String uArmClass::runCommand(String cmnd){
        return S;
     }else
     
-    //gPump---------------------------------------------------------------------
-    if(cmnd.indexOf(F("gPum")) >= 0){
-      switch(pump_status())
-      {
-        case GRABBING:return S0;
-                       break;
-        case WORKING: return S1;
-                       break;
-        case STOP:    return S2;
-                       break;
-      }
-    }else
-
     //sGripperV#----------------------------------------------------------------
     if(cmnd.indexOf(F("sGri")) >= 0){
        String parameters[] = {F("V")};
@@ -1239,6 +1220,85 @@ String uArmClass::runCommand(String cmnd){
        return S;
     }else
 
+    //sBuzzF#T#-----------------------------------------------------------------
+    if(cmnd.indexOf(F("sBuz")) >= 0){
+      String parameters[] = { F("F"),F("T")};
+      double values[2];
+      String errorResponse        = getValues(cmnd, parameters, 2, values);
+      if(errorResponse.length() > 0) {return errorResponse;}
+      tone(BUZZER, values[0]);
+      buzzerStopTime = millis() + int(values[1] * 1000.0); //sys_tick + values[1];
+      return S;
+    }else
+
+    //sStp-------------------------------------------------------------------------
+    if (cmnd.indexOf(F("sStp")) >= 0)
+    {
+      move_times = 255; //stop the movement
+      return S;
+    }else
+
+    //gVer----------------------------------------------------------------------
+    if(cmnd.indexOf(F("gVer")) >= 0){
+      return "[S" + String(current_ver) + "]";
+    }else
+
+    //gSimuX#Y#Z#V#-------------------------------------------------------------
+    if(cmnd.indexOf(F("gSim")) >= 0){
+      String parameters[] = {F("X"), F("Y"), F("Z")};
+      double values[3];
+      String errorResponse = getValues(cmnd, parameters, 3, values);
+      if(errorResponse.length() > 0) {return errorResponse;}
+
+      bool polar;
+      move_to_the_closest_point = false;//make sure move_to_the_closest_point is false so that we can get the out_of_range feedback
+      if(values[3]==1)
+        polar = true;
+      else
+        polar = false;
+      switch(move_to(values[0], values[1], values[2], polar))
+      {
+        case IN_RANGE             :move_times=255;//disable move
+                                  return S0;
+                                  break;
+        case OUT_OF_RANGE_IN_PATH :move_times=255;//disable move
+                                  return F0;
+                                  break;
+        case OUT_OF_RANGE_IN_DST  :move_times=255;//disable move
+                                  return F1;
+                                  break;
+        default:break;
+      }
+    }else
+
+    //gCrd---------------------------------------------------------------------
+    if(cmnd.indexOf(F("gCrd")) >= 0){
+      get_current_xyz(&cur_rot, &cur_left, &cur_right, &g_current_x, &g_current_y, &g_current_z, true);
+      return "[SX" + String(g_current_x) + "Y" + String(g_current_y) + "Z" + String(g_current_z) + "]";
+    }else
+
+    //gPolS#R#H#--------------------------------------------------------------
+    if(cmnd.indexOf(F("gPol")) >= 0){
+      get_current_xyz(&cur_rot, &cur_left, &cur_right, &g_current_x, &g_current_y, &g_current_z, true);
+      double stretch;
+      stretch = sqrt(g_current_x * g_current_x + g_current_y * g_current_y);
+      return "[SS" + String(stretch) + " R" + String(cur_rot) + " H" + String(g_current_z) + "]";
+
+    }else
+
+    //gPump---------------------------------------------------------------------
+    if(cmnd.indexOf(F("gPum")) >= 0){
+      switch(pump_status())
+      {
+        case GRABBING:return S0;
+                       break;
+        case WORKING: return S1;
+                       break;
+        case STOP:    return S2;
+                       break;
+      }
+    }else
+
     //gGipper-------------------------------------------------------------------
     if(cmnd.indexOf(F("gGri")) >= 0){
       switch(gripper_status())
@@ -1252,39 +1312,11 @@ String uArmClass::runCommand(String cmnd){
       }
     }else
 
-    // sAttachS#----------------------------------------------------------------
-    if(cmnd.indexOf(F("sAtt")) >= 0){
-      String parameters[] = {F("S")};
-      double values[1];
-      String errorResponse        = getValues(cmnd, parameters, 1, values);
-      if(errorResponse.length() > 0) {return errorResponse;}
-
-      attach_servo(values[0]);
-      return S;
-    }else
-
-    
-    // sDetachS#----------------------------------------------------------------
-    if(cmnd.indexOf(F("sDet")) >= 0){
-      String parameters[] = {F("S")};
-      double values[1];
-      String errorResponse        = getValues(cmnd, parameters, 1, values);
-      if(errorResponse.length() > 0) {return errorResponse;}
-
-      detach_servo(values[0]);
-      return S;
-    }else
-
-    //gCrd---------------------------------------------------------------------
-    if(cmnd.indexOf(F("gCrd")) >= 0){
-      get_current_xyz(&cur_rot, &cur_left, &cur_right, &g_current_x, &g_current_y, &g_current_z, true);
-      return "[SX" + String(g_current_x) + "Y" + String(g_current_y) + "Z" + String(g_current_z) + "]";
-    }else
-
     //gAng---------------------------------------------------------------------
     if(cmnd.indexOf(F("gAng")) >= 0){
       get_current_rotleftright();
-      return "[ST" + String(cur_rot) + "L" + String(cur_left) + "R" + String(cur_right) + "]";
+      read_servo_angle(SERVO_HAND_ROT_NUM);
+      return "[ST" + String(cur_rot) + "L" + String(cur_left) + "R" + String(cur_right) + "F" + String(cur_hand) + "]";
     }else
 
     //gIKX#Y#Z#----------------------------------------------------------------
@@ -1329,7 +1361,6 @@ String uArmClass::runCommand(String cmnd){
       return letter + "X" + String(x) + "Y" + String(y) + "Z" + String(z) + "]";
     }else
 
-    
     //gMov-----------------------------------------------------------------------
     if(cmnd.indexOf(F("gMov")) >= 0){
       if(available()==false)
@@ -1354,26 +1385,18 @@ String uArmClass::runCommand(String cmnd){
         return S1;
       }
     }else
-
-    //sBuzzF#T#-------------------------------------------------------------------
-    if(cmnd.indexOf(F("sBuz")) >= 0){
-      String parameters[] = { F("F"),F("T")};
-      double values[2];
-      String errorResponse        = getValues(cmnd, parameters, 2, values);
-      if(errorResponse.length() > 0) {return errorResponse;}
-
-      tone(BUZZER, values[0]);
-      buzzerStopTime = millis() + int(values[1] * 1000.0); //sys_tick + values[1];
-
-      return S;
-    }
-    
-    
+    //gPow-----------------------------------------------------------------------
+    if(cmnd.indexOf(F("gPow")) >= 0){
+      if(analogRead(POW_DET)>512)
+        return S;
+      else
+        return F;
+    }else
+    //print err-------------------------------------------------------------------
     if(cmnd.length() > 0){
-
       return "[ERR3]";
-
-    }else{
+    }
+    else{
       return F("");
     }
 }
