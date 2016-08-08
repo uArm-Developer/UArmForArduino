@@ -25,9 +25,9 @@
 
 #define LEARNING_MODE_STOP          5 //for the record() function to stop recording
 //for the different version of hardware
-#define LATEST_HARDWARE
+// #define LATEST_HARDWARE
 
-// for the external eeprom 
+// for the external eeprom
 #ifdef LATEST_HARDWARE
    #define EXTERNAL_EEPROM_SYS_ADDRESS 0xA2
    #define EXTERNAL_EEPROM_USER_ADDRESS 0xA0
