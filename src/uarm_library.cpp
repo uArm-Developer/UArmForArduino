@@ -46,7 +46,7 @@ void uArmClass::arm_process_commands()
   //movement function
   if(move_times!=255)
   {
-    
+
     //if(move_times <= INTERP_INTVLS)--------------------------------------------------------------
     if((millis() - moveStartTime) >= (move_times * microMoveTime))// detect if it's time to move
     {
@@ -62,7 +62,7 @@ void uArmClass::arm_process_commands()
       {
 		    write_servo_angle(SERVO_HAND_ROT_NUM, cur_hand);
       }
-      
+
       move_times++;
       if(move_times > INTERP_INTVLS)
       {
@@ -91,7 +91,7 @@ void uArmClass::arm_process_commands()
   }
   else
   {
-    sys_status = NORMAL_MODE;   
+    sys_status = NORMAL_MODE;
   }
   pinMode(BT_DETEC,OUTPUT);
   //check the button4 status------------------------------------------------------------------------
@@ -168,7 +168,7 @@ void uArmClass::arm_process_commands()
         case LEARNING_MODE:
             if(time_ticks % 4 < 2) digitalWrite(SYS_LED,LOW);
             else digitalWrite(SYS_LED,HIGH);
-            break;          
+            break;
         case SINGLE_PLAY_MODE:
         case LOOP_PLAY_MODE:
             if(time_ticks % 40< 20) digitalWrite(SYS_LED,LOW);
@@ -217,7 +217,7 @@ void uArmClass::arm_setup()
   if(digitalRead(4)==LOW)
   {
     while(digitalRead(4)==LOW);
-        
+
     write_servos_angle(90,90,0);
     while(1);
   }
@@ -282,12 +282,12 @@ void uArmClass::read_servo_calibration_data(double *rot, double *left, double *r
   calibration_data_to_servo_angle(left,LEFT_SERVO_ADDRESS);
   calibration_data_to_servo_angle(right,RIGHT_SERVO_ADDRESS);
 
-} 
+}
 
 /*!
    \brief check the external eeprom and transfer the ideal data to real angle data
    \param data the address of the variable
-   \param address the section starting address of the external eeprom 
+   \param address the section starting address of the external eeprom
 */
 void uArmClass::calibration_data_to_servo_angle(double *data,unsigned int address)
 {
@@ -306,7 +306,7 @@ void uArmClass::calibration_data_to_servo_angle(double *data,unsigned int addres
       {
         i_min = i;
         deltaA = deltaB;
-      } 
+      }
   }
 
   closest_data = ((calibration_data[i_min+i_min]<<8) + calibration_data[1+(i_min+i_min)])/10.0;//transfer the dat from ideal data to servo angles
@@ -333,7 +333,7 @@ void uArmClass::calibration_data_to_servo_angle(double *data,unsigned int addres
     {
       *data = 1.0 * (*data - another_closest_data) / (closest_data - another_closest_data) + min_data_calibration_address/2 + i_min;
     }
-  }  
+  }
 }
 
 /*!
@@ -384,15 +384,15 @@ void uArmClass::write_servo_angle(byte servo_number, double servo_angle)
         // = constrain(servo_angle,0.0,180.0);
         switch(servo_number)
         {
-        case SERVO_ROT_NUM:       
+        case SERVO_ROT_NUM:
                 g_servo_rot.write(servo_angle);// ,hand_speed);
                 cur_rot = servo_angle;
                 break;
-        case SERVO_LEFT_NUM:      
+        case SERVO_LEFT_NUM:
                 g_servo_left.write(servo_angle);// ,hand_speed);
                 cur_left = servo_angle;
                 break;
-        case SERVO_RIGHT_NUM:     
+        case SERVO_RIGHT_NUM:
                 g_servo_right.write(servo_angle);// ,hand_speed);
                 cur_right = servo_angle;
                 break;
@@ -528,7 +528,7 @@ double uArmClass::analog_to_angle(int input_analog, byte servo_num)
                               break;
     case  SERVO_RIGHT_NUM:    iic_readbuf(adc_calibration_data, EXTERNAL_EEPROM_SYS_ADDRESS, RIGHT_SERVO_ADDRESS + min_data_calibration_address + 360, DATA_LENGTH);//360 means the adc calibration data offset
                               break;
-    default:                  break;    
+    default:                  break;
   }
 
   unsigned int deltaA = 0xffff, deltaB = 0, i, i_min = 0;
@@ -559,7 +559,7 @@ double uArmClass::analog_to_angle(int input_analog, byte servo_num)
     max_calibration_data = (adc_calibration_data[i_min+i_min+2]<<8) + adc_calibration_data[i_min+i_min+3];
     min_calibration_data = (adc_calibration_data[i_min+i_min]<<8) + adc_calibration_data[i_min+i_min+1];
   }
- 
+
   if(min_calibration_data < max_calibration_data)//return the angle
   {
     return ( 1.0 * (input_analog - min_calibration_data)/(max_calibration_data - min_calibration_data) + angle_range_min);
@@ -567,16 +567,16 @@ double uArmClass::analog_to_angle(int input_analog, byte servo_num)
   else
   {
     return (angle_range_min + angle_range_max) / 2.0;//angle from 1-180 but the address from 0-179
-  } 
+  }
 }
 
 /** Calculate the angles from given coordinate x, y, z to theta_1, theta_2, theta_3
 **/
 /*!
    \brief Calculate the angles from given coordinate x, y, z to theta_1, theta_2, theta_3
-   \param x X axis 
-   \param y Y axis 
-   \param z Z axis 
+   \param x X axis
+   \param y Y axis
+   \param z Z axis
    \param theta_1 SERVO_ROT_NUM servo angles
    \param theta_2 SERVO_LEFT_NUM servo angles
    \param theta_3 SERVO_RIGHT_NUM servo angles
@@ -617,14 +617,14 @@ unsigned char uArmClass::coordinate_to_angle(double x, double y, double z, doubl
       *theta_1 = atan(y / x)*MATH_TRANS;//angle tranfer 0-180 CCW
 
     }
-    if (x < 0) 
+    if (x < 0)
     {
       (*theta_1) = 180 + atan(y / x)*MATH_TRANS;//angle tranfer  0-180 CCW
 
     }
 
   }
-            
+
   	// Calculate value of theta 3
   if((*theta_1)!=90)//x_in is the stretch
   {
@@ -807,7 +807,7 @@ unsigned char uArmClass::get_current_xyz(double *cur_rot, double *cur_left , dou
     }
     if((*cur_rot < 0)||(*cur_rot > 180))
     {
-      return OUT_OF_RANGE; 
+      return OUT_OF_RANGE;
     }
   }
   return IN_RANGE;
@@ -1082,9 +1082,9 @@ unsigned char uArmClass::pump_status()
 
 //*************************************uart communication**************************************//
 String uArmClass::runCommand(String cmnd){
-    
+
     // To save memory, create the "[OK" and "]\n" right now, in flash memory
-  String S   = F("[S]"); 
+  String S   = F("[S]");
  	String S0  = F("[S0]");
  	String S1  = F("[S1]");
  	String S2  = F("[S2]");
@@ -1100,16 +1100,16 @@ String uArmClass::runCommand(String cmnd){
       if(errorResponse.length() > 0) {return errorResponse;}
 
       //limit the speed
-      move_to_the_closest_point = true; 
+      move_to_the_closest_point = true;
       /*if(move_to(values[0], values[1], values[2], values[3], false)!=IN_RANGE)
       {
         move_to_the_closest_point = false; //stop the move_to_the_closest_point function to avoid other problems
       	return F;
       }*/
       move_to(values[0], values[1], values[2], values[3], false);
-      move_to_the_closest_point = false; 
+      move_to_the_closest_point = false;
       return S;
-            
+
     }else
 
     //sPolS#H#R#--------------------------------------------------------------
@@ -1124,11 +1124,11 @@ String uArmClass::runCommand(String cmnd){
 
       /*if(move_to(values[0], values[1], values[2], values[3], true)!=IN_RANGE)
       {
-        move_to_the_closest_point = false; 
+        move_to_the_closest_point = false;
         return F;
       }*/
       move_to(values[0], values[1], values[2], values[3], true);
-      move_to_the_closest_point = false; 
+      move_to_the_closest_point = false;
       return S;
 
     }else
@@ -1165,16 +1165,16 @@ String uArmClass::runCommand(String cmnd){
       if(errorResponse.length() > 0) {return errorResponse;}
 
       switch((int)values[0])
-      {    
-        case 0: 
+      {
+        case 0:
           values[1] -= ROT_SERVO_OFFSET;
           calibration_data_to_servo_angle(&values[1],ROT_SERVO_ADDRESS);
           break;
-        case 1: 
+        case 1:
           values[1] -= LEFT_SERVO_OFFSET;
           calibration_data_to_servo_angle(&values[1],LEFT_SERVO_ADDRESS);
           break;
-        case 2: 
+        case 2:
           values[1] -= RIGHT_SERVO_OFFSET;
           calibration_data_to_servo_angle(&values[1],RIGHT_SERVO_ADDRESS);
           break;
@@ -1202,7 +1202,7 @@ String uArmClass::runCommand(String cmnd){
        }
        return S;
     }else
-    
+
     //sGripperV#----------------------------------------------------------------
     if(cmnd.indexOf(F("sGri")) >= 0){
        String parameters[] = {F("V")};
@@ -1373,7 +1373,7 @@ String uArmClass::runCommand(String cmnd){
       }
 
     }else
-    
+
     //gTip-----------------------------------------------------------------------
     if(cmnd.indexOf(F("gTip")) >= 0){
       if(digitalRead(LIMIT_SW))
@@ -1385,6 +1385,7 @@ String uArmClass::runCommand(String cmnd){
         return S1;
       }
     }else
+#ifdef LATEST_HARDWARE
     //gPow-----------------------------------------------------------------------
     if(cmnd.indexOf(F("gPow")) >= 0){
       if(analogRead(POW_DET)>512)
@@ -1392,6 +1393,7 @@ String uArmClass::runCommand(String cmnd){
       else
         return F;
     }else
+#endif
     //print err-------------------------------------------------------------------
     if(cmnd.length() > 0){
       return "[ERR3]";
@@ -1411,22 +1413,22 @@ String uArmClass::getValues(String cmnd, String parameters[], int parameterCount
       index[p] = cmnd.indexOf(parameters[p]);
       if(index[p] == -1){return errorMissingParameter;}
   }
-  
+
   //  Check that there is something between each parameter (AKA, the value)
-  for(int p = 0; p < parameterCount; p++){   
+  for(int p = 0; p < parameterCount; p++){
     if(p < parameterCount - 1){
       if((index[p + 1] - index[p]) == 1){
         return errorMissingValue;
       }
       valueArray[p] = cmnd.substring(index[p] + 1, index[p + 1]).toFloat();
-    }else{ 
+    }else{
       if(index[p] == cmnd.length() - 1){
         return errorMissingValue;
       }
       valueArray[p] = cmnd.substring(index[p] + 1).toFloat();
     }
   }
-  
+
   return F("");
 }
 
@@ -1498,7 +1500,7 @@ unsigned char uArmClass::read_ack()
   {
     PORTB &= 0xFE;// SCL=0
     iic_stop();
-    return 1; 
+    return 1;
   }
   else{
     PORTB &= 0xFE;// SCL=0
@@ -1516,10 +1518,10 @@ unsigned char uArmClass::read_ack()
   {
     PORTC &= 0xDF;//  SCL=0
     iic_stop();
-    return 1; 
+    return 1;
   }
   else{
-    PORTC &= 0xDF;//  SCL=0 
+    PORTC &= 0xDF;//  SCL=0
     DDRC = old_state;
     return 0;
   }
@@ -1534,7 +1536,7 @@ void uArmClass::send_ack()
 #ifdef LATEST_HARDWARE
   old_state = DDRB;
   DDRB = DDRB | 0x02;//SDA OUTPUT
-  PORTB &= 0xFD;// SDA=0 
+  PORTB &= 0xFD;// SDA=0
   delay_us();
   PORTB |= 0x01;// SCL=1
   delay_us();
@@ -1546,14 +1548,14 @@ void uArmClass::send_ack()
 #else
   old_state = DDRC;
   DDRC = DDRC | 0x10;//SDA OUTPUT
-  PORTC &= 0xEF;//  SDA=0 
+  PORTC &= 0xEF;//  SDA=0
   delay_us();
   PORTC |= 0x20;//  SCL=1
   delay_us();
   PORTC &= 0xDF;//  SCL=0
   delay_us();
   DDRC = old_state;
-  PORTC |= 0x10;//  SDA=1 
+  PORTC |= 0x10;//  SDA=1
   delay_us();
 #endif
 }
@@ -1567,7 +1569,7 @@ void uArmClass::iic_sendbyte(unsigned char dat)
     if(dat & 0x80)
       PORTB |= 0x02;// SDA=1
     else
-      PORTB &= 0xFD;// SDA=0 
+      PORTB &= 0xFD;// SDA=0
     dat <<= 1;
     delay_us();
     PORTB |= 0x01;// SCL=1
@@ -1594,7 +1596,7 @@ unsigned char uArmClass::iic_receivebyte()
 #ifdef LATEST_HARDWARE
   old_state = DDRB;
   DDRB = DDRB & 0xFD;//SDA INPUT
-#else  
+#else
   old_state = DDRC;
   DDRC = DDRC & 0xEF;//SDA INPUT
 #endif
@@ -1642,7 +1644,7 @@ unsigned char uArmClass::iic_writebuf(unsigned char *buf,unsigned char device_ad
   iic_sendbyte(addr>>8);
   if(read_ack())return 1;
   iic_sendbyte(addr%256);
-  if(read_ack())return 1; 
+  if(read_ack())return 1;
   while(len != 0)
   {
     iic_sendbyte(*(buf + length_of_data - len));
@@ -1651,7 +1653,7 @@ unsigned char uArmClass::iic_writebuf(unsigned char *buf,unsigned char device_ad
     delay(5);
   }
   iic_stop();
-  
+
   return 0;
 }
 
@@ -1733,7 +1735,7 @@ bool uArmClass::record()
         sys_status = NORMAL_MODE;
       }*/
       return false;
-    }  
+    }
     recording_write(addr, data, 5);
     addr += 5;
     return true;
