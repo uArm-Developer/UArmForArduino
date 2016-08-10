@@ -1,10 +1,10 @@
 Commands:
   [sMovX#Y#Z#V#]  Where # is a double, This will move the robot to an XYZ position, in S is speed in  mm/s from the current location to goal location
-                  Send Example:   [sMovX15Y15Z20V300]\n   //y is positive  xyz are in mm,V from 100-1000mm/s
+                  Send Example:   [sMovX150Y150Z100V300]\n   //y is positive  xyz are in mm,V from 100-1000mm/s
                   Return Example: [S]\n or [F]  S:SUCCEED F:OUT OF RANGE(but will go to the closest point)
 
   [sPolS#R#H#V#]  Set the polar coordinates
-                  Send Example:   [sPolS100R50H100V1]\n  S&H MEANS STRETCH AND HEIGHT(in mm),R MEANS ROT(in degree),V from 100-1000mm/s
+                  Send Example:   [sPolS150R50H100V300]\n  S&H MEANS STRETCH AND HEIGHT(in mm),R MEANS ROT(in degree),V from 100-1000mm/s
 		  Return Example: [S] or [F]
 
   [gPol]          Get the polar coordinates
@@ -20,7 +20,7 @@ Commands:
 		  Return Example: [S1.3.4]\n
   
   [sSerN#V#]      Where S# is the servo number and V# is an angle between 0 and 180. This will set the angle of that particular servo
-                  Send Example:   [sSerN1V1]\n 
+                  Send Example:   [sSerN1V10]\n 
                   Return Example: [S]
                   
   [sPumV#]        Where # is either 1 or 0. 1 means pump on, 0 means pump off.
@@ -56,11 +56,11 @@ Commands:
                   Return Example: [ST#L#R#F#]
                   
   [gIKX#Y#Z#]     Returns the inverse kinematics for XYZ point in the form A#B#C# where ABC are servos 0,1,2 respectively
-                  Send Example:   [gIKX0Y-15Z15]\n
+                  Send Example:   [gIKX0Y150Z150]\n
                   Return Example: [ST90L15R80]
                   
   [gFKT#L#R#]     Returns the forward kinematics for TLR servo angles in the form X#Y#Z# where TLR are servos 0,1,2 respectively
-                  Send Example:   [gFKT90L15R80]\n
+                  Send Example:   [gFKT190L150R80]\n
                   Return Example: [SX0Y-15Z15] 
                   
   [gMov]          Returns whether or not the robot is currently moving. Returns either 1 or 0 if it is moving or not.
@@ -72,7 +72,7 @@ Commands:
                   Return Example: [S0] or [S1]  S0:OFF S1:ON
 
   [sBuzF#T#]      Set the buzzer to F Frequency for T time
-                  Send Example:   [sBuzzF261.63T1]\n
+                  Send Example:   [sBuzzF1000T1]\n
                   Return Example: [S] or [F]  S:SUCCESS  F:WRONG NUMBER
 
   [sStp]          Stop the movement immediately

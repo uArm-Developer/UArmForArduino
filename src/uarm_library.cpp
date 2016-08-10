@@ -40,7 +40,7 @@ void uArmClass::arm_process_commands()
   if(Serial.available())
   {
     message = Serial.readStringUntil(']') + ']';
-    Serial.println(runCommand(message));         // Run the command and send back the response
+    runCommand(message);         // Run the command and send back the response
   }
 
   //movement function
@@ -236,14 +236,14 @@ void uArmClass::arm_setup()
 #endif
   unsigned char strings[6];
   //TEST
-  /*strings[0]=0;
-  strings[1]=10;
+  strings[0]=0;
+  strings[1]=28;
   strings[2]=0;
-  strings[3]=56;
+  strings[3]=125;
   strings[4]=0;
-  strings[5]=0;
+  strings[5]=70;
   iic_writebuf(strings, EXTERNAL_EEPROM_SYS_ADDRESS, 0x870, 6);
-  delay(500);*/
+  delay(500);
   //get the offset of assembling(address:0x870 *sequence[L R T]* each data 2 bytes) and the data is 10 times greater than the real in order to store easier
   iic_readbuf(strings, EXTERNAL_EEPROM_SYS_ADDRESS, 0x870, 6);
   LEFT_SERVO_OFFSET = ((strings[0]<<8) + strings[1])/10.0;
@@ -440,7 +440,6 @@ void uArmClass::attach_servo(byte servo_number)
     case SERVO_RIGHT_NUM:
       if (!g_servo_right.attached()) {
         read_servo_angle(SERVO_RIGHT_NUM,true);
-
         g_servo_right.attach(SERVO_RIGHT_PIN);
         g_servo_right.write(cur_right);
       }
@@ -448,9 +447,8 @@ void uArmClass::attach_servo(byte servo_number)
     case SERVO_HAND_ROT_NUM:
       if (!g_servo_hand_rot.attached()) {
         read_servo_angle(SERVO_HAND_ROT_NUM,true);
-        g_servo_hand_rot.attach(cur_hand);
-
-        //write_servo_angle(SERVO_HAND_ROT_NUM, angleBefore);
+        g_servo_hand_rot.attach(SERVO_HAND_ROT_PIN,600,2400);
+        g_servo_hand_rot.write(cur_hand);
       }
       break;
   }
@@ -547,7 +545,7 @@ double uArmClass::analog_to_angle(int input_analog, byte servo_num)
 
   if((((adc_calibration_data[i_min+i_min]<<8) + adc_calibration_data[1+i_min+i_min]) - input_analog) >= 0)//determine if the current value bigger than the input_analog
   {
-    //angle_rang_min = map(input_analog, min_calibration_data, max_calibration_data, 0, 180) - (DATA_LENGTH>>2);
+    
     max_calibration_data = (adc_calibration_data[i_min+i_min]<<8) + adc_calibration_data[i_min+i_min+1];
     min_calibration_data = (adc_calibration_data[i_min+i_min-2]<<8) + adc_calibration_data[i_min+i_min-1];
 
@@ -715,6 +713,7 @@ void uArmClass::read_servo_angle(byte servo_number, bool original_data)
       data = &cur_right;
       break;
     case SERVO_HAND_ROT_NUM:
+    	Serial.println(analogRead(SERVO_HAND_ROT_ANALOG_PIN),DEC);
       cur_hand = map(analogRead(SERVO_HAND_ROT_ANALOG_PIN), SERVO_9G_MIN, SERVO_9G_MAX, 0, 180); //g_servo_hand_rot.read();  // SERVO_HAND_ROT_ANALOG_PIN),SERVO_HAND_ROT_NUM);
       return;
       break;
@@ -1081,34 +1080,30 @@ unsigned char uArmClass::pump_status()
 }
 
 //*************************************uart communication**************************************//
-String uArmClass::runCommand(String cmnd){
+void uArmClass::runCommand(String cmnd){
 
     // To save memory, create the "[OK" and "]\n" right now, in flash memory
-  String S   = F("[S]");
+  	String S   = F("[S]");
  	String S0  = F("[S0]");
  	String S1  = F("[S1]");
  	String S2  = F("[S2]");
  	String F   = F("[F]");
  	String F0  = F("[F0]");
  	String F1  = F("[F1]");
+ 	String errorResponse;
 
     // sMov Command----------------------------------------------------------
     if(cmnd.indexOf(F("sMov")) >= 0){
       String parameters[] = {F("X"), F("Y"), F("Z"), F("V")};
       double values[4];
-      String errorResponse = getValues(cmnd, parameters, 4, values);
-      if(errorResponse.length() > 0) {return errorResponse;}
-
-      //limit the speed
-      move_to_the_closest_point = true;
-      /*if(move_to(values[0], values[1], values[2], values[3], false)!=IN_RANGE)
-      {
-        move_to_the_closest_point = false; //stop the move_to_the_closest_point function to avoid other problems
-      	return F;
-      }*/
-      move_to(values[0], values[1], values[2], values[3], false);
-      move_to_the_closest_point = false;
-      return S;
+      errorResponse = getValues(cmnd, parameters, 4, values);
+      if(errorResponse.length() == 0) {								//means no err
+      	Serial.println(S);// successful feedback send it immediately
+      	//limit the speed
+      	move_to_the_closest_point = true;
+      	move_to(values[0], values[1], values[2], values[3], false);
+      	move_to_the_closest_point = false;
+  	  }
 
     }else
 
@@ -1116,21 +1111,14 @@ String uArmClass::runCommand(String cmnd){
     if(cmnd.indexOf(F("sPol")) >= 0){
       String parameters[] = {F("S"), F("R"), F("H"), F("V")};
       double values[4];
-      String errorResponse = getValues(cmnd, parameters, 4, values);
-      if(errorResponse.length() > 0) {return errorResponse;}
-
-      //limit the speed
-      move_to_the_closest_point = true;
-
-      /*if(move_to(values[0], values[1], values[2], values[3], true)!=IN_RANGE)
-      {
-        move_to_the_closest_point = false;
-        return F;
-      }*/
-      move_to(values[0], values[1], values[2], values[3], true);
-      move_to_the_closest_point = false;
-      return S;
-
+      errorResponse = getValues(cmnd, parameters, 4, values);
+      if(errorResponse.length() == 0) {
+      	Serial.println(S);// successful feedback send it immediately
+      	//limit the speed
+     	move_to_the_closest_point = true;
+      	move_to(values[0], values[1], values[2], values[3], true);
+      	move_to_the_closest_point = false;
+	  }
     }else
 
     // sAttachS#----------------------------------------------------------------
@@ -1138,10 +1126,10 @@ String uArmClass::runCommand(String cmnd){
       String parameters[] = {F("S")};
       double values[1];
       String errorResponse        = getValues(cmnd, parameters, 1, values);
-      if(errorResponse.length() > 0) {return errorResponse;}
-
-      attach_servo(values[0]);
-      return S;
+      if(errorResponse.length() == 0) {
+      	Serial.println(S);// successful feedback send it immediately
+      	attach_servo(values[0]);
+  	  }
     }else
 
     // sDetachS#----------------------------------------------------------------
@@ -1149,10 +1137,10 @@ String uArmClass::runCommand(String cmnd){
       String parameters[] = {F("S")};
       double values[1];
       String errorResponse        = getValues(cmnd, parameters, 1, values);
-      if(errorResponse.length() > 0) {return errorResponse;}
-
-      detach_servo(values[0]);
-      return S;
+      if(errorResponse.length() == 0) {
+      	Serial.println(S);// successful feedback send it immediately
+      	detach_servo(values[0]);
+      }
     }else
 
     // sServoN#V#--------------------------------------------------------------
@@ -1161,28 +1149,28 @@ String uArmClass::runCommand(String cmnd){
 
       String servoSetParameters[] = {F("N"), F("V")};
       double values[2];
-      String errorResponse = getValues(cmnd, servoSetParameters, 2, values);
-      if(errorResponse.length() > 0) {return errorResponse;}
-
-      switch((int)values[0])
-      {
-        case 0:
-          values[1] -= ROT_SERVO_OFFSET;
-          calibration_data_to_servo_angle(&values[1],ROT_SERVO_ADDRESS);
-          break;
-        case 1:
-          values[1] -= LEFT_SERVO_OFFSET;
-          calibration_data_to_servo_angle(&values[1],LEFT_SERVO_ADDRESS);
-          break;
-        case 2:
-          values[1] -= RIGHT_SERVO_OFFSET;
-          calibration_data_to_servo_angle(&values[1],RIGHT_SERVO_ADDRESS);
-          break;
-        case 3:
-          break;
+      errorResponse = getValues(cmnd, servoSetParameters, 2, values);
+      if(errorResponse.length() == 0) {
+      	Serial.println(S);// successful feedback send it immediately
+      	switch((int)values[0])
+      	{
+      	  case 0:
+     	     values[1] -= ROT_SERVO_OFFSET;
+      	    calibration_data_to_servo_angle(&values[1],ROT_SERVO_ADDRESS);
+      	    break;
+      	  case 1:
+      	    values[1] -= LEFT_SERVO_OFFSET;
+      	    calibration_data_to_servo_angle(&values[1],LEFT_SERVO_ADDRESS);
+     	     break;
+      	  case 2:
+      	    values[1] -= RIGHT_SERVO_OFFSET;
+      	    calibration_data_to_servo_angle(&values[1],RIGHT_SERVO_ADDRESS);
+      	    break;
+      	  case 3:
+      	    break;
+      	}
+      	uarm.write_servo_angle(values[0], values[1]);
       }
-      uarm.write_servo_angle(values[0], values[1]);
-       return S;
     }else
 
     //sPumpV#------------------------------------------------------------------
@@ -1190,17 +1178,17 @@ String uArmClass::runCommand(String cmnd){
        String parameters[] = {F("V")};
        double values[1];
        String errorResponse        = getValues(cmnd, parameters, 1, values);
-       if(errorResponse.length() > 0) {return errorResponse;}
+       if(errorResponse.length() == 0) {
+      	 Serial.println(S);// successful feedback send it immediately
 
-
-       if(values[0]==0)//off
-       {
-        pump_catch(false);
-       }else//on
-       {
-        pump_catch(true);
-       }
-       return S;
+       	 if(values[0]==0)//off
+       	 {
+       	 	pump_catch(false);
+       	 }else//on
+       	 {
+       	 	pump_catch(true);
+       	 }
+       }	
     }else
 
     //sGripperV#----------------------------------------------------------------
@@ -1208,16 +1196,16 @@ String uArmClass::runCommand(String cmnd){
        String parameters[] = {F("V")};
        double values[1];
        String errorResponse        = getValues(cmnd, parameters, 1, values);
-       if(errorResponse.length() > 0) {return errorResponse;}
-
-       if(values[0]==0)//release
-       {
-        gripper_catch(false);
-       }else//catch
-       {
-        gripper_catch(true);
+       if(errorResponse.length() == 0) {
+      	 Serial.println(S);// successful feedback send it immediately
+       	 if(values[0]==0)//release
+      	  {
+       	 	gripper_catch(false);
+       	 }else//catch
+       	 {
+       	 	gripper_catch(true);
+       	 }
        }
-       return S;
     }else
 
     //sBuzzF#T#-----------------------------------------------------------------
@@ -1225,56 +1213,56 @@ String uArmClass::runCommand(String cmnd){
       String parameters[] = { F("F"),F("T")};
       double values[2];
       String errorResponse        = getValues(cmnd, parameters, 2, values);
-      if(errorResponse.length() > 0) {return errorResponse;}
-      tone(BUZZER, values[0]);
-      buzzerStopTime = millis() + int(values[1] * 1000.0); //sys_tick + values[1];
-      return S;
+      if(errorResponse.length() == 0) {
+      	Serial.println(S);// successful feedback send it immediately
+      	tone(BUZZER, values[0]);
+      	buzzerStopTime = millis() + int(values[1] * 1000.0); //sys_tick + values[1];
+      }
     }else
 
     //sStp-------------------------------------------------------------------------
-    if (cmnd.indexOf(F("sStp")) >= 0)
-    {
-      move_times = 255; //stop the movement
-      return S;
+    if (cmnd.indexOf(F("sStp")) >= 0){
+      	Serial.println(S);// successful feedback send it immediately
+      	move_times = 255; //stop the movement   
     }else
 
     //gVer----------------------------------------------------------------------
     if(cmnd.indexOf(F("gVer")) >= 0){
-      return "[S" + String(current_ver) + "]";
+      Serial.println("[S" + String(current_ver) + "]");
     }else
 
     //gSimuX#Y#Z#V#-------------------------------------------------------------
     if(cmnd.indexOf(F("gSim")) >= 0){
       String parameters[] = {F("X"), F("Y"), F("Z")};
       double values[3];
-      String errorResponse = getValues(cmnd, parameters, 3, values);
-      if(errorResponse.length() > 0) {return errorResponse;}
-
-      bool polar;
-      move_to_the_closest_point = false;//make sure move_to_the_closest_point is false so that we can get the out_of_range feedback
-      if(values[3]==1)
-        polar = true;
-      else
-        polar = false;
-      switch(move_to(values[0], values[1], values[2], polar))
-      {
-        case IN_RANGE             :move_times=255;//disable move
-                                  return S0;
+      errorResponse = getValues(cmnd, parameters, 3, values);
+      if(errorResponse.length() == 0) {
+      	bool polar;
+      	move_to_the_closest_point = false;//make sure move_to_the_closest_point is false so that we can get the out_of_range feedback
+      	if(values[3]==1)
+        	polar = true;
+      	else
+        	polar = false;
+     	 switch(move_to(values[0], values[1], values[2], polar))
+      	{
+        	case IN_RANGE             :move_times=255;//disable move
+                                  Serial.println(S0);
                                   break;
-        case OUT_OF_RANGE_IN_PATH :move_times=255;//disable move
-                                  return F0;
+        	case OUT_OF_RANGE_IN_PATH :move_times=255;//disable move
+                                  Serial.println(F0);
                                   break;
-        case OUT_OF_RANGE_IN_DST  :move_times=255;//disable move
-                                  return F1;
+        	case OUT_OF_RANGE_IN_DST  :move_times=255;//disable move
+                                  Serial.println(F1);
                                   break;
-        default:break;
-      }
+        	default:break;
+      	}
+  	  }
     }else
 
     //gCrd---------------------------------------------------------------------
     if(cmnd.indexOf(F("gCrd")) >= 0){
       get_current_xyz(&cur_rot, &cur_left, &cur_right, &g_current_x, &g_current_y, &g_current_z, true);
-      return "[SX" + String(g_current_x) + "Y" + String(g_current_y) + "Z" + String(g_current_z) + "]";
+      Serial.println("[SX" + String(g_current_x) + "Y" + String(g_current_y) + "Z" + String(g_current_z) + "]");
     }else
 
     //gPolS#R#H#--------------------------------------------------------------
@@ -1282,7 +1270,7 @@ String uArmClass::runCommand(String cmnd){
       get_current_xyz(&cur_rot, &cur_left, &cur_right, &g_current_x, &g_current_y, &g_current_z, true);
       double stretch;
       stretch = sqrt(g_current_x * g_current_x + g_current_y * g_current_y);
-      return "[SS" + String(stretch) + " R" + String(cur_rot) + " H" + String(g_current_z) + "]";
+      Serial.println("[SS" + String(stretch) + " R" + String(cur_rot) + " H" + String(g_current_z) + "]");
 
     }else
 
@@ -1290,11 +1278,11 @@ String uArmClass::runCommand(String cmnd){
     if(cmnd.indexOf(F("gPum")) >= 0){
       switch(pump_status())
       {
-        case GRABBING:return S0;
+        case GRABBING:Serial.println(S0);
                        break;
-        case WORKING: return S1;
+        case WORKING: Serial.println(S1);
                        break;
-        case STOP:    return S2;
+        case STOP:    Serial.println(S2);
                        break;
       }
     }else
@@ -1303,11 +1291,11 @@ String uArmClass::runCommand(String cmnd){
     if(cmnd.indexOf(F("gGri")) >= 0){
       switch(gripper_status())
       {
-        case GRABBING:return S0;
+        case GRABBING:Serial.println(S0);
                        break;
-        case WORKING: return S1;
+        case WORKING: Serial.println(S1);
                        break;
-        case STOP:    return S2;
+        case STOP:    Serial.println(S2);
                        break;
       }
     }else
@@ -1316,29 +1304,30 @@ String uArmClass::runCommand(String cmnd){
     if(cmnd.indexOf(F("gAng")) >= 0){
       get_current_rotleftright();
       read_servo_angle(SERVO_HAND_ROT_NUM);
-      return "[ST" + String(cur_rot) + "L" + String(cur_left) + "R" + String(cur_right) + "F" + String(cur_hand) + "]";
+      Serial.println("[ST" + String(cur_rot) + "L" + String(cur_left) + "R" + String(cur_right) + "F" + String(cur_hand) + "]");
     }else
 
     //gIKX#Y#Z#----------------------------------------------------------------
     if(cmnd.indexOf(F("gIK")) >= 0){
       String parameters[] = {F("X"), F("Y"), F("Z")};
       double values[3];
-      String errorResponse = getValues(cmnd, parameters, 3, values);
-      if(errorResponse.length() > 0) {return errorResponse;}
+      errorResponse = getValues(cmnd, parameters, 3, values);
+      if(errorResponse.length() == 0) {
 
-      double rot, left, right;
-      move_to_the_closest_point = false;
-      String letter;
-      if(coordinate_to_angle(values[0], values[1], values[2] , &rot, &left, &right) == OUT_OF_RANGE)
-      {
-        letter = F("[F");
+      	double rot, left, right;
+      	move_to_the_closest_point = false;
+      	String letter;
+      	if(coordinate_to_angle(values[0], values[1], values[2] , &rot, &left, &right) == OUT_OF_RANGE)
+      	{
+        	letter = F("[F");
+      	}
+      	else{
+        	letter = F("[S");
+        	left = left - LEFT_SERVO_OFFSET;//assembling offset
+        	right = right - RIGHT_SERVO_OFFSET;//assembling offset
+      	}
+      	Serial.println(letter + "T" + String(rot) + "L" + String(left) + "R" + String(right) + "]");
       }
-      else{
-        letter = F("[S");
-        left = left - LEFT_SERVO_OFFSET;//assembling offset
-        right = right - RIGHT_SERVO_OFFSET;//assembling offset
-      }
-      return  letter + "T" + String(rot) + "L" + String(left) + "R" + String(right) + "]";
     }else
 
     //gFKT#L#R#-----------------------------------------------------------------
@@ -1346,30 +1335,31 @@ String uArmClass::runCommand(String cmnd){
     if(cmnd.indexOf(F("gFK")) >= 0){
       String parameters[] = {F("T"), F("L"), F("R")};
       double values[3];
-      String errorResponse = getValues(cmnd, parameters, 3, values);
-      if(errorResponse.length() > 0) {return errorResponse;}
+      errorResponse = getValues(cmnd, parameters, 3, values);
+      	if(errorResponse.length() == 0) {
 
-      double x, y, z;
-      String letter;
-      if(get_current_xyz(&values[0], &values[1], &values[2], &x, &y, &z, false) == OUT_OF_RANGE)
-      {
-        letter = F("[F");
+      	double x, y, z;
+      	String letter;
+      	if(get_current_xyz(&values[0], &values[1], &values[2], &x, &y, &z, false) == OUT_OF_RANGE)
+      	{
+        	letter = F("[F");
+      	}
+      	else{
+        	letter = F("[S");
+      	}
+      	Serial.println(letter + "X" + String(x) + "Y" + String(y) + "Z" + String(z) + "]");
       }
-      else{
-        letter = F("[S");
-      }
-      return letter + "X" + String(x) + "Y" + String(y) + "Z" + String(z) + "]";
     }else
 
     //gMov-----------------------------------------------------------------------
     if(cmnd.indexOf(F("gMov")) >= 0){
       if(available()==false)
       {
-        return S;
+        Serial.println(S);
       }
       else
       {
-        return F;
+        Serial.println(F);
       }
 
     }else
@@ -1378,28 +1368,31 @@ String uArmClass::runCommand(String cmnd){
     if(cmnd.indexOf(F("gTip")) >= 0){
       if(digitalRead(LIMIT_SW))
       {
-        return S0;
+        Serial.println(S0);
       }
       else
       {
-        return S1;
+        Serial.println(S1);
       }
     }else
 #ifdef LATEST_HARDWARE
     //gPow-----------------------------------------------------------------------
     if(cmnd.indexOf(F("gPow")) >= 0){
       if(analogRead(POW_DET)>512)
-        return S;
+        Serial.println(S);
       else
-        return F;
+        Serial.println(F);
     }else
 #endif
     //print err-------------------------------------------------------------------
     if(cmnd.length() > 0){
-      return "[ERR3]";
+      Serial.println("[ERR3]");
     }
     else{
-      return F("");
+      Serial.println("");
+    }
+    if(errorResponse.length() > 0){// print the err infos
+    	Serial.println(errorResponse);
     }
 }
 

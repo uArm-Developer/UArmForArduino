@@ -39,7 +39,11 @@
 #define RIGHT_SERVO_ADDRESS  0x02D0
 #define ROT_SERVO_ADDRESS    0x05A0
 
-#define current_ver         "0.9.8b"
+#ifdef LATEST_HARDWARE
+	#define current_ver         "S0.9.9H2"
+#else
+   #define current_ver         "S0.9.9H3"
+#endif
 
 #define SERVO_ROT_NUM           0
 #define SERVO_LEFT_NUM          1
@@ -49,7 +53,7 @@
 #define SERVO_ROT_PIN           11
 #define SERVO_LEFT_PIN          13
 #define SERVO_RIGHT_PIN         12
-#define SERVO_HAND_PIN          10
+#define SERVO_HAND_ROT_PIN      10
 
 #define SERVO_ROT_ANALOG_PIN 2
 #define SERVO_LEFT_ANALOG_PIN 0
@@ -107,8 +111,8 @@
 #define STOP            2
 #define PUMP_GRABBING_CURRENT 55
 //ADC value of the front 9g servo
-#define SERVO_9G_MAX    605
-#define SERVO_9G_MIN    80
+#define SERVO_9G_MAX    460
+#define SERVO_9G_MIN    98
 // movement path types
 #define PATH_LINEAR     0   // path based on linear interpolation
 #define PATH_ANGLES     1   // path based on interpolation of servo angles
@@ -183,9 +187,7 @@ public:
     int write_servos_angle(double servo_rot_angle, double servo_left_angle, double servo_right_angle);
     void attach_all();
     void attach_servo(byte servo_num);
-    String runCommand(String cmnd);
-    void getCommandValues(String cmnd, String parameters[], int parameterCount, double *valueArray);
-    String isValidCommand(String cmnd, String parameters[], int parameterCount);
+    void runCommand(String cmnd);
     String getValues(String cmnd, String parameters[], int parameterCount, double *valueArray);
 
 private:
@@ -228,9 +230,9 @@ protected:
     double hand_speed=10;//to save the memory
 
     //offset of assembling
-    float RIGHT_SERVO_OFFSET =   5.6;//12.5ALEX//5.6mine//-1liebao   //1.8Degree
-    float LEFT_SERVO_OFFSET  =   1;//3.8ALEX//1mine//18.6liebao   //2.6Degree
-    float ROT_SERVO_OFFSET   =   0;//7ALEX//0mine//-7liebao
+    float RIGHT_SERVO_OFFSET =   12.5;//12.5ALEX//5.6mine//-1liebao   //1.8Degree
+    float LEFT_SERVO_OFFSET  =   3.8;//3.8ALEX//1mine//18.6liebao   //2.6Degree
+    float ROT_SERVO_OFFSET   =   7;//7ALEX//0mine//-7liebao
 
     //sys status
     unsigned char sys_status = NORMAL_MODE;
