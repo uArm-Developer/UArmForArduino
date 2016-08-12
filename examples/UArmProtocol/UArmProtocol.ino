@@ -20,7 +20,7 @@
 
 #define UARM_FIRMWARE_MAJOR_VERSION 1
 #define UARM_FIRMWARE_MINOR_VERSION 7
-#define UARM_FIRMWARE_BUGFIX        1
+#define UARM_FIRMWARE_BUGFIX        2
 
 #define START_SYSEX             0xF0 // start a MIDI Sysex message
 #define END_SYSEX               0xF7 // end a MIDI Sysex message
@@ -320,6 +320,7 @@ boolean handleSysex(byte command, byte argc, byte *argv)
             for(byte i=0; i<14; i++){
                 EEPROM.write(SERIAL_NUMBER_ADDRESS+i+1, argv[i+1]);
             }
+            EEPROM.write(SERIAL_NUMBER_ADDRESS, CONFIRM_FLAG);
             return true;
         }
         //0X21 READ_SERIAL_NUMBER

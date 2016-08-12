@@ -1,5 +1,19 @@
 # uArm Arduino Library Release Note
 
+## [1.7.3] - 2016-07-07
+
+### Fix
+- Fix write serial number CONFIRM_FLAG
+- uArm won't move if no LINEAR Calibration
+
+## [1.7.2] - 2016-06-30
+
+### Fix
+- attach servo even not calibrate
+- rewrite set_servo_status replace attach_servo detach_servo
+- execute write_stretch_height event not calibrate
+- Doxygen Document Support
+
 ## [1.7.1] - 2016-06-28
 
 ### Fix
