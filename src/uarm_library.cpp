@@ -236,19 +236,22 @@ void uArmClass::arm_setup()
 #endif
   unsigned char strings[6];
   //TEST
-  strings[0]=0;
-  strings[1]=28;
-  strings[2]=0;
-  strings[3]=125;
-  strings[4]=0;
-  strings[5]=70;
+  strings[0]=(int)(LEFT_SERVO_OFFSET*10)>>8;
+  strings[1]=(int)(LEFT_SERVO_OFFSET*10);
+  strings[2]=(int)(RIGHT_SERVO_OFFSET*10)>>8;
+  strings[3]=(int)(RIGHT_SERVO_OFFSET*10);
+  strings[4]=(int)(ROT_SERVO_OFFSET*10)>>8;
+  strings[5]=(int)(ROT_SERVO_OFFSET*10);
   iic_writebuf(strings, EXTERNAL_EEPROM_SYS_ADDRESS, 0x870, 6);
   delay(500);
   //get the offset of assembling(address:0x870 *sequence[L R T]* each data 2 bytes) and the data is 10 times greater than the real in order to store easier
   iic_readbuf(strings, EXTERNAL_EEPROM_SYS_ADDRESS, 0x870, 6);
-  LEFT_SERVO_OFFSET = ((strings[0]<<8) + strings[1])/10.0;
-  RIGHT_SERVO_OFFSET = ((strings[2]<<8) + strings[3])/10.0;
-  ROT_SERVO_OFFSET = ((strings[4]<<8) + strings[5])/10.0;
+  LEFT_SERVO_OFFSET = ((int)(strings[0]<<8) + strings[1])/10.0;
+  //Serial.println(LEFT_SERVO_OFFSET,DEC);
+  RIGHT_SERVO_OFFSET = ((int)(strings[2]<<8) + strings[3])/10.0;
+  //Serial.println(RIGHT_SERVO_OFFSET,DEC);
+  ROT_SERVO_OFFSET = ((int)(strings[4]<<8) + strings[5])/10.0;
+  //Serial.println(ROT_SERVO_OFFSET,DEC);
 }
 
 /*!
@@ -586,6 +589,10 @@ unsigned char uArmClass::coordinate_to_angle(double x, double y, double z, doubl
   double right_all = 0.0;
   double sqrt_z_x = 0.0;
   double phi = 0.0;
+  //make sure the xyz has two vaid data after the dot 
+  x = (double)((int)(x*100)/100.0);
+  y = (double)((int)(y*100)/100.0);
+  z = (double)((int)(z*100)/100.0);
 
   z_in = (z - MATH_L1) / MATH_L3;
   if(move_to_the_closest_point == false)//if need the move to closest point we have to jump over the return function
@@ -713,7 +720,6 @@ void uArmClass::read_servo_angle(byte servo_number, bool original_data)
       data = &cur_right;
       break;
     case SERVO_HAND_ROT_NUM:
-    	Serial.println(analogRead(SERVO_HAND_ROT_ANALOG_PIN),DEC);
       cur_hand = map(analogRead(SERVO_HAND_ROT_ANALOG_PIN), SERVO_9G_MIN, SERVO_9G_MAX, 0, 180); //g_servo_hand_rot.read();  // SERVO_HAND_ROT_ANALOG_PIN),SERVO_HAND_ROT_NUM);
       return;
       break;
@@ -886,6 +892,7 @@ unsigned char uArmClass::move_to(double x, double y, double z, double hand_angle
   	y = stretch * sin(y / MATH_TRANS);
   }
   // get current angles of servos
+  //get_current_xyz();
   // deal with relative xyz positioning
   if(relative_flags == RELATIVE)
   {
@@ -908,7 +915,6 @@ unsigned char uArmClass::move_to(double x, double y, double z, double hand_angle
     	return OUT_OF_RANGE_IN_DST;
   	}
   }
-
   //calculate the length and use the longest to determine the numbers of interpolation
   unsigned int delta_rot=abs(tgt_rot-cur_rot);
   unsigned int delta_left=abs(tgt_left-cur_left);
@@ -918,14 +924,13 @@ unsigned char uArmClass::move_to(double x, double y, double z, double hand_angle
   INTERP_INTVLS = max(INTERP_INTVLS,delta_right);
 
   INTERP_INTVLS = (INTERP_INTVLS<60) ? INTERP_INTVLS : 60;
-  //INTERP_INTVLS =1;// INTERP_INTVLS * (10 / times);// speed determine the number of interpolation
+  //INTERP_INTVLS =10;// INTERP_INTVLS * (10 / times);// speed determine the number of interpolation
   times = constrain(times, 100, 1000);
   hand_speed = times;//set the had rot speed
 
     interpolate(g_current_x, x, x_array, ease_type);// /10 means to make sure the t*t*t is still in the range
     interpolate(g_current_y, y, y_array, ease_type);
     interpolate(g_current_z, z, z_array, ease_type);
-
 
     //give the final destination value to the array
     x_array[INTERP_INTVLS] = x;
@@ -939,6 +944,7 @@ unsigned char uArmClass::move_to(double x, double y, double z, double hand_angle
       //check if all the data in range and give the tlr angles to the xyz array
       if(coordinate_to_angle(x_array[i], y_array[i], z_array[i], &rot, &left, &right) == OUT_OF_RANGE)
       {
+
       	if(move_to_the_closest_point==false){
       		return OUT_OF_RANGE_IN_PATH;
       	}
@@ -1048,7 +1054,21 @@ unsigned char uArmClass::gripper_status()
     }
   }
 #else
-
+  if(digitalRead(GRIPPER) == HIGH)
+  {
+  	return STOP;
+  }
+  else
+  {
+  	if(analogRead(GRIPPER_FEEDBACK) > 600)
+  	{
+  		return WORKING;
+  	}
+  	else
+  	{
+  		return GRABBING;
+  	}
+  }
 #endif
 }
 

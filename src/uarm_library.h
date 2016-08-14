@@ -40,9 +40,9 @@
 #define ROT_SERVO_ADDRESS    0x05A0
 
 #ifdef LATEST_HARDWARE
-	#define current_ver         "S0.9.9H2"
+	#define current_ver         "H3-S0.9.9a"
 #else
-   #define current_ver         "S0.9.9H3"
+   #define current_ver         "H2-S0.9.9a"
 #endif
 
 #define SERVO_ROT_NUM           0
@@ -88,6 +88,7 @@
     #define PUMP_EN                 6    // HIGH = Valve OPEN
     #define VALVE_EN                5    // HIGH = Pump ON
     #define GRIPPER                 9    // LOW = Catch
+    #define GRIPPER_FEEDBACK        A6
 #endif
 
 #define MATH_PI 3.141592653589793238463
@@ -230,9 +231,10 @@ protected:
     double hand_speed=10;//to save the memory
 
     //offset of assembling
-    float RIGHT_SERVO_OFFSET =   12.5;//12.5ALEX//5.6mine//-1liebao   //1.8Degree
-    float LEFT_SERVO_OFFSET  =   3.8;//3.8ALEX//1mine//18.6liebao   //2.6Degree
-    float ROT_SERVO_OFFSET   =   7;//7ALEX//0mine//-7liebao
+
+    float LEFT_SERVO_OFFSET  =   18.6;//3.8ALEX//1mine//18.6liebao   //2.6Degree
+    float RIGHT_SERVO_OFFSET =   -11;//12.5ALEX//5.6mine//-1liebao   //1.8Degree
+    float ROT_SERVO_OFFSET   =   -7;//7ALEX//0mine//-7liebao
 
     //sys status
     unsigned char sys_status = NORMAL_MODE;
