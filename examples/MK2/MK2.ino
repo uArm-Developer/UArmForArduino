@@ -1,4 +1,4 @@
-#define LATEST_HARDWARE
+#define PRODUCT_MKII
 #include "uarm_library.h"
 
 void setup() {

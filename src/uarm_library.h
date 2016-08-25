@@ -24,22 +24,21 @@
 #define LOOP_PLAY_MODE              4
 
 #define LEARNING_MODE_STOP          5 //for the record() function to stop recording
-//for the different version of hardware
-// #define LATEST_HARDWARE
 
+// #define LATEST_HARDWARE
 // for the external eeprom
-#ifdef LATEST_HARDWARE
+#ifdef PRODUCT_MKII
    #define EXTERNAL_EEPROM_SYS_ADDRESS 0xA2
    #define EXTERNAL_EEPROM_USER_ADDRESS 0xA0
 #else
-   #define EXTERNAL_EEPROM_SYS_ADDRESS  0xA0
+   #define EXTERNAL_EEPROM_USER_ADDRESS  0xA0 // EEPROM for learning mode - John Feng
 #endif
 #define DATA_LENGTH  0x20
 #define LEFT_SERVO_ADDRESS   0x0000
 #define RIGHT_SERVO_ADDRESS  0x02D0
 #define ROT_SERVO_ADDRESS    0x05A0
 
-#ifdef LATEST_HARDWARE
+#ifdef PRODUCT_MKII
 	#define current_ver         "H3-S0.9.9a"
 #else
    #define current_ver         "H2-S0.9.9a"
@@ -78,7 +77,8 @@
 #define BTN_D4                  4    // LOW = Pressed
 #define BTN_D7                  7    // LOW = Pressed
 
-#ifdef LATEST_HARDWARE
+
+#ifdef PRODUCT_MKII
     #define POW_DET                 A6   // power detection
     #define PUMP_GRI_STATUS         A7   // pump status feedback
     #define PUMP_GRI_EN             5    // HIGH = Pump ON
@@ -90,7 +90,6 @@
     #define GRIPPER                 9    // LOW = Catch
     #define GRIPPER_FEEDBACK        A6
 #endif
-
 #define MATH_PI 3.141592653589793238463
 #define MATH_TRANS  57.2958
 #define MATH_L1 90.00
@@ -104,16 +103,37 @@
 #define OUT_OF_RANGE_IN_PATH 2
 #define OUT_OF_RANGE         3
 
-#define RELATIVE 1
-#define ABSOLUTE 0
+//#define RELATIVE 1
+//#define ABSOLUTE 0
 //for the pump gripper function
 #define GRABBING        0
 #define WORKING         1
 #define STOP            2
 #define PUMP_GRABBING_CURRENT 55
-//ADC value of the front 9g servo
+#ifdef PRODUCT_MKII
 #define SERVO_9G_MAX    460
 #define SERVO_9G_MIN    98
+
+#else
+// Calibration Flag & OFFSET EEPROM ADDRESS
+#define CALIBRATION_FLAG                    10
+#define CALIBRATION_LINEAR_FLAG             11
+#define CALIBRATION_MANUAL_FLAG             12
+#define CALIBRATION_STRETCH_FLAG            13
+
+#define LINEAR_INTERCEPT_START_ADDRESS      70
+#define LINEAR_SLOPE_START_ADDRESS          50
+#define MANUAL_OFFSET_ADDRESS               30
+#define OFFSET_STRETCH_START_ADDRESS        20
+#define SERIAL_NUMBER_ADDRESS               100
+
+#define A
+
+#define CONFIRM_FLAG                        0x80
+
+#endif
+
+
 // movement path types
 #define PATH_LINEAR     0   // path based on linear interpolation
 #define PATH_ANGLES     1   // path based on interpolation of servo angles
@@ -134,6 +154,9 @@
 
 #define LINEAR_INTERCEPT        1
 #define LINEAR_SLOPE            2
+
+#define SUCCESS                 1
+#define FAILED                  -1
 
 class uArmClass
 {
@@ -162,19 +185,31 @@ public:
 
     unsigned char get_current_xyz(double *cur_rot, double *cur_left, double *cur_right, double *g_current_x, double *g_current_y, double *g_current_z, bool for_movement );
     void get_current_rotleftright();
+#ifdef PRODUCT_MKII	
     void calibration_data_to_servo_angle(double *data,unsigned int address);
     void read_servo_angle(byte servo_number, bool original_data);
     void read_servo_angle(byte servo_number)
     {
         read_servo_angle(servo_number, false);
     }
+	
+#else
+	int write_servo_angle(double servo_rot_angle, double servo_left_angle, double servo_right_angle);
+	void write_servo_angle(byte servo_num, double servo_angle,  boolean with_offset);
+	double read_servo_angle(byte servo_num);
+	double read_servo_angle(byte servo_num, boolean with_offset);
+	double analog_to_angle(int input_angle, byte servo_num, boolean with_offset);
+	void read_linear_offset(byte servo_num, double& intercept_val, double& slope_val);
+	void get_current_xyz();
+    void get_current_xyz(double theta_1, double theta_2, double theta_3);
+#endif	
 
     unsigned char coordinate_to_angle(double x, double y, double z, double *theta_1, double *theta_2, double *theta_3);
 
     void interpolate(double start_val, double end_val, double *interp_vals, byte ease_type);
 
     void gripper_catch(bool value);
-    unsigned char gripper_status();
+	unsigned char gripper_status();
     void pump_catch(bool value);
     unsigned char pump_status();
 
@@ -190,7 +225,19 @@ public:
     void attach_servo(byte servo_num);
     void runCommand(String cmnd);
     String getValues(String cmnd, String parameters[], int parameterCount, double *valueArray);
+    
+    // functions modified to be used for old version uArm
+    //void angle_to_coordinate(double theta_1, double theta_2, double theta_3, double& x, double& y, double &z) {
+    //    get_current_xyz(theta_1, theta_2, theta_3); x = g_current_x; y = g_current_y; z = g_current_z;    
+	//void get_current_xyz(double theta_1, double theta_2, double theta_3);
+	
 
+//	double read_servo_offset(byte servo_num);
+//	boolean set_servo_status(boolean attach_state, byte servo_num);
+
+
+
+	
 private:
     void delay_us();
     void iic_start();
@@ -212,9 +259,9 @@ protected:
     double cur_right = 90;
     double cur_hand = 90;
 
-    double g_current_x = 0;
-    double g_current_y = 200;
-    double g_current_z = 100;
+    double g_current_x = 10;
+    double g_current_y = 100;
+    double g_current_z = 150;
 
     boolean move_to_the_closest_point = false;
 
@@ -231,10 +278,10 @@ protected:
     double hand_speed=10;//to save the memory
 
     //offset of assembling
-
-    float LEFT_SERVO_OFFSET  =   18.6;//3.8ALEX//1mine//18.6liebao   //2.6Degree
-    float RIGHT_SERVO_OFFSET =   -11;//12.5ALEX//5.6mine//-1liebao   //1.8Degree
-    float ROT_SERVO_OFFSET   =   -7;//7ALEX//0mine//-7liebao
+    double RIGHT_SERVO_OFFSET;//12.5ALEX//5.6mine//-1liebao   //1.8Degree
+    double LEFT_SERVO_OFFSET;//3.8ALEX//1mine//18.6liebao   //2.6Degree
+    double ROT_SERVO_OFFSET;//7ALEX//0mine//-7liebao
+    double HAND_ROT_SERVO_OFFSET;
 
     //sys status
     unsigned char sys_status = NORMAL_MODE;
