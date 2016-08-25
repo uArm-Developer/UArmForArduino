@@ -39,9 +39,9 @@
 #define ROT_SERVO_ADDRESS    0x05A0
 
 #ifdef PRODUCT_MKII
-	#define current_ver         "H3-S0.9.9a"
+	#define current_ver         "H3-S2.0.9a"
 #else
-   #define current_ver         "H2-S0.9.9a"
+   #define current_ver         "H2-S2.0.9a"
 #endif
 
 #define SERVO_ROT_NUM           0
