@@ -1672,6 +1672,112 @@ void uArmClass::runCommand(String cmnd){
         Serial.println(F);
     }else
 #endif
+
+    // gDigN# Command----------------------------------------------------------
+    if(cmnd.indexOf(F("gDig")) >= 0){
+      String parameters[] = {F("N")}; // digit PIN: 10-13
+      double values[1];
+      errorResponse = getValues(cmnd, parameters, 1, values);
+      if(errorResponse.length() == 0) {								//means no err
+      	// read the digit value
+      	double val_d;
+      	val_d = digitalRead(values[0]);
+      	Serial.println("[S" + String(val_d) + "]");
+  	  }
+    }else
+    
+    // sDigN#V# Command----------------------------------------------------------
+    if(cmnd.indexOf(F("sDig")) >= 0){
+      String parameters[] = {F("N"), F("V")}; // 1 means to put PIN HIGH; 0 means LOW
+      double values[2];
+      errorResponse = getValues(cmnd, parameters, 2, values);
+      if(errorResponse.length() == 0) {								//means no err
+      	Serial.println(S);// successful feedback send it immediately
+      	// write the digit value
+      	values[1] == 1 ? digitalWrite(values[0], HIGH) : digitalWrite(values[0], LOW);
+  	  }
+    }else
+    
+    // gAnaN# Command----------------------------------------------------------
+    if(cmnd.indexOf(F("gAna")) >= 0){
+      String parameters[] = {F("N")}; // digit PIN: 0-3
+      double values[1];
+      errorResponse = getValues(cmnd, parameters, 1, values);
+      if(errorResponse.length() == 0) {								//means no err
+      	// read the analog value
+      	double val_a;
+      	val_a = analogRead(values[0]);
+      	Serial.println("[S" + String(val_a) + "]");
+  	  }
+    }else
+    
+    // gEEPRA#T# Command----------------------------------------------------------
+    if(cmnd.indexOf(F("gEEPR")) >= 0){
+      String parameters[] = {F("A"), F("T")}; // A: adress 0~2048 T: data type 1 or 2 or 4 bytes
+      double values[2];
+      errorResponse = getValues(cmnd, parameters, 2, values);
+      if(errorResponse.length() == 0) {								//means no err
+      	// read the EEPROM value
+            switch(int(values[1]))
+            {
+                case DATA_TYPE_BYTE:
+                {
+                    Serial.println("[S" + String(EEPROM.read(values[0])) + "]");
+                    break;
+                }
+                case DATA_TYPE_INTEGER:
+                {
+                    int i_val = 0;
+                    EEPROM.get(values[0], i_val);
+                    Serial.println("[S" + String(i_val) + "]");
+                    break;
+                }
+                case DATA_TYPE_FLOAT:
+                {
+                    float f_val = 0.0f;
+                    EEPROM.get(values[0],f_val);
+                    Serial.println("[S" + String(f_val) + "]");
+                    break;
+                }
+            }
+  	  }
+    }else
+    
+    // sEEPRA#T#V# Command----------------------------------------------------------
+    if(cmnd.indexOf(F("sEEPR")) >= 0){
+      String parameters[] = {F("A"), F("T"), F("V")}; // A: adress 0~2048 T: data type 1 or 2 or 4 bytes V: value
+      double values[3];
+      errorResponse = getValues(cmnd, parameters, 3, values);
+      if(errorResponse.length() == 0) {								//means no err
+      	Serial.println(S);// successful feedback send it immediately      	
+		  // write the EEPROM value
+            switch(int(values[1]))
+            {
+                case DATA_TYPE_BYTE:
+                {
+                	byte b_val;
+                	b_val = byte(values[2]);
+                    EEPROM.write(values[0], b_val);
+                    break;
+                }
+                case DATA_TYPE_INTEGER:
+                {
+                    int i_val = 0;
+                    i_val = int(values[2]);
+                    EEPROM.get(values[0], i_val);
+                    break;
+                }
+                case DATA_TYPE_FLOAT:
+                {
+                    float f_val = 0.0f;
+                    f_val = float(values[2]);
+                    EEPROM.get(values[0],f_val);
+                    break;
+                }
+            }
+  	  }
+    }else
+    
     //print err-------------------------------------------------------------------
     if(cmnd.length() > 0){
       Serial.println("[ERR3]");

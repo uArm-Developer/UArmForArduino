@@ -158,6 +158,10 @@
 #define SUCCESS                 1
 #define FAILED                  -1
 
+#define DATA_TYPE_BYTE          1
+#define DATA_TYPE_INTEGER       2
+#define DATA_TYPE_FLOAT         4
+
 class uArmClass
 {
 public:
