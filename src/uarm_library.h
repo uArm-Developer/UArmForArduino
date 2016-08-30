@@ -39,9 +39,9 @@
 #define ROT_SERVO_ADDRESS    0x05A0
 
 #ifdef PRODUCT_MKII
-	#define current_ver         "H3-S2.0.9a"
+	#define current_ver         "H3-2.0.9a"
 #else
-   #define current_ver         "H2-S2.0.9a"
+   #define current_ver         "H2-2.0.9a"
 #endif
 
 #define SERVO_ROT_NUM           0
@@ -189,14 +189,14 @@ public:
 
     unsigned char get_current_xyz(double *cur_rot, double *cur_left, double *cur_right, double *g_current_x, double *g_current_y, double *g_current_z, bool for_movement );
     void get_current_rotleftright();
-#ifdef PRODUCT_MKII	
+#ifdef PRODUCT_MKII
     void calibration_data_to_servo_angle(double *data,unsigned int address);
     void read_servo_angle(byte servo_number, bool original_data);
     void read_servo_angle(byte servo_number)
     {
         read_servo_angle(servo_number, false);
     }
-	
+
 #else
 	int write_servo_angle(double servo_rot_angle, double servo_left_angle, double servo_right_angle);
 	void write_servo_angle(byte servo_num, double servo_angle,  boolean with_offset);
@@ -206,7 +206,7 @@ public:
 	void read_linear_offset(byte servo_num, double& intercept_val, double& slope_val);
 	void get_current_xyz();
     void get_current_xyz(double theta_1, double theta_2, double theta_3);
-#endif	
+#endif
 
     unsigned char coordinate_to_angle(double x, double y, double z, double *theta_1, double *theta_2, double *theta_3);
 
@@ -229,19 +229,19 @@ public:
     void attach_servo(byte servo_num);
     void runCommand(String cmnd);
     String getValues(String cmnd, String parameters[], int parameterCount, double *valueArray);
-    
+
     // functions modified to be used for old version uArm
     //void angle_to_coordinate(double theta_1, double theta_2, double theta_3, double& x, double& y, double &z) {
-    //    get_current_xyz(theta_1, theta_2, theta_3); x = g_current_x; y = g_current_y; z = g_current_z;    
+    //    get_current_xyz(theta_1, theta_2, theta_3); x = g_current_x; y = g_current_y; z = g_current_z;
 	//void get_current_xyz(double theta_1, double theta_2, double theta_3);
-	
+
 
 //	double read_servo_offset(byte servo_num);
 //	boolean set_servo_status(boolean attach_state, byte servo_num);
 
 
 
-	
+
 private:
     void delay_us();
     void iic_start();
