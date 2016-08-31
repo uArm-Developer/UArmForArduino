@@ -1762,14 +1762,14 @@ void uArmClass::runCommand(String cmnd){
                 {
                     int i_val = 0;
                     i_val = int(values[2]);
-                    EEPROM.get(values[0], i_val);
+                    EEPROM.put(values[0], i_val);
                     break;
                 }
                 case DATA_TYPE_FLOAT:
                 {
                     float f_val = 0.0f;
                     f_val = float(values[2]);
-                    EEPROM.get(values[0],f_val);
+                    EEPROM.put(values[0],f_val);
                     break;
                 }
             }
