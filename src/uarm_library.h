@@ -1,12 +1,12 @@
-/*! ******************************************************************************
+/*!
    \file uarm_library.h
    \brief uarm library header
-   \author Joey Song
-   \update Joey Song, Alex Tan, Dave Corboy
-   \date 12/Dec/2014
-   \License GNU
-   \Copyright 2016 UFactory Team. All right reserved
-* *******************************************************************************/
+   License GNU
+   Copyright 2016 UFactory Team. All right reserved   
+   \author Joey Song, Alex Tan, Dave Corboy
+   \version MKII: H3-S2.0.9a  uArm Metal: H2-S2.0.9a
+   \date 08/30/2016
+*/
 #include <Arduino.h>
 #include <EEPROM.h>
 #include <Wire.h>
@@ -23,15 +23,16 @@
 #define SINGLE_PLAY_MODE            3
 #define LOOP_PLAY_MODE              4
 
-#define LEARNING_MODE_STOP          5 //for the record() function to stop recording
+//for the record() function to stop recording
+#define LEARNING_MODE_STOP          5 
 
-// #define LATEST_HARDWARE
 // for the external eeprom
 #ifdef PRODUCT_MKII
    #define EXTERNAL_EEPROM_SYS_ADDRESS 0xA2
    #define EXTERNAL_EEPROM_USER_ADDRESS 0xA0
 #else
-   #define EXTERNAL_EEPROM_USER_ADDRESS  0xA0 // EEPROM for learning mode - John Feng
+   // EEPROM for learning mode - John Feng
+   #define EXTERNAL_EEPROM_USER_ADDRESS  0xA0 
 #endif
 #define DATA_LENGTH  0x20
 #define LEFT_SERVO_ADDRESS   0x0000
@@ -39,9 +40,9 @@
 #define ROT_SERVO_ADDRESS    0x05A0
 
 #ifdef PRODUCT_MKII
-	#define current_ver         "H3-2.0.9a"
+	#define current_ver         "H3-S2.0.9a"
 #else
-   #define current_ver         "H2-2.0.9a"
+   #define current_ver         "H2-S2.0.9a"
 #endif
 
 #define SERVO_ROT_NUM           0
@@ -60,7 +61,6 @@
 #define SERVO_HAND_ROT_ANALOG_PIN 3
 
 // Old Control method Stretch / Height
-
 #define ARM_STRETCH_MIN   0
 #define ARM_STRETCH_MAX   300
 #define ARM_HEIGHT_MIN    -100
@@ -97,6 +97,7 @@
 #define MATH_L3 148.25
 #define MATH_L4 160.2
 #define MATH_L43 MATH_L4/MATH_L3
+
 //for the move_to function
 #define IN_RANGE             0
 #define OUT_OF_RANGE_IN_DST  1
@@ -181,7 +182,6 @@ public:
     unsigned char move_to(double x, double y, double z, double hand_angle, byte relative_flags, double times, byte ease_type, boolean enable_hand, bool polar);
     unsigned char move_to(double x, double y,double z, bool polar) {
         return move_to(x, y, z, 0, ABSOLUTE, 1.0, INTERP_EASE_INOUT_CUBIC, false, polar);
-        //return move_to(x, y, z, 0, ABSOLUTE, 1.0, INTERP_EASE_INOUT_CUBIC, false);
     }
     unsigned char move_to(double x, double y,double z,double times, bool polar) {
         return move_to(x, y, z, 0, ABSOLUTE, times, INTERP_EASE_INOUT_CUBIC, true, polar);
@@ -202,7 +202,7 @@ public:
 	void write_servo_angle(byte servo_num, double servo_angle,  boolean with_offset);
 	double read_servo_angle(byte servo_num);
 	double read_servo_angle(byte servo_num, boolean with_offset);
-	double analog_to_angle(int input_angle, byte servo_num, boolean with_offset);
+	double analog_to_angle(int input_angle, byte servo_num, bool with_offset);
 	void read_linear_offset(byte servo_num, double& intercept_val, double& slope_val);
 	void get_current_xyz();
     void get_current_xyz(double theta_1, double theta_2, double theta_3);
@@ -234,13 +234,8 @@ public:
     //void angle_to_coordinate(double theta_1, double theta_2, double theta_3, double& x, double& y, double &z) {
     //    get_current_xyz(theta_1, theta_2, theta_3); x = g_current_x; y = g_current_y; z = g_current_z;
 	//void get_current_xyz(double theta_1, double theta_2, double theta_3);
-
-
 //	double read_servo_offset(byte servo_num);
 //	boolean set_servo_status(boolean attach_state, byte servo_num);
-
-
-
 
 private:
     void delay_us();

@@ -1,10 +1,11 @@
 /*!
    \file uarm_library.cpp
-   \brief uArm Library for Arduino
-   \author Joe Song
-   \update Alex Tan, Dave Corboy
-   \license GNU
-   \copyright(c) 2016 UFactory Team. All right reserved
+   \brief uArm Library for Arduino 
+   license GNU
+   copyright(c) 2016 UFactory Team. All right reserved  
+   \author Joe Song, Alex Tan and Dave Corboy
+   \version MKII: H3-S2.0.9a  uArm Metal: H2-S2.0.9a
+   \date 08/30/2016
  */
 #include "uarm_library.h"
 
@@ -18,8 +19,8 @@ uArmClass::uArmClass()
 
 /*!
    \brief check the arm status
-   \Return true:free; false:busy
- */
+   \return true: free, false: busy
+*/
 bool uArmClass::available()
 {
   if(move_times!=255)
@@ -32,7 +33,6 @@ bool uArmClass::available()
 
 /*!
    \brief process the uarm movement
-   \no parameter
 */
 void uArmClass::arm_process_commands()
 {
@@ -192,7 +192,6 @@ void uArmClass::arm_process_commands()
       switch(sys_status)//every 0.125s per point
       {
         case SINGLE_PLAY_MODE:
-          //Serial.println("Test: whether single play mode");
           if(play() == false)
           {
             sys_status = NORMAL_MODE;
@@ -200,7 +199,7 @@ void uArmClass::arm_process_commands()
           }
           break;
         case LOOP_PLAY_MODE:
-          //Serial.println("Test: whether loop play mode");
+          //Serial.println("Test: whether loop play mode"); 
 		  if(play() == false)
           {
             //sys_status = LOOP_PLAY_MODE;
@@ -212,11 +211,9 @@ void uArmClass::arm_process_commands()
         case LEARNING_MODE_STOP:
           if(record() == false)
           {
-          	//Serial.println("Test: record stop");
             sys_status = NORMAL_MODE;
             addr = 0;
             attach_all();
-            //Serial.println("Test: whether get out from learning mode");
           }
           break;
         default: break;
@@ -228,6 +225,9 @@ void uArmClass::arm_process_commands()
 
 }
 
+/*!
+   \brief uArm initial setup
+*/
 void uArmClass::arm_setup()
 {
         pinMode(BTN_D4,INPUT_PULLUP);//special mode for calibration
@@ -316,7 +316,6 @@ int uArmClass::write_servo_angle(double servo_rot_angle, double servo_left_angle
    \brief Write the angle to Servo
    \param servo_number SERVO_ROT_NUM, SERVO_LEFT_NUM, SERVO_RIGHT_NUM, SERVO_HAND_ROT_NUM
    \param servo_angle Servo target angle, 0.00 - 180.00
-   \param writeWithoffset True: with Offset, False: without Offset
  */
 void uArmClass::write_servo_angle(byte servo_number, double servo_angle)
 {
@@ -347,6 +346,12 @@ void uArmClass::write_servo_angle(byte servo_number, double servo_angle)
 #endif
 }
 
+/*!
+   \brief Write the angle to one Servo
+   \param servo_number SERVO_ROT_NUM, SERVO_LEFT_NUM, SERVO_RIGHT_NUM, SERVO_HAND_ROT_NUM
+   \param servo_angle Servo target angle, 0.00 - 180.00
+   \param writeWithoffset True: with Offset, False: without Offset
+ */
 #ifndef PRODUCT_MKII
 void uArmClass::write_servo_angle(byte servo_number, double servo_angle, boolean writeWithoffset)
 {
@@ -382,12 +387,11 @@ void uArmClass::attach_all()
         attach_servo(SERVO_LEFT_NUM);
         attach_servo(SERVO_RIGHT_NUM);
         attach_servo(SERVO_HAND_ROT_NUM);
-        //Serial.println("attach_all");
 }
 
 /*!
    \brief Attach Servo, if servo has not been attached, attach the servo, and read the current Angle
-   \param servo number SERVO_ROT_NUM, SERVO_LEFT_NUM, SERVO_RIGHT_NUM, SERVO_HAND_ROT_NUM
+   \param servo_number SERVO_ROT_NUM, SERVO_LEFT_NUM, SERVO_RIGHT_NUM, SERVO_HAND_ROT_NUM
  */
 void uArmClass::attach_servo(byte servo_number)
 {
@@ -509,11 +513,10 @@ void uArmClass::detach_servo(byte servo_number)
 }
 
 /*!
-   \brief Convert the Analog to Servo Angle, by this formatter, angle = intercept + slope * analog
+   \brief Convert the Analog to Servo Angle
    \param input_analog Analog Value
    \param servo_num SERVO_ROT_NUM, SERVO_LEFT_NUM, SERVO_RIGHT_NUM, SERVO_HAND_ROT_NUM
-   \param withOffset true, false
-   \return Return Servo Angle
+   \return Servo Angle
  */
 
 double uArmClass::analog_to_angle(int input_analog, byte servo_num)
@@ -593,6 +596,14 @@ double uArmClass::analog_to_angle(int input_analog, byte servo_num)
 		analog_to_angle(input_analog, servo_num, true);
 #endif
 }
+
+/*!
+   \brief Convert the Analog to Servo Angle, by this formatter, angle = intercept + slope * analog
+   \param input_analog Analog Value
+   \param servo_num SERVO_ROT_NUM, SERVO_LEFT_NUM, SERVO_RIGHT_NUM, SERVO_HAND_ROT_NUM
+   \param withOffset true, false
+   \return Servo Angle
+ */
 #ifndef PRODUCT_MKII
 double uArmClass::analog_to_angle(int input_analog, byte servo_num, bool withOffset)
 {
@@ -604,8 +615,6 @@ double uArmClass::analog_to_angle(int input_analog, byte servo_num, bool withOff
 }
 #endif
 
-/** Calculate the angles from given coordinate x, y, z to theta_1, theta_2, theta_3
-**/
 /*!
    \brief Calculate the angles from given coordinate x, y, z to theta_1, theta_2, theta_3
    \param x X axis
@@ -614,6 +623,7 @@ double uArmClass::analog_to_angle(int input_analog, byte servo_num, bool withOff
    \param theta_1 SERVO_ROT_NUM servo angles
    \param theta_2 SERVO_LEFT_NUM servo angles
    \param theta_3 SERVO_RIGHT_NUM servo angles
+   \return IN_RANGE, OUT_OF_RANGE
  */
 unsigned char uArmClass::coordinate_to_angle(double x, double y, double z, double *theta_1, double *theta_2, double *theta_3)//theta_1:rotation angle   theta_2:the angle of lower arm and horizon   theta_3:the angle of upper arm and horizon
 {
@@ -736,6 +746,9 @@ void uArmClass::get_current_xyz()
 
 /*!
    \brief Calculate X,Y,Z to g_current_x,g_current_y,g_current_z
+   \param theta_1 Rot Servo Angle
+   \param theta_2 Left Servo Angle
+   \param theta_3 Right Servo Angle
  */
 void uArmClass::get_current_xyz(double theta_1, double theta_2, double theta_3)
 {
@@ -761,6 +774,7 @@ cur_left = read_servo_angle(SERVO_LEFT_NUM);
 cur_right = read_servo_angle(SERVO_RIGHT_NUM);
 #endif
 }
+
 #ifdef PRODUCT_MKII
 /*!
    \brief get the calibration data from the external eeprom
@@ -768,7 +782,6 @@ cur_right = read_servo_angle(SERVO_RIGHT_NUM);
    \param left the calibration data of left
    \param right the calibration data of right
  */
-
 void uArmClass::read_servo_calibration_data(double *rot, double *left, double *right)
 {
 
@@ -783,7 +796,6 @@ void uArmClass::read_servo_calibration_data(double *rot, double *left, double *r
    \param data the address of the variable
    \param address the section starting address of the external eeprom
 */
-
 void uArmClass::calibration_data_to_servo_angle(double *data,unsigned int address)
 {
   unsigned char calibration_data[DATA_LENGTH]; //get the calibration data around the data input
@@ -831,6 +843,11 @@ void uArmClass::calibration_data_to_servo_angle(double *data,unsigned int addres
   }
 }
 
+/*!
+   \brief read servo angle with calibration
+   \param servo_number SERVO_ROT_NUM, SERVO_LEFT_NUM, SERVO_RIGHT_NUM, SERVO_HAND_ROT_NUM
+   \param original_data true, false 
+*/
 void uArmClass::read_servo_angle(byte servo_number, bool original_data)
 {
   double angle = 0;
@@ -956,14 +973,6 @@ double uArmClass::read_servo_angle(byte servo_num, boolean withOffset)
 }
 
 /*!
-   \brief Convert the Analog to Servo Angle, by this formatter, angle = intercept + slope * analog
-   \param input_analog Analog Value
-   \param servo_num SERVO_ROT_NUM, SERVO_LEFT_NUM, SERVO_RIGHT_NUM, SERVO_HAND_ROT_NUM
-   \param withOffset true, false
-   \return Return Servo Angle
- */
-
-/*!
    \brief read Linear Offset from EEPROM, From LINEAR_INTERCEPT_START_ADDRESS & LINEAR_SLOPE_START_ADDRESS, each offset occupy 4 bytes in rom
    \param servo_num SERVO_ROT_NUM, SERVO_LEFT_NUM, SERVO_RIGHT_NUM, SERVO_HAND_ROT_NUM
    \param intercept_val get intercept_val
@@ -973,7 +982,6 @@ void uArmClass::read_linear_offset(byte servo_num, double& intercept_val, double
         EEPROM.get(LINEAR_INTERCEPT_START_ADDRESS + servo_num * sizeof(intercept_val), intercept_val);
         EEPROM.get(LINEAR_SLOPE_START_ADDRESS + servo_num * sizeof(slope_val), slope_val);
 }
-
 
 /*!
    \brief Read Servo Offset from EEPROM. From OFFSET_START_ADDRESS, each offset occupy 4 bytes in rom
@@ -1007,13 +1015,13 @@ void uArmClass::alert(byte times, byte runTime, byte stopTime)
 
 /*!
    \brief Calculate X,Y,Z to g_current_x,g_current_y,g_current_z
-   \param *cur_rot the address of value we want to caculate
-   \param *cur_left the address of value we want to caculate
-   \param *cur_right the address of value we want to caculate
-   \param *g_currnet_x the address of value we want to caculate
-   \param *g_current_y the address of value we want to caculate
-   \param *g_current_z the address of value we want to caculate
-   \param for movement is the flage to detect if we should get the real current angle of the uarm
+   \param cur_rot the address of value we want to caculate
+   \param cur_left the address of value we want to caculate
+   \param cur_right the address of value we want to caculate
+   \param g_current_x the address of value we want to caculate
+   \param g_current_y the address of value we want to caculate
+   \param g_current_z the address of value we want to caculate
+   \param for_movement the flage to detect if we should get the real current angle of the uarm
  */
 unsigned char uArmClass::get_current_xyz(double *cur_rot, double *cur_left , double *cur_right, double *g_current_x, double *g_current_y, double *g_current_z, bool for_movement )
 {
@@ -1052,7 +1060,7 @@ unsigned char uArmClass::get_current_xyz(double *cur_rot, double *cur_left , dou
   return IN_RANGE;
 }
 /*!
-   \brief "Genernate the position array"
+   \brief Genernate the position array
    \param start_val Start Position
    \param end_val End Position
    \param interp_vals interpolation array
@@ -1111,8 +1119,10 @@ void uArmClass::interpolate(double start_val, double end_val, double *interp_val
    \param z Z Axis Value if polar is true then z is the height
    \param hand_angle Hand Axis
    \param relative_flags ABSOLUTE, RELATIVE
+   \param times speed
+   \param ease_type interpolate type
    \param enable_hand Enable Hand Axis
-   \param polar is xyz coordinates or stretch&height&rot
+   \param polar false: xyz coordinates, true: stretch&height&rot
 */
 
 unsigned char uArmClass::move_to(double x, double y, double z, double hand_angle, byte relative_flags, double times, byte ease_type, boolean enable_hand, bool polar) {
@@ -1233,20 +1243,8 @@ unsigned char uArmClass::move_to(double x, double y, double z, double hand_angle
 }
 
 /*!
-   \brief Calculate X,Y,Z to g_current_x,g_current_y,g_current_z
- */
- /*
-void uArmClass::get_current_xyz(double theta_1, double theta_2, double theta_3)
-{
-        double l5 = (MATH_L2 + MATH_L3*cos(theta_2 / MATH_TRANS) + MATH_L4*cos(theta_3 / MATH_TRANS));
-
-        g_current_x = -cos(abs(theta_1 / MATH_TRANS))*l5;
-        g_current_y = -sin(abs(theta_1 / MATH_TRANS))*l5;
-        g_current_z = MATH_L1 + MATH_L3*sin(abs(theta_2 / MATH_TRANS)) - MATH_L4*sin(abs(theta_3 / MATH_TRANS));
-*/
-
-/*!
    \brief Gripper catch
+   \param value true, false
 */
 void uArmClass::gripper_catch(bool value)
 {
@@ -1272,6 +1270,7 @@ void uArmClass::gripper_catch(bool value)
 }
 /*!
    \brief Pump catch
+   \param value true, false
 */
 void uArmClass::pump_catch(bool value)
 {
@@ -1806,10 +1805,7 @@ String uArmClass::getValues(String cmnd, String parameters[], int parameterCount
       if((index[p + 1] - index[p]) == 1){
         return errorMissingValue;
       }
-      //Serial.println(index[p]);
-      //Serial.println(cmnd.substring(index[p] + 1, index[p + 1]));
       valueArray[p] = cmnd.substring(index[p] + 1, index[p + 1]).toFloat();
-      //Serial.println(valueArray[p]);
     }else{
       if(index[p] == cmnd.length() - 1){
         return errorMissingValue;
@@ -1817,10 +1813,6 @@ String uArmClass::getValues(String cmnd, String parameters[], int parameterCount
       valueArray[p] = cmnd.substring(index[p] + 1).toFloat();
     }
   }
-  //Serial.println(valueArray[0]);
-  //Serial.println(valueArray[1]);
-  //Serial.println(valueArray[2]);
-  //Serial.println(valueArray[3]);
   return F("");
 }
 
@@ -2089,16 +2081,6 @@ bool uArmClass::play()
 {
         unsigned char data[5]; // 0: L  1: R  2: Rotation 3: hand rotation 4:gripper
         recording_read(addr, data, 5);
-        //Serial.print("	LEFT ");
-        //Serial.print(data[0]);
-        //Serial.print("	RIGHT ");
-        //Serial.print(data[1]);
-        //Serial.print("	ROT ");
-        //Serial.print(data[2]);
-        //Serial.print("	data[3] ");
-        //Serial.print(data[3]);
-        //Serial.print("	data[4] ");
-        //Serial.println(data[4]);
         if(data[0]!=255)
         {
 #ifdef PRODUCT_MKII
