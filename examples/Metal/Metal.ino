@@ -9,7 +9,7 @@ void setup() {
   //uarm.move_to(70,70,150,false);
   uarm.arm_setup();
   //uarm.detach_servo(SERVO_HAND_ROT_NUM);
-  Serial.println("start");
+  // Serial.println("start");
   //float intercept_val = 0.00f;
   //float slope_val = 0.00f;
   //LEFT_SERVO_OFFSET = read_servo_offset(SERVO_LEFT_NUM);

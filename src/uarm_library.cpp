@@ -66,7 +66,7 @@ void uArmClass::arm_process_commands()
       {
 		    write_servo_angle(SERVO_HAND_ROT_NUM, cur_hand);
       }
-      
+
       move_times++;
       if(move_times > INTERP_INTVLS)
       {
@@ -200,7 +200,7 @@ void uArmClass::arm_process_commands()
           }
           break;
         case LOOP_PLAY_MODE:
-          //Serial.println("Test: whether loop play mode"); 
+          //Serial.println("Test: whether loop play mode");
 		  if(play() == false)
           {
             //sys_status = LOOP_PLAY_MODE;
@@ -344,7 +344,7 @@ void uArmClass::write_servo_angle(byte servo_number, double servo_angle)
         }
 #else
 		write_servo_angle(servo_number,servo_angle,true);
-#endif			
+#endif
 }
 
 #ifndef PRODUCT_MKII
@@ -549,7 +549,7 @@ double uArmClass::analog_to_angle(int input_analog, byte servo_num)
                               break;
     case  SERVO_RIGHT_NUM:    iic_readbuf(adc_calibration_data, EXTERNAL_EEPROM_SYS_ADDRESS, RIGHT_SERVO_ADDRESS + min_data_calibration_address + 360, DATA_LENGTH);//360 means the adc calibration data offset
                               break;
-    default:                  break;    
+    default:                  break;
   }
 
   unsigned int deltaA = 0xffff, deltaB = 0, i, i_min = 0;
@@ -580,7 +580,7 @@ double uArmClass::analog_to_angle(int input_analog, byte servo_num)
     max_calibration_data = (adc_calibration_data[i_min+i_min+2]<<8) + adc_calibration_data[i_min+i_min+3];
     min_calibration_data = (adc_calibration_data[i_min+i_min]<<8) + adc_calibration_data[i_min+i_min+1];
   }
- 
+
   if(min_calibration_data < max_calibration_data)//return the angle
   {
     return ( 1.0 * (input_analog - min_calibration_data)/(max_calibration_data - min_calibration_data) + angle_range_min);
@@ -588,7 +588,7 @@ double uArmClass::analog_to_angle(int input_analog, byte servo_num)
   else
   {
     return (angle_range_min + angle_range_max) / 2.0;//angle from 1-180 but the address from 0-179
-  } 
+  }
 #else
 		analog_to_angle(input_analog, servo_num, true);
 #endif
@@ -608,9 +608,9 @@ double uArmClass::analog_to_angle(int input_analog, byte servo_num, bool withOff
 **/
 /*!
    \brief Calculate the angles from given coordinate x, y, z to theta_1, theta_2, theta_3
-   \param x X axis 
-   \param y Y axis 
-   \param z Z axis 
+   \param x X axis
+   \param y Y axis
+   \param z Z axis
    \param theta_1 SERVO_ROT_NUM servo angles
    \param theta_2 SERVO_LEFT_NUM servo angles
    \param theta_3 SERVO_RIGHT_NUM servo angles
@@ -654,14 +654,14 @@ unsigned char uArmClass::coordinate_to_angle(double x, double y, double z, doubl
       *theta_1 = atan(y / x)*MATH_TRANS;//angle tranfer 0-180 CCW
 
     }
-    if (x < 0) 
+    if (x < 0)
     {
       (*theta_1) = 180 + atan(y / x)*MATH_TRANS;//angle tranfer  0-180 CCW
 
     }
 
   }
-            
+
   	// Calculate value of theta 3
   if((*theta_1)!=90)//x_in is the stretch
   {
@@ -776,12 +776,12 @@ void uArmClass::read_servo_calibration_data(double *rot, double *left, double *r
   calibration_data_to_servo_angle(left,LEFT_SERVO_ADDRESS);
   calibration_data_to_servo_angle(right,RIGHT_SERVO_ADDRESS);
 
-} 
+}
 
 /*!
    \brief check the external eeprom and transfer the ideal data to real angle data
    \param data the address of the variable
-   \param address the section starting address of the external eeprom 
+   \param address the section starting address of the external eeprom
 */
 
 void uArmClass::calibration_data_to_servo_angle(double *data,unsigned int address)
@@ -801,7 +801,7 @@ void uArmClass::calibration_data_to_servo_angle(double *data,unsigned int addres
       {
         i_min = i;
         deltaA = deltaB;
-      } 
+      }
   }
 
   closest_data = ((calibration_data[i_min+i_min]<<8) + calibration_data[1+(i_min+i_min)])/10.0;//transfer the dat from ideal data to servo angles
@@ -828,7 +828,7 @@ void uArmClass::calibration_data_to_servo_angle(double *data,unsigned int addres
     {
       *data = 1.0 * (*data - another_closest_data) / (closest_data - another_closest_data) + min_data_calibration_address/2 + i_min;
     }
-  }  
+  }
 }
 
 void uArmClass::read_servo_angle(byte servo_number, bool original_data)
@@ -1046,7 +1046,7 @@ unsigned char uArmClass::get_current_xyz(double *cur_rot, double *cur_left , dou
     }
     if((*cur_rot < 0)||(*cur_rot > 180))
     {
-      return OUT_OF_RANGE; 
+      return OUT_OF_RANGE;
     }
   }
   return IN_RANGE;
@@ -1130,7 +1130,7 @@ unsigned char uArmClass::move_to(double x, double y, double z, double hand_angle
   	y = stretch * sin(y / MATH_TRANS);
   }
   // get current angles of servos
-  
+
     // find current position using cached servo values
     //double current_x;
     //double current_y;
@@ -1360,7 +1360,7 @@ unsigned char uArmClass::pump_status()
 void uArmClass::runCommand(String cmnd){
 
     // To save memory, create the "[OK" and "]\n" right now, in flash memory
-    String S   = F("[S]"); 
+    String S   = F("[S]");
  	String S0  = F("[S0]");
  	String S1  = F("[S1]");
  	String S2  = F("[S2]");
@@ -1383,7 +1383,7 @@ void uArmClass::runCommand(String cmnd){
   	  }
 
     }else
-    
+
      //sPolS#H#R#--------------------------------------------------------------
     if(cmnd.indexOf(F("sPol")) >= 0){
       String parameters[] = {F("S"), F("R"), F("H"), F("V")};
@@ -1680,12 +1680,12 @@ void uArmClass::runCommand(String cmnd){
       errorResponse = getValues(cmnd, parameters, 1, values);
       if(errorResponse.length() == 0) {								//means no err
       	// read the digit value
-      	double val_d;
+      	int val_d;
       	val_d = digitalRead(values[0]);
       	Serial.println("[S" + String(val_d) + "]");
   	  }
     }else
-    
+
     // sDigN#V# Command----------------------------------------------------------
     if(cmnd.indexOf(F("sDig")) >= 0){
       String parameters[] = {F("N"), F("V")}; // 1 means to put PIN HIGH; 0 means LOW
@@ -1697,7 +1697,7 @@ void uArmClass::runCommand(String cmnd){
       	values[1] == 1 ? digitalWrite(values[0], HIGH) : digitalWrite(values[0], LOW);
   	  }
     }else
-    
+
     // gAnaN# Command----------------------------------------------------------
     if(cmnd.indexOf(F("gAna")) >= 0){
       String parameters[] = {F("N")}; // digit PIN: 0-3
@@ -1705,12 +1705,12 @@ void uArmClass::runCommand(String cmnd){
       errorResponse = getValues(cmnd, parameters, 1, values);
       if(errorResponse.length() == 0) {								//means no err
       	// read the analog value
-      	double val_a;
+      	int val_a;
       	val_a = analogRead(values[0]);
       	Serial.println("[S" + String(val_a) + "]");
   	  }
     }else
-    
+
     // gEEPRA#T# Command----------------------------------------------------------
     if(cmnd.indexOf(F("gEEPR")) >= 0){
       String parameters[] = {F("A"), F("T")}; // A: adress 0~2048 T: data type 1 or 2 or 4 bytes
@@ -1742,14 +1742,14 @@ void uArmClass::runCommand(String cmnd){
             }
   	  }
     }else
-    
+
     // sEEPRA#T#V# Command----------------------------------------------------------
     if(cmnd.indexOf(F("sEEPR")) >= 0){
       String parameters[] = {F("A"), F("T"), F("V")}; // A: adress 0~2048 T: data type 1 or 2 or 4 bytes V: value
       double values[3];
       errorResponse = getValues(cmnd, parameters, 3, values);
       if(errorResponse.length() == 0) {								//means no err
-      	Serial.println(S);// successful feedback send it immediately      	
+      	Serial.println(S);// successful feedback send it immediately
 		  // write the EEPROM value
             switch(int(values[1]))
             {
@@ -1764,20 +1764,20 @@ void uArmClass::runCommand(String cmnd){
                 {
                     int i_val = 0;
                     i_val = int(values[2]);
-                    EEPROM.get(values[0], i_val);
+                    EEPROM.put(values[0], i_val);
                     break;
                 }
                 case DATA_TYPE_FLOAT:
                 {
                     float f_val = 0.0f;
                     f_val = float(values[2]);
-                    EEPROM.get(values[0],f_val);
+                    EEPROM.put(values[0],f_val);
                     break;
                 }
             }
   	  }
     }else
-    
+
     //print err-------------------------------------------------------------------
     if(cmnd.length() > 0){
       Serial.println("[ERR3]");
@@ -1799,9 +1799,9 @@ String uArmClass::getValues(String cmnd, String parameters[], int parameterCount
       index[p] = cmnd.indexOf(parameters[p]);
       if(index[p] == -1){return errorMissingParameter;}
   }
-  
+
   //  Check that there is something between each parameter (AKA, the value)
-  for(int p = 0; p < parameterCount; p++){   
+  for(int p = 0; p < parameterCount; p++){
     if(p < parameterCount - 1){
       if((index[p + 1] - index[p]) == 1){
         return errorMissingValue;
@@ -1810,7 +1810,7 @@ String uArmClass::getValues(String cmnd, String parameters[], int parameterCount
       //Serial.println(cmnd.substring(index[p] + 1, index[p + 1]));
       valueArray[p] = cmnd.substring(index[p] + 1, index[p + 1]).toFloat();
       //Serial.println(valueArray[p]);
-    }else{ 
+    }else{
       if(index[p] == cmnd.length() - 1){
         return errorMissingValue;
       }
