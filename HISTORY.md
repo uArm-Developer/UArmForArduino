@@ -1,5 +1,10 @@
 # uArm Arduino Library Release Note
 
+## [2.0.9] - 2016-09-01
+
+## Changes
+- Brand New Communication Protocol
+
 ## [1.7.3] - 2016-07-07
 
 ### Fix

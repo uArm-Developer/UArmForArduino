@@ -60,6 +60,31 @@ static inline void handle_interrupts(timer16_Sequence_t timer, volatile uint16_t
 
   Channel[timer]++;    // increment to the next channel
   if( SERVO_INDEX(timer,Channel[timer]) < ServoCount && Channel[timer] < SERVOS_PER_TIMER) {
+
+
+      // Extension for slowmove 
+   if (SERVO(timer,Channel[timer]).speed) { 
+     // Increment ticks by speed until we reach the target. 
+     // When the target is reached, speed is set to 0 to disable that code. 
+     if (SERVO(timer,Channel[timer]).target > SERVO(timer,Channel[timer]).ticks) { 
+       SERVO(timer,Channel[timer]).ticks += SERVO(timer,Channel[timer]).speed; 
+       if (SERVO(timer,Channel[timer]).target <= SERVO(timer,Channel[timer]).ticks) { 
+         SERVO(timer,Channel[timer]).ticks = SERVO(timer,Channel[timer]).target; 
+         SERVO(timer,Channel[timer]).speed = 0; 
+       } 
+     } 
+     else { 
+       SERVO(timer,Channel[timer]).ticks -= SERVO(timer,Channel[timer]).speed; 
+       if (SERVO(timer,Channel[timer]).target >= SERVO(timer,Channel[timer]).ticks) { 
+         SERVO(timer,Channel[timer]).ticks = SERVO(timer,Channel[timer]).target; 
+         SERVO(timer,Channel[timer]).speed = 0; 
+       } 
+     } 
+   } 
+   // End of Extension for slowmove 
+
+
+    //original
     *OCRnA = *TCNTn + SERVO(timer,Channel[timer]).ticks;
     if(SERVO(timer,Channel[timer]).Pin.isActive == true)     // check if activated
       digitalWrite( SERVO(timer,Channel[timer]).Pin.nbr,HIGH); // its an active channel so pulse it high
@@ -272,6 +297,56 @@ void Servo::write(float value)
   }
   this->writeMicroseconds(value);
 }
+
+// Extension for slowmove 
+/* 
+   write(value, speed) - Just like write but at reduced speed. 
+  
+   value - Target position for the servo. Identical use as value of the function write. 
+   speed - Speed at which to move the servo. 
+           speed=0 - Full speed, identical to write 
+           speed=1 - Minimum speed 
+           speed=255 - Maximum speed 
+ */ 
+ void Servo::write(float value, uint8_t speed) { 
+   // This fuction is a copy of write and writeMicroseconds but value will be saved 
+   // in target instead of in ticks in the servo structure and speed will be save 
+   // there too. 
+ 
+
+   //double degrees = value; 
+ 
+   if (speed) { 
+     if (value < MIN_PULSE_WIDTH) { 
+       // treat values less than 544 as angles in degrees (valid values in microseconds are handled as microseconds) 
+           // updated to use constrain instead of if, pva 
+          value = value * 10;//make the value tem times bigger, must after the if() detection or if() will fail
+          value = constrain(value, 0, 1800); 
+          value = map(value, 0, 1800, SERVO_MIN(),  SERVO_MAX());     
+     } 
+
+     // calculate and store the values for the given channel 
+     byte channel = this->servoIndex; 
+     if( (channel >= 0) && (channel < MAX_SERVOS) ) {   // ensure channel is valid 
+           // updated to use constrain instead of if, pva 
+           //value = constrain(value, SERVO_MIN(), SERVO_MAX()); 
+      //Serial.println(value,DEC);
+ 
+       //value = value - TRIM_DURATION; 
+       value = usToTicks(value);  // convert to ticks after compensating for interrupt overhead - 12 Aug 2009 
+ 
+       // Set speed and direction 
+       uint8_t oldSREG = SREG; 
+       cli(); 
+       servos[channel].target = value;   
+       servos[channel].speed = speed;   
+       SREG = oldSREG;    
+     } 
+   }  
+   else { 
+     write (value); 
+   } 
+} 
 
 void Servo::writeMicroseconds(int value)
 {

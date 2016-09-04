@@ -1,10 +1,12 @@
-﻿# uArm Library Introduction {#mainpage}
-
+﻿
 **Warning, This Library is for developer, After upload the library, you must recalibrate the uArm**
 
 **Compatible**
 
  - uArm Metal
+
+Specification Please read Documentation Center /API
+[Developer Center][3]  
 
 ## Installation
 
@@ -17,6 +19,8 @@
 - Upload the example to your uArm
  If you don't know how to upload Arduino sketch,  We recommend you read this [Arduino Getting Started on Windows][397d20eb] or [Arduino Getting Started on MacOS][2d8a8b7a]
 - You need to recalibrate when you are new to this library. we recommend the GUI Calibration tool.   
+
+
 
 ### Manual Installation
 
