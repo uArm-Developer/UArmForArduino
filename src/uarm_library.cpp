@@ -1,8 +1,8 @@
 /*!
    \file uarm_library.cpp
-   \brief uArm Library for Arduino 
+   \brief uArm Library for Arduino
    license GNU
-   copyright(c) 2016 UFactory Team. All right reserved  
+   copyright(c) 2016 UFactory Team. All right reserved
    \author Joe Song, Alex Tan and Dave Corboy
    \version MKII: H3-S2.0.9a  uArm Metal: H2-S2.0.9a
    \date 08/30/2016
@@ -201,7 +201,7 @@ void uArmClass::arm_process_commands()
           }
           break;
         case LOOP_PLAY_MODE:
-          //Serial.println("Test: whether loop play mode"); 
+          //Serial.println("Test: whether loop play mode");
 		  if(play() == false)
           {
             //sys_status = LOOP_PLAY_MODE;
@@ -858,7 +858,7 @@ void uArmClass::calibration_data_to_servo_angle(double *data,unsigned int addres
 /*!
    \brief read servo angle with calibration
    \param servo_number SERVO_ROT_NUM, SERVO_LEFT_NUM, SERVO_RIGHT_NUM, SERVO_HAND_ROT_NUM
-   \param original_data true, false 
+   \param original_data true, false
 */
 void uArmClass::read_servo_angle(byte servo_number, bool original_data)
 {
@@ -1393,7 +1393,7 @@ void uArmClass::runCommand(String cmnd){
     // sMov Command----------------------------------------------------------
     //if(cmnd.indexOf(F("sPol"))>=0){
     if(cmnd == "sMov"){
-      char parameters[4] = {'X', 'Y', 'Z', 'V'};      
+      char parameters[4] = {'X', 'Y', 'Z', 'V'};
       //errorResponse = getValues(cmnd, parameters, 4, values);
       if(getValue(command, parameters, 4, values) == OK) {								//means no err
       	Serial.println(S);// successful feedback send it immediately
@@ -1489,9 +1489,9 @@ void uArmClass::runCommand(String cmnd){
        	 {
        	 	pump_catch(true);
        	 }
-       }	
+       }
     }else
-    
+
     //sGripperV#----------------------------------------------------------------
     //if(cmnd.indexOf(F("sGri")) >= 0){
     if(cmnd == "sGri"){
@@ -1525,13 +1525,13 @@ void uArmClass::runCommand(String cmnd){
     //if (cmnd.indexOf(F("sStp")) >= 0){
     if(cmnd == "sStp"){
       	Serial.println(S);// successful feedback send it immediately
-      	move_times = 255; //stop the movement   
+      	move_times = 255; //stop the movement
     }else
 
     //gVer----------------------------------------------------------------------
     //if(cmnd.indexOf(F("gVer")) >= 0){
     if(cmnd == "gVer"){
-      Serial.print(current_ver);
+      Serial.println(current_ver);
     }else
 
     //gSimuX#Y#Z#V#-------------------------------------------------------------
@@ -1539,7 +1539,7 @@ void uArmClass::runCommand(String cmnd){
     if(cmnd == "gSim"){
       char parameters[3] = {'X', 'Y', 'Z'};
       //errorResponse = getValues(cmnd, parameters, 3, values);
-      if(getValue(command, parameters, 3, values) == OK) 
+      if(getValue(command, parameters, 3, values) == OK)
       {
       	bool polar;
       	move_to_the_closest_point = false;//make sure move_to_the_closest_point is false so that we can get the out_of_range feedback
@@ -1560,7 +1560,7 @@ void uArmClass::runCommand(String cmnd){
       	}
   	  }
     }else
-    
+
     //gCrd---------------------------------------------------------------------
     if(cmnd == "gCrd"){
 #ifdef PRODUCT_MKII
@@ -1590,7 +1590,7 @@ void uArmClass::runCommand(String cmnd){
       values[2] = g_current_z;
       printf(true, values, letters, 3);
     }else
-    
+
 #ifdef PRODUCT_MKII
     //gPump---------------------------------------------------------------------
     //if(cmnd.indexOf(F("gPum")) >= 0){
@@ -1854,7 +1854,7 @@ char uArmClass::getValue(char *cmnd, char *parameters, int parameterCount, doubl
 {
   int index[parameterCount + 1];
   unsigned int p, q, minus_flag = 0;
-  
+
   delay(1);
   for(p = 0; p < parameterCount; p++)
   {
@@ -1914,7 +1914,7 @@ char uArmClass::getValue(char *cmnd, char *parameters, int parameterCount, doubl
       {
         minus_flag = 1;
         continue;
-      }      
+      }
 
       valueArray[p] *= 10;
       valueArray[p] += cmnd[index[p] + q] - 48;
