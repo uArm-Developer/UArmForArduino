@@ -163,6 +163,11 @@
 #define DATA_TYPE_INTEGER       2
 #define DATA_TYPE_FLOAT         4
 
+//getValue() function return
+#define OK                      0
+#define ERR1                    1
+#define ERR2                    2  
+
 class uArmClass
 {
 public:
@@ -228,7 +233,8 @@ public:
     void attach_all();
     void attach_servo(byte servo_num);
     void runCommand(String cmnd);
-    String getValues(String cmnd, String parameters[], int parameterCount, double *valueArray);
+    void printf(bool success, double *dat, char *letters, unsigned char num);
+	char getValue(char *cmnd, char *parameters, int parameterCount, double *valueArray);
 
     // functions modified to be used for old version uArm
     //void angle_to_coordinate(double theta_1, double theta_2, double theta_3, double& x, double& y, double &z) {
@@ -257,10 +263,16 @@ protected:
     double cur_left = 90;
     double cur_right = 90;
     double cur_hand = 90;
-
-    double g_current_x = 10;
-    double g_current_y = 100;
-    double g_current_z = 150;
+    
+    #ifdef PRODUCT_MKII
+    	double g_current_x = 0;
+    	double g_current_y = 200;
+    	double g_current_z = 100;
+    #else
+    	double g_current_x = 10;
+    	double g_current_y = 100;
+    	double g_current_z = 150; 
+	#endif   	
 
     boolean move_to_the_closest_point = false;
 
@@ -277,10 +289,16 @@ protected:
     double hand_speed=10;//to save the memory
 
     //offset of assembling
-    double RIGHT_SERVO_OFFSET;//12.5ALEX//5.6mine//-1liebao   //1.8Degree
-    double LEFT_SERVO_OFFSET;//3.8ALEX//1mine//18.6liebao   //2.6Degree
-    double ROT_SERVO_OFFSET;//7ALEX//0mine//-7liebao
-    double HAND_ROT_SERVO_OFFSET;
+    #ifdef PRODUCT_MKII
+	    float LEFT_SERVO_OFFSET  =   1;//3.8ALEX//1mine//18.6liebao   //2.6Degree
+    	float RIGHT_SERVO_OFFSET =   5.6;//12.5ALEX//5.6mine//-1liebao   //1.8Degree
+    	float ROT_SERVO_OFFSET   =   0;//7ALEX//0mine//-7liebao
+    #else
+    	double RIGHT_SERVO_OFFSET;
+    	double LEFT_SERVO_OFFSET;
+    	double ROT_SERVO_OFFSET;
+    	double HAND_ROT_SERVO_OFFSET;
+    #endif
 
     //sys status
     unsigned char sys_status = NORMAL_MODE;
