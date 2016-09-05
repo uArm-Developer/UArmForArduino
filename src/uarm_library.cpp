@@ -1566,7 +1566,7 @@ void uArmClass::runCommand(String cmnd){
 #ifdef PRODUCT_MKII
       get_current_xyz(&cur_rot, &cur_left, &cur_right, &g_current_x, &g_current_y, &g_current_z, true);
 #else
-      void get_current_xyz();
+      get_current_xyz(&cur_rot, &cur_left, &cur_right, &g_current_x, &g_current_y, &g_current_z, true);
 #endif
       char letters[3] = {'X','Y','Z'};
       values[0] = g_current_x;
@@ -1580,7 +1580,7 @@ void uArmClass::runCommand(String cmnd){
 #ifdef PRODUCT_MKII
       get_current_xyz(&cur_rot, &cur_left, &cur_right, &g_current_x, &g_current_y, &g_current_z, true);
 #else
-      void get_current_xyz();
+      get_current_xyz(&cur_rot, &cur_left, &cur_right, &g_current_x, &g_current_y, &g_current_z, true);
 #endif
       double stretch;
       stretch = sqrt(g_current_x * g_current_x + g_current_y * g_current_y);
