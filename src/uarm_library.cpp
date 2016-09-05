@@ -448,8 +448,8 @@ void uArmClass::attach_servo(byte servo_number)
         switch(servo_number) {
         case SERVO_ROT_NUM:
                 if (is_linear_calibrated == true) {
-                        read_servo_angle(SERVO_ROT_NUM);
-                        uarm.g_servo_rot.attach(SERVO_ROT_PIN);
+                		uarm.g_servo_rot.attach(SERVO_ROT_PIN);
+                        cur_rot = read_servo_angle(SERVO_ROT_NUM);
                         uarm.g_servo_rot.write(cur_rot + ROT_SERVO_OFFSET);
                 }
                 else{
@@ -459,8 +459,8 @@ void uArmClass::attach_servo(byte servo_number)
                 break;
         case SERVO_LEFT_NUM:
                 if (is_linear_calibrated == true) {
-                        uarm.read_servo_angle(SERVO_LEFT_NUM);
                         uarm.g_servo_left.attach(SERVO_LEFT_PIN);
+						cur_left = uarm.read_servo_angle(SERVO_LEFT_NUM);
                         uarm.g_servo_left.write(cur_left + LEFT_SERVO_OFFSET);
                 }
                 else{
@@ -470,8 +470,8 @@ void uArmClass::attach_servo(byte servo_number)
                 break;
         case SERVO_RIGHT_NUM:
                 if (is_linear_calibrated == true) {
-                        uarm.read_servo_angle(SERVO_RIGHT_NUM);
                         uarm.g_servo_right.attach(SERVO_RIGHT_PIN);
+						cur_right = uarm.read_servo_angle(SERVO_RIGHT_NUM);
                         uarm.g_servo_right.write(cur_right + RIGHT_SERVO_OFFSET);
                 }
                 else{
@@ -481,8 +481,8 @@ void uArmClass::attach_servo(byte servo_number)
                 break;
         case SERVO_HAND_ROT_NUM:
                 if (is_linear_calibrated == true) {
-                        uarm.read_servo_angle(SERVO_HAND_ROT_NUM);
                         uarm.g_servo_hand_rot.attach(SERVO_HAND_ROT_PIN);
+						cur_hand = uarm.read_servo_angle(SERVO_HAND_ROT_NUM);
                         uarm.g_servo_hand_rot.write(cur_hand + HAND_ROT_SERVO_OFFSET);
                 }
                 break;
@@ -1468,8 +1468,8 @@ void uArmClass::runCommand(String cmnd){
       }
 	  uarm.write_servo_angle(values[0], values[1]);
 #else
-              // in write_servo_angle function, add offset
-                uarm.write_servo_angle(byte(values[0]), values[1], true);
+        // in write_servo_angle function, add offset
+        uarm.write_servo_angle(byte(values[0]), values[1], true);
 #endif
         }
         }else
