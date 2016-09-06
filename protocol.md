@@ -26,12 +26,17 @@
 
  - \[gVer\]          Return the version of the firmware
 				  Send Example:   \[gVer\]\\n
-		  Return Example: \[S1.3.4\]\\n
+		  Return Example: \[vH2-1.3.4\]\\n
 
-  - \[sSerN#V#\]      Set Servo Angle
+  - \[sSerN#V#\]      Set Raw Servo Angle no offset
 	Where S# is the servo number and V# is an angle between 0 and 180. This will set the angle of that particular servo
 				  Send Example:   \[sSerN1V10\]\\n
 				  Return Example: \[S\]
+
+	- \[sAngN#V#\]      Set  Servo Angle with offset
+	Where S# is the servo number and V# is an angle between 0 and 180. This will set the angle of that particular servo
+				  Send Example:   \[sAngN1V10\]\\n
+				  Return Example: \[S\]					
 
  - \[sPumV#\]       Set Pump
 	 Where # is either 1 or 0. 1 means pump on, 0 means pump off.
@@ -63,9 +68,13 @@
 				  Send Example:   \[gCrd\]\\n
 				  Return Example: \[SX#Y#Z#\]
 
-  - \[gAng\]          Returns the analog read angle of all the servos in the robot and returns them as angleA#B#C#D# where ABCD are servos 0,1,2,3 respectively
+  - \[gAng\]          Returns the servo angles with offset of all the servos in the robot and returns them as angleA#B#C#D# where ABCD are servos 0,1,2,3 respectively
 				  Send Example:   \[gAng\]\\n
 				  Return Example: \[ST#L#R#F#\]
+
+	- \[gSer\]          Returns the RAW angle no offset of all the servos in the robot and returns them as angleA#B#C#D# where ABCD are servos 0,1,2,3 respectively
+				  Send Example:   \[gAng\]\\n
+				  Return Example: \[ST#L#R#F#\]					
 
  - \[gIKX#Y#Z#\]     Returns the inverse kinematics for XYZ point in the form A#B#C# where ABC are servos 0,1,2 respectively
 				  Send Example:   \[gIKX0Y150Z150\]\\n
@@ -94,12 +103,12 @@
   - \[gPow\]          Get the status of power connection
 				  Send Example:   \[gPow\]\\n
 				  Return Example: \[S\] or \[F\]
- - \[gEEPRA#T#\]   Get data from EEPROM
+ - \[gEEPA#T#\]   Get data from EEPROM
 				A# means address, address between 0 and 64 \* 1024
 				T# means data type, **1** means Byte, **2** means Integer, **4** means float
 				Send Example: \[gEEPRA1000T1\]\\n
 				Return Example: \[S100\]\\n
-- \[sEEPRA#T#V#\] Set Data to EEPROM
+- \[sEEPA#T#V#\] Set Data to EEPROM
 				A# Means Address, address between 0 and 64 \* 1024
 				T# means data type, **1** means Byte, **2** means Integer, **4** means float
 				V#, if T is 1, V data type is byte, if T is 2, V data type is Integer, if T is 4, V data type is float
