@@ -1383,13 +1383,13 @@ unsigned char uArmClass::pump_status()
 void uArmClass::runCommand(String cmnd){
 
     // To save memory, create the "OK" and "]\n" right now, in flash memory
-    String S   = F("[S]");
- 	String S0  = F("[S0]");
- 	String S1  = F("[S1]");
- 	String S2  = F("[S2]");
- 	String F   = F("[F]");
- 	String F0  = F("[F0]");
- 	String F1  = F("[F1]");
+  //   String S   = F("[S]");
+ // 	String S0  = F("[S0]");
+ // 	String S1  = F("[S1]");
+ // 	String S2  = F("[S2]");
+ // 	String F   = F("[F]");
+ // 	String F0  = F("[F0]");
+ // 	String F1  = F("[F1]");
     // char command[50];
     // cmnd.toCharArray(command, 50);
     // //get the first 4 command and compare it below
@@ -1402,10 +1402,10 @@ void uArmClass::runCommand(String cmnd){
     // sMov Command----------------------------------------------------------
     //if(cmnd.indexOf(F("sPol"))>=0){
     if(cmd == "sMov"){
-      char parameters[4] = {'X', 'Y', 'Z', 'V'};
+      const char parameters[4] = {'X', 'Y', 'Z', 'V'};
       //errorResponse = getValues(cmnd, parameters, 4, values);
       if(getValue(cmnd, parameters, 4, values) == OK) {								//means no err
-      	Serial.println(S);// successful feedback send it immediately
+      	Serial.println(SS);// successful feedback send it immediately
       	//limit the speed
       	move_to_the_closest_point = true;
       	move_to(values[0], values[1], values[2], values[3], false);
@@ -1417,10 +1417,10 @@ void uArmClass::runCommand(String cmnd){
     //sPolS#H#R#--------------------------------------------------------------
     //if(cmnd.indexOf(F("sPol")) >= 0){
     if(cmd == "sPol"){
-      char parameters[4] = {'S', 'R', 'H', 'V'};
+      const char parameters[4] = {'S', 'R', 'H', 'V'};
       //errorResponse = getValues(cmnd, parameters, 4, values);
       if(getValue(cmnd, parameters, 4, values) == OK) {
-      	Serial.println(S);// successful feedback send it immediately
+      	Serial.println(SS);// successful feedback send it immediately
       	//limit the speed
      	  move_to_the_closest_point = true;
       	move_to(values[0], values[1], values[2], values[3], true);
@@ -1431,10 +1431,10 @@ void uArmClass::runCommand(String cmnd){
     // sAttachS#----------------------------------------------------------------
     //if(cmnd.indexOf(F("sAtt")) >= 0){
     if(cmd == "sAtt"){
-      char parameters[1] = {'S'};
+      const char parameters[1] = {'S'};
       //String errorResponse        = getValues(cmnd, parameters, 1, values);
       if(getValue(cmnd, parameters, 1, values) == OK) {
-      	Serial.println(S);// successful feedback send it immediately
+      	Serial.println(SS);// successful feedback send it immediately
       	attach_servo(values[0]);
   	  }
     }else
@@ -1442,19 +1442,19 @@ void uArmClass::runCommand(String cmnd){
     // sDetachS#----------------------------------------------------------------
     //if(cmnd.indexOf(F("sDet")) >= 0){
     if(cmd == "sDet"){
-      char parameters[1] = {'S'};
+      const char parameters[1] = {'S'};
       //String errorResponse        = getValues(cmnd, parameters, 1, values);
       if(getValue(cmnd, parameters, 1, values) == OK) {
-      	Serial.println(S);// successful feedback send it immediately
+      	Serial.println(SS);// successful feedback send it immediately
       	detach_servo(values[0]);
       }
     }else
     // sServoN#V#--------------------------------------------------------------
     //if(cmnd.indexOf(F("sSer")) >= 0){
     if(cmd == "sSer"){
-      char parameters[2] = {'N', 'V'};
+      const char parameters[2] = {'N', 'V'};
       if(getValue(cmnd, parameters, 2, values) == OK) {
-        Serial.println(S);// successful feedback send it immediately
+        Serial.println(SS);// successful feedback send it immediately
         #ifdef PRODUCT_MKII
               switch((int)values[0])
               {
@@ -1482,10 +1482,10 @@ void uArmClass::runCommand(String cmnd){
     }
     // sAngN#V#--------------------------------------------------------------
     if(cmd == "sAng"){
-      char parameters[2] = {'N', 'V'};
+      const char parameters[2] = {'N', 'V'};
 
       if(getValue(cmnd, parameters, 2, values) == OK) {
-      	Serial.println(S);// successful feedback send it immediately
+      	Serial.println(SS);// successful feedback send it immediately
 #ifdef PRODUCT_MKII
       switch((int)values[0])
       {
@@ -1515,10 +1515,10 @@ void uArmClass::runCommand(String cmnd){
     //sPumpV#------------------------------------------------------------------
     //if(cmnd.indexOf(F("sPum")) >= 0){
     if(cmd == "sPum"){
-       char parameters[1] = {'V'};
+       const char parameters[1] = {'V'};
        //String errorResponse        = getValues(cmnd, parameters, 1, values);
        if(getValue(cmnd, parameters, 1, values) == OK) {
-      	 Serial.println(S);// successful feedback send it immediately
+      	 Serial.println(SS);// successful feedback send it immediately
 
        	 if(values[0] == 0)//off
        	 {
@@ -1533,10 +1533,10 @@ void uArmClass::runCommand(String cmnd){
     //sGripperV#----------------------------------------------------------------
     //if(cmnd.indexOf(F("sGri")) >= 0){
     if(cmd == "sGri"){
-       char parameters[1] = {'V'};
+       const char parameters[1] = {'V'};
        //String errorResponse        = getValues(cmnd, parameters, 1, values);
        if(getValue(cmnd, parameters, 1, values) == OK) {
-      	 Serial.println(S);// successful feedback send it immediately
+      	 Serial.println(SS);// successful feedback send it immediately
        	 if(values[0]==0)//release
       	  {
        	 	gripper_catch(false);
@@ -1550,10 +1550,10 @@ void uArmClass::runCommand(String cmnd){
     //sBuzzF#T#-----------------------------------------------------------------
     //if(cmnd.indexOf(F("sBuz")) >= 0){
     if(cmd == "sBuz"){
-      char parameters[3] = {'F','T', 'S'};
+      const char parameters[3] = {'F','T', 'S'};
       //String errorResponse        = getValues(cmnd, parameters, 2, values);
       if(getValue(cmnd, parameters, 3, values) == OK) {
-      	Serial.println(S);// successful feedback send it immediately
+      	Serial.println(SS);// successful feedback send it immediately
       	alert(values[0],values[1], values[2]);
       	// buzzerStopTime = millis() + int(values[1] * 1000.0); //sys_tick + values[1];
       }
@@ -1562,7 +1562,7 @@ void uArmClass::runCommand(String cmnd){
     //sStp-------------------------------------------------------------------------
     //if (cmnd.indexOf(F("sStp")) >= 0){
     if(cmd == "sStp"){
-      	Serial.println(S);// successful feedback send it immediately
+      	Serial.println(SS);// successful feedback send it immediately
       	move_times = 255; //stop the movement
     }else
 
@@ -1578,7 +1578,7 @@ void uArmClass::runCommand(String cmnd){
     //gSimuX#Y#Z#V#-------------------------------------------------------------
     //if(cmnd.indexOf(F("gSim")) >= 0){
     if(cmd == "gSim"){
-      char parameters[3] = {'X', 'Y', 'Z'};
+      const char parameters[3] = {'X', 'Y', 'Z'};
       //errorResponse = getValues(cmnd, parameters, 3, values);
       if(getValue(cmnd, parameters, 3, values) == OK)
       {
@@ -1689,7 +1689,7 @@ void uArmClass::runCommand(String cmnd){
     //gIKX#Y#Z#----------------------------------------------------------------
     //if(cmnd.indexOf(F("gIK")) >= 0){
     if(cmd == "gIKX"){
-      char parameters[3] = {'X', 'Y', 'Z'};
+      const char parameters[3] = {'X', 'Y', 'Z'};
       //errorResponse = getValues(cmnd, parameters, 3, values);
       if(getValue(cmnd, parameters, 3, values) == OK) {
 
@@ -1717,7 +1717,7 @@ void uArmClass::runCommand(String cmnd){
     // Get Forward Kinematics
     //if(cmnd.indexOf(F("gFK")) >= 0){
     if(cmd == "gFKT"){
-      char parameters[3] = {'T', 'L', 'R'};
+      const char parameters[3] = {'T', 'L', 'R'};
       //errorResponse = getValues(cmnd, parameters, 3, values);
       if(getValue(cmnd, parameters, 3, values) == OK) {
 
@@ -1744,11 +1744,11 @@ void uArmClass::runCommand(String cmnd){
     if(cmd == "gMov"){
       if(available()==false)
       {
-        Serial.println(S);
+        Serial.println(SS);
       }
       else
       {
-        Serial.println(F);
+        Serial.println(FF);
       }
 
     }else
@@ -1770,15 +1770,15 @@ void uArmClass::runCommand(String cmnd){
     //if(cmnd.indexOf(F("gPow")) >= 0){
     if(cmd == "gPow"){
       if(analogRead(POW_DET) > 512)
-        Serial.println(S);
+        Serial.println(SS);
       else
-        Serial.println(F);
+        Serial.println(FF);
     }else
 #endif
 
     // gDigN# Command----------------------------------------------------------
     if(cmd == "gDig"){
-      char parameters[1] = {'N'}; // digit PIN: 10-13
+      const char parameters[1] = {'N'}; // digit PIN: 10-13
       //double values[1];
       if(getValue(cmnd, parameters, 1, values) == OK) {								//means no err
       	// read the digit value
@@ -1792,10 +1792,10 @@ void uArmClass::runCommand(String cmnd){
     // sDigN#V# Command----------------------------------------------------------
     if(cmd == "sDig"){
       // 1 means to put PIN HIGH; 0 means LOW
-      char parameters[2] = {'N', 'V'};
+      const char parameters[2] = {'N', 'V'};
       //errorResponse = getValues(cmnd, parameters, 4, values);
       if(getValue(cmnd, parameters, 2, values) == OK) {
-      	Serial.println(S);// successful feedback send it immediately
+      	Serial.println(SS);// successful feedback send it immediately
       	// write the digit value
       	values[1] == 1 ? digitalWrite(values[0], HIGH) : digitalWrite(values[0], LOW);
   	  }
@@ -1803,7 +1803,7 @@ void uArmClass::runCommand(String cmnd){
 
     // gAnaN# Command----------------------------------------------------------
     if(cmd == "gAna"){
-      	char parameters[1] = {'N'}; // digit PIN: 0-3
+      	const char parameters[1] = {'N'}; // digit PIN: 0-3
       //double values[1];
       if(getValue(cmnd, parameters, 1, values) == OK) {								//means no err
       	// read the digit value
@@ -1816,7 +1816,7 @@ void uArmClass::runCommand(String cmnd){
 
     // gEEPRA#T# Command----------------------------------------------------------
     if(cmd == "gEEP"){
-      char parameters[2] = {'A', 'T'}; // A: adress 0~2048 T: data type 1 or 2 or 4 bytes
+      const char parameters[2] = {'A', 'T'}; // A: adress 0~2048 T: data type 1 or 2 or 4 bytes
 	  if(getValue(cmnd, parameters, 2, values) == OK) {								//means no err
       		//Serial.println("test"+String(int(values[0]))+"test"+String(int(values[1])));
 		  // read the EEPROM value
@@ -1852,9 +1852,9 @@ void uArmClass::runCommand(String cmnd){
 
     // sEEPRA#T#V# Command----------------------------------------------------------
     if(cmd == "sEEP"){
-      char parameters[3] = {'A', 'T', 'V'}; // A: adress 0~2048 T: data type 1 or 2 or 4 bytes V: value
+      const char parameters[3] = {'A', 'T', 'V'}; // A: adress 0~2048 T: data type 1 or 2 or 4 bytes V: value
         if(getValue(cmnd, parameters, 3, values) == OK) {								//means no err
-      	Serial.println(S);// successful feedback send it immediately
+      	Serial.println(SS);// successful feedback send it immediately
 		  // write the EEPROM value
             switch(int(values[1]))
             {
@@ -1925,7 +1925,7 @@ void uArmClass::printf(bool success, int dat)
 }
 /*!
 */
-char uArmClass::getValue(String cmnd, char *parameters, int parameterCount, double valueArray[])
+char uArmClass::getValue(String cmnd, const char *parameters, int parameterCount, double valueArray[])
 {
   // int index[parameterCount + 1];
   // unsigned int p, q, minus_flag = 0;

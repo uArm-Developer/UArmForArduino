@@ -42,9 +42,9 @@
 #define ROT_SERVO_ADDRESS    0x05A0
 
 #ifdef PRODUCT_MKII
-	#define current_ver         "H3-2.1.0"
+	#define current_ver         "vH3-2.0.10"
 #else
-   #define current_ver         "H2-2.1.0"
+   #define current_ver         "vH2-2.0.10"
 #endif
 
 #define SERVO_ROT_NUM           0
@@ -170,6 +170,15 @@
 #define ERR1                    1
 #define ERR2                    2
 
+//
+#define SS   "[S]"
+#define S0  "[S0]"
+#define S1  "[S1]"
+#define S2  "[S2]"
+#define FF   "[F]"
+#define F0  "[F0]"
+#define F1  "[F1]"
+
 class uArmClass
 {
 public:
@@ -238,7 +247,7 @@ public:
     void printf(bool success, double *dat, char *letters, unsigned char num);
     void printf(bool success, double dat);
     void printf(bool success, int dat);
-	char getValue(String cmnd, char *parameters, int parameterCount, double valueArray[]);
+	char getValue(String cmnd, const char *parameters, int parameterCount, double valueArray[]);
 
     // functions modified to be used for old version uArm
     //void angle_to_coordinate(double theta_1, double theta_2, double theta_3, double& x, double& y, double &z) {
