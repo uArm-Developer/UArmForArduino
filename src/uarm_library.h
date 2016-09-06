@@ -209,8 +209,8 @@ public:
 	double read_servo_angle(byte servo_num, boolean with_offset);
 	double analog_to_angle(int input_angle, byte servo_num, bool with_offset);
 	void read_linear_offset(byte servo_num, double& intercept_val, double& slope_val);
-	void get_current_xyz();
-    void get_current_xyz(double theta_1, double theta_2, double theta_3);
+	//void get_current_xyz();
+    //void get_current_xyz(double theta_1, double theta_2, double theta_3);
 #endif
 
     unsigned char coordinate_to_angle(double x, double y, double z, double *theta_1, double *theta_2, double *theta_3);

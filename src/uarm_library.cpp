@@ -744,10 +744,11 @@ unsigned char uArmClass::coordinate_to_angle(double x, double y, double z, doubl
   return IN_RANGE;
 }
 
-#ifndef PRODUCT_MKII
+//#ifndef PRODUCT_MKII
 /*!
    \brief Calculate X,Y,Z to g_current_x,g_current_y,g_current_z
  */
+ /*
 void uArmClass::get_current_xyz()
 {
         double theta_1 = uarm.analog_to_angle(analogRead(SERVO_ROT_ANALOG_PIN),SERVO_ROT_NUM, false);
@@ -762,6 +763,7 @@ void uArmClass::get_current_xyz()
    \param theta_2 Left Servo Angle
    \param theta_3 Right Servo Angle
  */
+ /*
 void uArmClass::get_current_xyz(double theta_1, double theta_2, double theta_3)
 {
         double l5 = (MATH_L2 + MATH_L3*cos(theta_2 / MATH_TRANS) + MATH_L4*cos(theta_3 / MATH_TRANS));
@@ -771,6 +773,7 @@ void uArmClass::get_current_xyz(double theta_1, double theta_2, double theta_3)
         g_current_z = MATH_L1 + MATH_L3*sin(abs(theta_2 / MATH_TRANS)) - MATH_L4*sin(abs(theta_3 / MATH_TRANS));
 }
 #endif
+*/
 /*!
    \brief get the current rot left right angles
  */
@@ -1531,7 +1534,7 @@ void uArmClass::runCommand(String cmnd){
     //gVer----------------------------------------------------------------------
     //if(cmnd.indexOf(F("gVer")) >= 0){
     if(cmnd == "gVer"){
-      Serial.println(current_ver);
+      Serial.println("[" + String(current_ver) + "]");
     }else
 
     //gSimuX#Y#Z#V#-------------------------------------------------------------
