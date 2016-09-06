@@ -2,7 +2,7 @@
    \file uarm_library.h
    \brief uarm library header
    License GNU
-   Copyright 2016 UFactory Team. All right reserved   
+   Copyright 2016 UFactory Team. All right reserved
    \author Joey Song, Alex Tan, Dave Corboy
    \version MKII: H3-S2.0.9a  uArm Metal: H2-S2.0.9a
    \date 08/30/2016
@@ -16,6 +16,8 @@
 #ifndef uArm_library_h
 #define uArm_library_h
 
+// #define PRODUCT_MKII
+
 //for the sys status
 #define NORMAL_MODE                 0
 #define NORMAL_BT_CONNECTED_MODE    1
@@ -24,7 +26,7 @@
 #define LOOP_PLAY_MODE              4
 
 //for the record() function to stop recording
-#define LEARNING_MODE_STOP          5 
+#define LEARNING_MODE_STOP          5
 
 // for the external eeprom
 #ifdef PRODUCT_MKII
@@ -32,7 +34,7 @@
    #define EXTERNAL_EEPROM_USER_ADDRESS 0xA0
 #else
    // EEPROM for learning mode - John Feng
-   #define EXTERNAL_EEPROM_USER_ADDRESS  0xA0 
+   #define EXTERNAL_EEPROM_USER_ADDRESS  0xA0
 #endif
 #define DATA_LENGTH  0x20
 #define LEFT_SERVO_ADDRESS   0x0000
@@ -40,9 +42,9 @@
 #define ROT_SERVO_ADDRESS    0x05A0
 
 #ifdef PRODUCT_MKII
-	#define current_ver         "H3-S2.0.9a"
+	#define current_ver         "vH3-2.1.0"
 #else
-   #define current_ver         "H2-S2.0.9a"
+   #define current_ver         "vH2-2.1.0"
 #endif
 
 #define SERVO_ROT_NUM           0
@@ -166,7 +168,7 @@
 //getValue() function return
 #define OK                      0
 #define ERR1                    1
-#define ERR2                    2  
+#define ERR2                    2
 
 class uArmClass
 {
@@ -176,7 +178,7 @@ public:
     double read_servo_offset(byte servo_num);
     void read_servo_calibration_data(double *rot, double *left, double *right);
     void detach_servo(byte servo_num);
-    void alert(byte times, byte runt_time, byte stop_time);
+    void alert(byte times, int runt_time, int stop_time);
     void detach_all_servos();
     void write_servo_angle(byte servo_num, double servo_angle);
     double analog_to_angle(int input_angle, byte servo_num);
@@ -234,7 +236,9 @@ public:
     void attach_servo(byte servo_num);
     void runCommand(String cmnd);
     void printf(bool success, double *dat, char *letters, unsigned char num);
-	char getValue(char *cmnd, char *parameters, int parameterCount, double *valueArray);
+    void printf(bool success, double dat);
+    void printf(bool success, int dat);
+	char getValue(String cmnd, char *parameters, int parameterCount, double valueArray[]);
 
     // functions modified to be used for old version uArm
     //void angle_to_coordinate(double theta_1, double theta_2, double theta_3, double& x, double& y, double &z) {
@@ -263,7 +267,7 @@ protected:
     double cur_left = 90;
     double cur_right = 90;
     double cur_hand = 90;
-    
+
     #ifdef PRODUCT_MKII
     	double g_current_x = 0;
     	double g_current_y = 200;
@@ -271,8 +275,8 @@ protected:
     #else
     	double g_current_x = 10;
     	double g_current_y = 100;
-    	double g_current_z = 150; 
-	#endif   	
+    	double g_current_z = 150;
+	#endif
 
     boolean move_to_the_closest_point = false;
 
