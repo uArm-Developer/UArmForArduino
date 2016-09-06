@@ -39,8 +39,9 @@ void uArmClass::arm_process_commands()
         //get the uart command
         if(Serial.available())
         {
-                message = Serial.readStringUntil('\n');
+                message = Serial.readStringUntil(']');
                 message.trim();
+                message += ']';
                 runCommand(message); // Run the command and send back the response
         }
 
@@ -1382,17 +1383,17 @@ unsigned char uArmClass::pump_status()
 void uArmClass::runCommand(String cmnd){
 
     // To save memory, create the "OK" and "]\n" right now, in flash memory
-    String S   = F("S");
- 	String S0  = F("S0");
- 	String S1  = F("S1");
- 	String S2  = F("S2");
- 	String F   = F("F");
- 	String F0  = F("F0");
- 	String F1  = F("F1");
+    String S   = F("[S]");
+ 	String S0  = F("[S0]");
+ 	String S1  = F("[S1]");
+ 	String S2  = F("[S2]");
+ 	String F   = F("[F]");
+ 	String F0  = F("[F0]");
+ 	String F1  = F("[F1]");
     // char command[50];
     // cmnd.toCharArray(command, 50);
     // //get the first 4 command and compare it below
-    String cmd = cmnd.substring(0,4);
+    String cmd = cmnd.substring(1,5);
     // Serial.println(cmd);
     // cmnd = String(cmnd[1])+String(cmnd[2])+String(cmnd[3])+String(cmnd[4]);
     double values[4];
@@ -1567,8 +1568,11 @@ void uArmClass::runCommand(String cmnd){
 
     //gVer----------------------------------------------------------------------
     //if(cmnd.indexOf(F("gVer")) >= 0){
-    if(cmnd == "gVer"){
+    if(cmd == "gVer"){
       Serial.println("[" + String(current_ver) + "]");
+      // Serial.print(F("["));
+      // Serial.print(current_ver);
+      // Serial.println(F("]"));
     }else
 
     //gSimuX#Y#Z#V#-------------------------------------------------------------
@@ -1884,40 +1888,40 @@ void uArmClass::runCommand(String cmnd){
 void uArmClass::printf(bool success, double *dat, char *letters, unsigned char num)
 {
   if(success == true)
-    Serial.print(F("S"));
+    Serial.print(F("[S"));
   else
-    Serial.print(F("F"));
+    Serial.print(F("[F"));
   //print the parameter
   for(unsigned char i = 0; i < num; i++)
   {
     Serial.print(letters[i]);
     Serial.print(dat[i]);
   }
-  Serial.println(F(""));
+  Serial.println(F("]"));
 
 }
 
 void uArmClass::printf(bool success, double dat)
 {
   if(success == true)
-    Serial.print(F("S"));
+    Serial.print(F("[S"));
   else
-    Serial.print(F("F"));
+    Serial.print(F("[F"));
 
     Serial.print(dat);
-  Serial.println(F(""));
+  Serial.println(F("]"));
 
 }
 
 void uArmClass::printf(bool success, int dat)
 {
   if(success == true)
-    Serial.print(F("S"));
+    Serial.print(F("[S"));
   else
-    Serial.print(F("F"));
+    Serial.print(F("[F"));
 
     Serial.print(dat);
-  Serial.println(F(""));
+  Serial.println(F("]"));
 }
 /*!
 */
@@ -1986,7 +1990,7 @@ char uArmClass::getValue(String cmnd, char *parameters, int parameterCount, doub
       }
     }
     else{
-      end_index = cmnd.length();
+      end_index = cmnd.length() - 1;
     }
     valueArray[i] = cmnd.substring(start_index, end_index).toFloat();
   }

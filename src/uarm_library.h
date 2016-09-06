@@ -42,9 +42,9 @@
 #define ROT_SERVO_ADDRESS    0x05A0
 
 #ifdef PRODUCT_MKII
-	#define current_ver         "vH3-2.1.0"
+	#define current_ver         "H3-2.1.0"
 #else
-   #define current_ver         "vH2-2.1.0"
+   #define current_ver         "H2-2.1.0"
 #endif
 
 #define SERVO_ROT_NUM           0
