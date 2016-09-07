@@ -11,7 +11,6 @@
 #include <EEPROM.h>
 #include <Wire.h>
 #include "UFServo.h"
-#include "linreg.h"
 
 #ifndef uArm_library_h
 #define uArm_library_h
@@ -42,9 +41,9 @@
 #define ROT_SERVO_ADDRESS    0x05A0
 
 #ifdef PRODUCT_MKII
-	#define current_ver         "vH3-2.0.10"
+	#define current_ver         "sH3-2.0.10"
 #else
-   #define current_ver         "vH2-2.0.10"
+   #define current_ver         "sH2-2.0.10"
 #endif
 
 #define SERVO_ROT_NUM           0
