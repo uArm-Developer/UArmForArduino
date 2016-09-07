@@ -52,16 +52,7 @@ void uArmClass::arm_process_commands()
                 //if(move_times <= INTERP_INTVLS)--------------------------------------------------------------
                 if((millis() - moveStartTime) >= (move_times * microMoveTime))// detect if it's time to move
                 {
-#ifdef PRODUCT_MKII
-                        y_array[move_times] = y_array[move_times] - LEFT_SERVO_OFFSET; //assembling offset
-                        z_array[move_times] = z_array[move_times] - RIGHT_SERVO_OFFSET; //assembling offset
-                        x_array[move_times] = x_array[move_times] - ROT_SERVO_OFFSET; //rot offset
-
-                        read_servo_calibration_data(&x_array[move_times], &y_array[move_times], &z_array[move_times]);
-                        write_servos_angle(x_array[move_times], y_array[move_times], z_array[move_times]);
-#else
                         write_servo_angle(x_array[move_times], y_array[move_times], z_array[move_times]);// let servo run - John Feng
-#endif
 
       //hand rot as hand rot do not have the smooth array
       if(move_times == (INTERP_INTVLS / 4))
@@ -134,14 +125,8 @@ void uArmClass::arm_process_commands()
                         case LOOP_PLAY_MODE:
                                 sys_status = NORMAL_MODE;
                                 break;
-#ifdef PRODUCT_MKII
                         case LEARNING_MODE:
-                                if(digitalRead(PUMP_GRI_EN) == HIGH) //detec the status of pump and gri and do the opposite
-                                        digitalWrite(PUMP_GRI_EN,LOW);
-                                else
-                                        digitalWrite(PUMP_GRI_EN,HIGH);
                                 break;
-#endif
                         }
                 }
                 while(digitalRead(BTN_D7)==LOW) ; // make sure button is released
@@ -153,45 +138,6 @@ void uArmClass::arm_process_commands()
     time_50ms = millis()%50;
     if(time_50ms == 0)
     {
-#ifdef PRODUCT_MKII
-		//check the BT status*****************
-  		if((sys_status == NORMAL_MODE)||(sys_status == NORMAL_BT_CONNECTED_MODE))
-  		{
-  			pinMode(BT_DETEC, INPUT);
-  			digitalWrite(BT_DETEC,HIGH);//
-  			if(digitalRead(BT_DETEC)==HIGH)//do it here
-  			{
-    			sys_status = NORMAL_BT_CONNECTED_MODE;
-  			}
-  			else
-  			{
-    			sys_status = NORMAL_MODE;
-  			}
-  			pinMode(BT_DETEC,OUTPUT);
-  		}
-  		//end*********************************
-        switch(sys_status)
-        {
-        case NORMAL_MODE:
-                if(time_ticks % 40 == 0) digitalWrite(SYS_LED,LOW);
-                else digitalWrite(SYS_LED,HIGH);
-                break;
-        case NORMAL_BT_CONNECTED_MODE:
-                digitalWrite(SYS_LED,LOW);
-                break;
-        case LEARNING_MODE:
-                if(time_ticks % 4 < 2) digitalWrite(SYS_LED,LOW);
-                else digitalWrite(SYS_LED,HIGH);
-                break;
-        case SINGLE_PLAY_MODE:
-        case LOOP_PLAY_MODE:
-                if(time_ticks % 40< 20) digitalWrite(SYS_LED,LOW);
-                else digitalWrite(SYS_LED,HIGH);
-                break;
-        }
-        time_ticks++;
-#endif
-
       //learning&playing mode function****************
       switch(sys_status)//every 0.125s per point
       {
@@ -236,43 +182,11 @@ void uArmClass::arm_setup()
 {
         pinMode(BTN_D4,INPUT_PULLUP);//special mode for calibration
         pinMode(BUZZER,OUTPUT);
-#ifdef PRODUCT_MKII
-        if(digitalRead(4)==LOW)
-        {
-                while(digitalRead(4)==LOW) ;
-                write_servo_angle(90,90,0);
-                while(1) ;
-        }
-#endif
         pinMode(LIMIT_SW, INPUT_PULLUP);
         pinMode(BTN_D7, INPUT_PULLUP);
-#ifdef PRODUCT_MKII
-
-        pinMode(PUMP_GRI_EN,OUTPUT);
-        pinMode(SYS_LED,OUTPUT);
-        digitalWrite(PUMP_GRI_EN,HIGH);//keep the pump off
-#else
         pinMode(PUMP_EN,OUTPUT);
         pinMode(VALVE_EN,OUTPUT);
         pinMode(GRIPPER,OUTPUT);
-#endif
-#ifdef PRODUCT_MKII
-        unsigned char strings[6];
-        //TEST
-        strings[0]=(int)(LEFT_SERVO_OFFSET*10)>>8;
-        strings[1]=(int)(LEFT_SERVO_OFFSET*10);
-        strings[2]=(int)(RIGHT_SERVO_OFFSET*10)>>8;
-        strings[3]=(int)(RIGHT_SERVO_OFFSET*10);
-        strings[4]=(int)(ROT_SERVO_OFFSET*10)>>8;
-        strings[5]=(int)(ROT_SERVO_OFFSET*10);
-        iic_writebuf(strings, EXTERNAL_EEPROM_SYS_ADDRESS, 0x870, 6);
-        delay(500);
-        //get the offset of assembling(address:0x870 *sequence[L R T]* each data 2 bytes) and the data is 10 times greater than the real in order to store easier
-        iic_readbuf(strings, EXTERNAL_EEPROM_SYS_ADDRESS, 0x870, 6);
-        LEFT_SERVO_OFFSET = ((int)(strings[0]<<8) + strings[1])/10.0;
-        RIGHT_SERVO_OFFSET = ((int)(strings[2]<<8) + strings[3])/10.0;
-        ROT_SERVO_OFFSET = ((int)(strings[4]<<8) + strings[5])/10.0;
-#else
         LEFT_SERVO_OFFSET = read_servo_offset(SERVO_LEFT_NUM);
         RIGHT_SERVO_OFFSET = read_servo_offset(SERVO_RIGHT_NUM);
         ROT_SERVO_OFFSET = read_servo_offset(SERVO_ROT_NUM);
@@ -288,25 +202,7 @@ void uArmClass::arm_setup()
         attach_servo(SERVO_LEFT_NUM);
         attach_servo(SERVO_RIGHT_NUM);
         attach_servo(SERVO_HAND_ROT_NUM);
-#endif
 }
-
-#ifdef PRODUCT_MKII
-/*!
-   \brief Write 4 Servo Angles, servo_rot, servo_left, servo_right, servo_hand_rot
-   \param servo_rot_angle SERVO_ROT_NUM
-   \param servo_left_angle SERVO_LEFT_NUM
-   \param servo_right_angle SERVO_RIGHT_NUM
-   \param servo_hand_rot_angle SERVO_HAND_ROT_NUM
-   \return SUCCESS, FAILED
- */
-int uArmClass::write_servos_angle(double servo_rot_angle, double servo_left_angle, double servo_right_angle, double servo_hand_rot_angle)
-{
-        attach_all();
-        write_servo_angle(servo_rot_angle, servo_left_angle, servo_right_angle);
-        write_servo_angle(SERVO_HAND_ROT_NUM,servo_hand_rot_angle);
-}
-#endif
 
 /*!
    \brief Write 3 Servo Angles, servo_rot, servo_left, servo_right
@@ -333,31 +229,7 @@ int uArmClass::write_servo_angle(double servo_rot_angle, double servo_left_angle
  */
 void uArmClass::write_servo_angle(byte servo_number, double servo_angle)
 {
-#ifdef PRODUCT_MKII
-        attach_servo(servo_number);
-        switch(servo_number)
-        {
-        case SERVO_ROT_NUM:
-                g_servo_rot.write(servo_angle);// ,hand_speed);
-                cur_rot = servo_angle;
-                break;
-        case SERVO_LEFT_NUM:
-                g_servo_left.write(servo_angle);// ,hand_speed);
-                cur_left = servo_angle;
-                break;
-        case SERVO_RIGHT_NUM:
-                g_servo_right.write(servo_angle);// ,hand_speed);
-                cur_right = servo_angle;
-                break;
-        case SERVO_HAND_ROT_NUM:  //servo_angle = constrain(servo_angle, 5, 180);
-                g_servo_hand_rot.write(servo_angle,hand_speed);     //set the hand speed
-                cur_hand = servo_angle;
-                break;
-        default: break;
-        }
-#else
 		write_servo_angle(servo_number,servo_angle,true);
-#endif
 }
 
 /*!
@@ -366,7 +238,6 @@ void uArmClass::write_servo_angle(byte servo_number, double servo_angle)
    \param servo_angle Servo target angle, 0.00 - 180.00
    \param writeWithoffset True: with Offset, False: without Offset
  */
-#ifndef PRODUCT_MKII
 void uArmClass::write_servo_angle(byte servo_number, double servo_angle, boolean writeWithoffset)
 {
         // attach_servo(servo_number);
@@ -389,7 +260,6 @@ void uArmClass::write_servo_angle(byte servo_number, double servo_angle, boolean
         default:                  break;
         }
 }
-#endif
 
 /*!
    \brief Attach All Servo
@@ -409,39 +279,6 @@ void uArmClass::attach_all()
  */
 void uArmClass::attach_servo(byte servo_number)
 {
-#ifdef PRODUCT_MKII
-        switch(servo_number) {
-        case SERVO_ROT_NUM:
-                if(!g_servo_rot.attached()) {
-                        read_servo_angle(SERVO_ROT_NUM,true);
-                        g_servo_rot.attach(SERVO_ROT_PIN);
-                        g_servo_rot.write(cur_rot);
-                }
-                break;
-        case SERVO_LEFT_NUM:
-                if (!g_servo_left.attached()) {
-                        read_servo_angle(SERVO_LEFT_NUM,true);
-                        g_servo_left.attach(SERVO_LEFT_PIN);
-                        g_servo_left.write(cur_left);
-                }
-                break;
-        case SERVO_RIGHT_NUM:
-                if (!g_servo_right.attached()) {
-                        read_servo_angle(SERVO_RIGHT_NUM,true);
-                        g_servo_right.attach(SERVO_RIGHT_PIN);
-                        g_servo_right.write(cur_right);
-                }
-                break;
-        case SERVO_HAND_ROT_NUM:
-                if (!g_servo_hand_rot.attached()) {
-                        read_servo_angle(SERVO_HAND_ROT_NUM,true);
-                        g_servo_hand_rot.attach(SERVO_HAND_ROT_PIN,600,2400);
-                        g_servo_hand_rot.write(cur_hand);
-                }
-                break;
-        }
-
-#else
         boolean is_linear_calibrated = false;
         if (EEPROM.read(CALIBRATION_LINEAR_FLAG) == CONFIRM_FLAG)
         {
@@ -452,6 +289,7 @@ void uArmClass::attach_servo(byte servo_number)
                 if (is_linear_calibrated == true) {
                 		uarm.g_servo_rot.attach(SERVO_ROT_PIN);
                         cur_rot = read_servo_angle(SERVO_ROT_NUM);
+                        //Serial.println(cur_rot);
                         uarm.g_servo_rot.write(cur_rot + ROT_SERVO_OFFSET);
                 }
                 else{
@@ -489,7 +327,6 @@ void uArmClass::attach_servo(byte servo_number)
                 }
                 break;
         }
-#endif
 }
 
 
@@ -535,80 +372,7 @@ void uArmClass::detach_servo(byte servo_number)
 
 double uArmClass::analog_to_angle(int input_analog, byte servo_num)
 {
-#ifdef PRODUCT_MKII
-  unsigned char adc_calibration_data[DATA_LENGTH],data[4]; //get the calibration data around the data input
-  unsigned int min_data_calibration_address, max_calibration_data, min_calibration_data;
-  unsigned int angle_range_min, angle_range_max;
-  switch(servo_num)
-  {
-    case  SERVO_ROT_NUM:      iic_readbuf(&data[0], EXTERNAL_EEPROM_SYS_ADDRESS, ROT_SERVO_ADDRESS + 360, 2);//get the min adc calibration data for the map() function
-                              iic_readbuf(&data[2], EXTERNAL_EEPROM_SYS_ADDRESS, ROT_SERVO_ADDRESS + 360 + 358, 2);//get the max adc calibraiton data for the map() function
-                              break;
-    case  SERVO_LEFT_NUM:     iic_readbuf(&data[0], EXTERNAL_EEPROM_SYS_ADDRESS, LEFT_SERVO_ADDRESS + 360, 2);//get the min adc calibration data for the map() function
-                              iic_readbuf(&data[2], EXTERNAL_EEPROM_SYS_ADDRESS, LEFT_SERVO_ADDRESS + 360 + 358, 2);//get the max adc calibraiton data for the map() function
-                              break;
-    case  SERVO_RIGHT_NUM:    iic_readbuf(&data[0], EXTERNAL_EEPROM_SYS_ADDRESS, RIGHT_SERVO_ADDRESS + 360, 2);//get the min adc calibration data for the map() function
-                              iic_readbuf(&data[2], EXTERNAL_EEPROM_SYS_ADDRESS, RIGHT_SERVO_ADDRESS + 360 + 358, 2);//get the max adc calibraiton data for the map() function
-                              break;
-    default:                  break;
-  }
-
-  max_calibration_data = (data[2]<<8) + data[3];
-  min_calibration_data = (data[0]<<8) + data[1];
-
-  angle_range_min = map(input_analog, min_calibration_data, max_calibration_data, 1, 180) - (DATA_LENGTH>>2);
-  min_data_calibration_address = (angle_range_min * 2);
-  switch(servo_num)
-  {
-    case  SERVO_ROT_NUM:      iic_readbuf(adc_calibration_data, EXTERNAL_EEPROM_SYS_ADDRESS, ROT_SERVO_ADDRESS + min_data_calibration_address + 360, DATA_LENGTH);//360 means the adc calibration data offset
-                              break;
-    case  SERVO_LEFT_NUM:     iic_readbuf(adc_calibration_data, EXTERNAL_EEPROM_SYS_ADDRESS, LEFT_SERVO_ADDRESS + min_data_calibration_address + 360, DATA_LENGTH);//360 means the adc calibration data offset
-                              break;
-    case  SERVO_RIGHT_NUM:    iic_readbuf(adc_calibration_data, EXTERNAL_EEPROM_SYS_ADDRESS, RIGHT_SERVO_ADDRESS + min_data_calibration_address + 360, DATA_LENGTH);//360 means the adc calibration data offset
-                              break;
-    default:                  break;
-  }
-
-  unsigned int deltaA = 0xffff, deltaB = 0, i, i_min = 0;
-  for(i=0;i<(DATA_LENGTH >> 1);i++)
-  {
-      deltaB = abs ((adc_calibration_data[i+i]<<8) + adc_calibration_data[1+(i+i)] - input_analog);
-      if(deltaA > deltaB)
-      {
-        i_min = i;
-        deltaA = deltaB;
-      }
-  }
-
-  angle_range_min = angle_range_min + i_min;
-  angle_range_max = angle_range_min + 1;
-
-  if((((adc_calibration_data[i_min+i_min]<<8) + adc_calibration_data[1+i_min+i_min]) - input_analog) >= 0)//determine if the current value bigger than the input_analog
-  {
-    //angle_rang_min = map(input_analog, min_calibration_data, max_calibration_data, 0, 180) - (DATA_LENGTH>>2);
-    max_calibration_data = (adc_calibration_data[i_min+i_min]<<8) + adc_calibration_data[i_min+i_min+1];
-    min_calibration_data = (adc_calibration_data[i_min+i_min-2]<<8) + adc_calibration_data[i_min+i_min-1];
-
-  }
-  else
-  {
-    angle_range_min++;//change the degree range
-    angle_range_max++;
-    max_calibration_data = (adc_calibration_data[i_min+i_min+2]<<8) + adc_calibration_data[i_min+i_min+3];
-    min_calibration_data = (adc_calibration_data[i_min+i_min]<<8) + adc_calibration_data[i_min+i_min+1];
-  }
-
-  if(min_calibration_data < max_calibration_data)//return the angle
-  {
-    return ( 1.0 * (input_analog - min_calibration_data)/(max_calibration_data - min_calibration_data) + angle_range_min);
-  }
-  else
-  {
-    return (angle_range_min + angle_range_max) / 2.0;//angle from 1-180 but the address from 0-179
-  }
-#else
 		analog_to_angle(input_analog, servo_num, true);
-#endif
 }
 
 /*!
@@ -618,7 +382,6 @@ double uArmClass::analog_to_angle(int input_analog, byte servo_num)
    \param withOffset true, false
    \return Servo Angle
  */
-#ifndef PRODUCT_MKII
 double uArmClass::analog_to_angle(int input_analog, byte servo_num, bool withOffset)
 {
         double intercept = 0.0f;
@@ -627,7 +390,6 @@ double uArmClass::analog_to_angle(int input_analog, byte servo_num, bool withOff
         double angle = intercept + slope*input_analog;
         return withOffset ? angle + read_servo_offset(servo_num) : angle;
 }
-#endif
 
 /*!
    \brief Calculate the angles from given coordinate x, y, z to theta_1, theta_2, theta_3
@@ -781,169 +543,12 @@ void uArmClass::get_current_xyz(double theta_1, double theta_2, double theta_3)
  */
 void uArmClass::get_current_rotleftright()
 {
-#ifdef PRODUCT_MKII
-read_servo_angle(SERVO_ROT_NUM);
-read_servo_angle(SERVO_LEFT_NUM);
-read_servo_angle(SERVO_RIGHT_NUM);
-read_servo_angle(SERVO_HAND_ROT_NUM);
-#else
 cur_rot = read_servo_angle(SERVO_ROT_NUM);
 cur_left = read_servo_angle(SERVO_LEFT_NUM);
 cur_right = read_servo_angle(SERVO_RIGHT_NUM);
 cur_hand = read_servo_angle(SERVO_HAND_ROT_NUM);
-#endif
 }
 
-#ifdef PRODUCT_MKII
-/*!
-   \brief get the calibration data from the external eeprom
-   \param rot the calibration data of rotation
-   \param left the calibration data of left
-   \param right the calibration data of right
- */
-void uArmClass::read_servo_calibration_data(double *rot, double *left, double *right)
-{
-
-  calibration_data_to_servo_angle(rot,ROT_SERVO_ADDRESS);
-  calibration_data_to_servo_angle(left,LEFT_SERVO_ADDRESS);
-  calibration_data_to_servo_angle(right,RIGHT_SERVO_ADDRESS);
-
-}
-
-/*!
-   \brief check the external eeprom and transfer the ideal data to real angle data
-   \param data the address of the variable
-   \param address the section starting address of the external eeprom
-*/
-void uArmClass::calibration_data_to_servo_angle(double *data,unsigned int address)
-{
-  unsigned char calibration_data[DATA_LENGTH]; //get the calibration data around the data input
-  unsigned int min_data_calibration_address;
-  double closest_data, another_closest_data;
-  unsigned int deltaA = 0xffff, deltaB = 0, i, i_min = 0;
-  deltaA = 0xffff;
-  deltaB = 0;
-  min_data_calibration_address = (((unsigned int)(*data) - (DATA_LENGTH >> 2)) * 2);
-  iic_readbuf(calibration_data, EXTERNAL_EEPROM_SYS_ADDRESS, address + min_data_calibration_address, DATA_LENGTH);
-  for(i=0;i<(DATA_LENGTH >> 1);i++)
-  {
-      deltaB = abs ((calibration_data[i+i]<<8) + calibration_data[1+(i+i)] - (*data) * 10);
-      if(deltaA > deltaB)
-      {
-        i_min = i;
-        deltaA = deltaB;
-      }
-  }
-
-  closest_data = ((calibration_data[i_min+i_min]<<8) + calibration_data[1+(i_min+i_min)])/10.0;//transfer the dat from ideal data to servo angles
-  if((*data) >= closest_data)
-  {
-    another_closest_data = ((calibration_data[i_min+i_min+2]<<8) + calibration_data[3+i_min+i_min])/10.0;//bigger than closest
-    if(another_closest_data == closest_data)
-    {
-      *data = min_data_calibration_address/2 + i_min + 1 + 0.5;
-    }
-    else
-    {
-      *data = 1.0 * (*data - closest_data) / (another_closest_data - closest_data) + min_data_calibration_address/2 + i_min + 1;
-    }
-  }
-  else
-  {
-    another_closest_data = ((calibration_data[i_min+i_min-2]<<8) + calibration_data[i_min+i_min-1])/10.0;//smaller than closest
-    if(another_closest_data == closest_data)
-    {
-      *data = min_data_calibration_address/2 + i_min + 0.5;
-    }
-    else
-    {
-      *data = 1.0 * (*data - another_closest_data) / (closest_data - another_closest_data) + min_data_calibration_address/2 + i_min;
-    }
-  }
-}
-
-/*!
-   \brief read servo angle with calibration
-   \param servo_number SERVO_ROT_NUM, SERVO_LEFT_NUM, SERVO_RIGHT_NUM, SERVO_HAND_ROT_NUM
-   \param original_data true, false
-*/
-void uArmClass::read_servo_angle(byte servo_number, bool original_data)
-{
-  double angle = 0;
-  unsigned int address;
-  double *data;
-
-  switch(servo_number) {
-    case SERVO_ROT_NUM:
-      address = ROT_SERVO_ADDRESS;
-      data = &cur_rot;
-      break;
-    case SERVO_LEFT_NUM:
-      address = LEFT_SERVO_ADDRESS;
-      data = &cur_left;
-      break;
-    case SERVO_RIGHT_NUM:
-      address = RIGHT_SERVO_ADDRESS;
-      data = &cur_right;
-      break;
-    case SERVO_HAND_ROT_NUM:
-				cur_hand = map(analogRead(SERVO_HAND_ROT_ANALOG_PIN), SERVO_9G_MIN, SERVO_9G_MAX, 0, 180); //g_servo_hand_rot.read();  // SERVO_HAND_ROT_ANALOG_PIN),SERVO_HAND_ROT_NUM);
-      return;
-      break;
-  }
-
-  unsigned int dat[8], temp;
-  unsigned char i=0,j=0;
-  for(i=0;i<8;i++)
-  {
-    switch(address)
-    {
-      case ROT_SERVO_ADDRESS: dat[i] = analogRead(SERVO_ROT_ANALOG_PIN);break;
-      case LEFT_SERVO_ADDRESS: dat[i] = analogRead(SERVO_LEFT_ANALOG_PIN);break;
-      case RIGHT_SERVO_ADDRESS: dat[i] = analogRead(SERVO_RIGHT_ANALOG_PIN);break;
-      default:break;
-    }
-  }
-  for(i=0;i<8;i++){//BULB to get the most accuracy data
-    for(j=0;i+j<7;j++){
-      if(dat[j]>dat[j+1]){
-        temp = dat[j];
-        dat[j] = dat[j+1];
-        dat[j+1] = temp;
-      }
-    }
-  }
-  switch(address)
-  {
-    case ROT_SERVO_ADDRESS: (*data) = uarm.analog_to_angle((dat[2]+dat[3]+dat[4]+dat[5])/4,SERVO_ROT_NUM);break;
-    case LEFT_SERVO_ADDRESS: (*data) = uarm.analog_to_angle((dat[2]+dat[3]+dat[4]+dat[5])/4,SERVO_LEFT_NUM);break;
-    case RIGHT_SERVO_ADDRESS: (*data) = uarm.analog_to_angle((dat[2]+dat[3]+dat[4]+dat[5])/4,SERVO_RIGHT_NUM);break;
-    default:break;
-  }
-  if((original_data == false)&&(servo_number != SERVO_HAND_ROT_NUM))//servo hand do not have the calibration data, jump over!
-  {
-    //check the external eeprom and transfer the real angle to ideal angle
-    unsigned char ideal_angle[4];
-    iic_readbuf(ideal_angle, EXTERNAL_EEPROM_SYS_ADDRESS, address + (((unsigned int)(*data) - 1) << 1), 4);
-    (*data) = (double)(((ideal_angle[2] << 8) + ideal_angle[3]) - ((ideal_angle[0] << 8) + ideal_angle[1])) * ((*data) - (unsigned int)(*data)) + ((ideal_angle[0] << 8) + ideal_angle[1]);
-    (*data) = (*data) / 10.0;
-			    switch(servo_number) {
-			      case SERVO_ROT_NUM:
-			          (*data) += ROT_SERVO_OFFSET;
-			          break;
-			      case SERVO_LEFT_NUM:
-			          (*data) += LEFT_SERVO_OFFSET;
-			          break;
-			      case SERVO_RIGHT_NUM:
-			          (*data) += RIGHT_SERVO_OFFSET;
-			          break;
-			      default:
-			          break;
-			    }
-			  }
-        }
-}
-#else
 /*!
    \brief read Angle by servo_num without offset
    \param servo_num SERVO_ROT_NUM, SERVO_LEFT_NUM, SERVO_RIGHT_NUM, SERVO_HAND_ROT_NUM
@@ -1030,7 +635,6 @@ void uArmClass::alert(byte times, int runTime, int stopTime)
                 digitalWrite(BUZZER, LOW);
         }
 }
-#endif
 
 /*!
    \brief Calculate X,Y,Z to g_current_x,g_current_y,g_current_z
@@ -1047,13 +651,6 @@ unsigned char uArmClass::get_current_xyz(double *cur_rot, double *cur_left , dou
   if(for_movement==true){
     get_current_rotleftright();
   }
-
-        //add the offset first
-#ifndef PRODUCT_MKII
-        *cur_left = *cur_left + LEFT_SERVO_OFFSET;
-        *cur_right = *cur_right + RIGHT_SERVO_OFFSET;
-#endif
-
   double stretch = MATH_L3 * cos((*cur_left) / MATH_TRANS) + MATH_L4 * cos((*cur_right) / MATH_TRANS) + MATH_L2;
   double height = MATH_L3 * sin((*cur_left) / MATH_TRANS) - MATH_L4 * sin((*cur_right) / MATH_TRANS) + MATH_L1;
   *g_current_x = stretch * cos((*cur_rot) / MATH_TRANS);
@@ -1146,13 +743,11 @@ void uArmClass::interpolate(double start_val, double end_val, double *interp_val
 */
 
 unsigned char uArmClass::move_to(double x, double y, double z, double hand_angle, byte relative_flags, double times, byte ease_type, boolean enable_hand, bool polar) {
-    #ifndef PRODUCT_MKII
 	if (EEPROM.read(CALIBRATION_LINEAR_FLAG) != CONFIRM_FLAG)
     {
         alert(50, 10, 10);
         return FAILED;
     }
-    #endif
   if(polar == true)//change the stretch rot and height to xyz coordinates
   {
   	double stretch = x;
@@ -1256,12 +851,6 @@ unsigned char uArmClass::move_to(double x, double y, double z, double hand_angle
 	g_current_x = x;
 	g_current_y = y;
 	g_current_z = z;
-	#ifdef PRODUCT_MKII
-	cur_rot = rot;
-	cur_left = left;
-	cur_right = right;
-	cur_hand = hand_angle;
-	#endif
   move_times = 0;//start to caculate the movement
   return IN_RANGE;
 }
@@ -1272,16 +861,6 @@ unsigned char uArmClass::move_to(double x, double y, double z, double hand_angle
 */
 void uArmClass::gripper_catch(bool value)
 {
-#ifdef PRODUCT_MKII
-  if(value)
-  {
-    digitalWrite(PUMP_GRI_EN, LOW);  // gripper and pump catch
-  }
-  else
-  {
-    digitalWrite(PUMP_GRI_EN, HIGH);  //gripper and pump off
-  }
-#else
   if(value)
   {
     digitalWrite(GRIPPER, LOW);  // gripper and pump catch
@@ -1290,7 +869,6 @@ void uArmClass::gripper_catch(bool value)
   {
     digitalWrite(GRIPPER, HIGH);  // gripper and pump off
   }
-#endif
 }
 /*!
    \brief Pump catch
@@ -1298,9 +876,6 @@ void uArmClass::gripper_catch(bool value)
 */
 void uArmClass::pump_catch(bool value)
 {
-#ifdef PRODUCT_MKII
-  gripper_catch(value);
-#else
   if(value)
   {
     digitalWrite(PUMP_EN, HIGH);  // pump catch
@@ -1311,30 +886,12 @@ void uArmClass::pump_catch(bool value)
     digitalWrite(PUMP_EN, LOW);  // pump catch
     digitalWrite(VALVE_EN, HIGH);
   }
-#endif
 }
 /*!
    \brief Get Gripper Status
 */
 unsigned char uArmClass::gripper_status()
 {
-#ifdef PRODUCT_MKII
-  if(digitalRead(PUMP_GRI_EN) == HIGH)
-  {
-    return STOP;//NOT WORKING
-  }
-  else
-  {
-    if(digitalRead(PUMP_GRI_STATUS) == HIGH)
-    {
-      return GRABBING;
-    }
-    else
-    {
-      return WORKING;
-    }
-  }
-#else
   if(digitalRead(GRIPPER) == HIGH)
   {
   	return STOP;
@@ -1350,34 +907,7 @@ unsigned char uArmClass::gripper_status()
   		return GRABBING;
   	}
   }
-#endif
 }
-
-#ifdef PRODUCT_MKII
-/*!
-   \brief Get Pump Status
-*/
-unsigned char uArmClass::pump_status()
-{
-
-  if(digitalRead(PUMP_GRI_EN) == HIGH)
-  {
-    return STOP;//NOT WORKING
-  }
-  else
-  {
-    if(analogRead(PUMP_GRI_STATUS) >= PUMP_GRABBING_CURRENT)
-    {
-      return GRABBING;
-    }
-    else
-    {
-      return WORKING;
-    }
-  }
-
-}
-#endif
 
 //*************************************uart communication**************************************//
 void uArmClass::runCommand(String cmnd){
@@ -1434,8 +964,24 @@ void uArmClass::runCommand(String cmnd){
       const char parameters[1] = {'S'};
       //String errorResponse        = getValues(cmnd, parameters, 1, values);
       if(getValue(cmnd, parameters, 1, values) == OK) {
-      	Serial.println(SS);// successful feedback send it immediately
-      	attach_servo(values[0]);
+        Serial.println(SS);// successful feedback send it immediately
+        attach_servo(values[0]);
+        get_current_xyz(&cur_rot, &cur_left, &cur_right, &g_current_x, &g_current_y, &g_current_z, true);
+        double rot, left, right;
+        if(coordinate_to_angle(g_current_x, g_current_y, g_current_z, &rot, &left, &right) == OUT_OF_RANGE)
+        {
+        	 alert(50, 10, 10);
+             cur_rot = 90;
+             cur_left = 90;
+             cur_right = 90;
+             cur_hand = 90;
+             g_current_x = 10;
+             g_current_y = 100;
+             g_current_z = 150;
+      	     uarm.move_to(10,100,150,false);
+      	     //Serial.println("TEST");
+      	     attach_all();
+	    }
   	  }
     }else
 
@@ -1455,29 +1001,8 @@ void uArmClass::runCommand(String cmnd){
       const char parameters[2] = {'N', 'V'};
       if(getValue(cmnd, parameters, 2, values) == OK) {
         Serial.println(SS);// successful feedback send it immediately
-        #ifdef PRODUCT_MKII
-              switch((int)values[0])
-              {
-                case 0:
-                  values[1] -= ROT_SERVO_OFFSET;
-                  calibration_data_to_servo_angle(&values[1],ROT_SERVO_ADDRESS);
-                  break;
-                case 1:
-                  values[1] -= LEFT_SERVO_OFFSET;
-                  calibration_data_to_servo_angle(&values[1],LEFT_SERVO_ADDRESS);
-                  break;
-                case 2:
-                  values[1] -= RIGHT_SERVO_OFFSET;
-                  calibration_data_to_servo_angle(&values[1],RIGHT_SERVO_ADDRESS);
-                  break;
-                case 3:
-                  break;
-              }
-        	  uarm.write_servo_angle(values[0], values[1]);
-        #else
                 // in write_servo_angle function, add offset
                 uarm.write_servo_angle(byte(values[0]), values[1], false);
-        #endif
       }
     }
     // sAngN#V#--------------------------------------------------------------
@@ -1486,29 +1011,8 @@ void uArmClass::runCommand(String cmnd){
 
       if(getValue(cmnd, parameters, 2, values) == OK) {
       	Serial.println(SS);// successful feedback send it immediately
-#ifdef PRODUCT_MKII
-      switch((int)values[0])
-      {
-        case 0:
-          values[1] -= ROT_SERVO_OFFSET;
-          calibration_data_to_servo_angle(&values[1],ROT_SERVO_ADDRESS);
-          break;
-        case 1:
-          values[1] -= LEFT_SERVO_OFFSET;
-          calibration_data_to_servo_angle(&values[1],LEFT_SERVO_ADDRESS);
-          break;
-        case 2:
-          values[1] -= RIGHT_SERVO_OFFSET;
-          calibration_data_to_servo_angle(&values[1],RIGHT_SERVO_ADDRESS);
-          break;
-        case 3:
-          break;
-      }
-	  uarm.write_servo_angle(values[0], values[1]);
-#else
         // in write_servo_angle function, add offset
         uarm.write_servo_angle(byte(values[0]), values[1], true);
-#endif
         }
         }else
 
@@ -1604,11 +1108,7 @@ void uArmClass::runCommand(String cmnd){
 
     //gCrd---------------------------------------------------------------------
     if(cmd == "gCrd"){
-#ifdef PRODUCT_MKII
       get_current_xyz(&cur_rot, &cur_left, &cur_right, &g_current_x, &g_current_y, &g_current_z, true);
-#else
-      get_current_xyz(&cur_rot, &cur_left, &cur_right, &g_current_x, &g_current_y, &g_current_z, true);
-#endif
       char letters[3] = {'X','Y','Z'};
       values[0] = g_current_x;
       values[1] = g_current_y;
@@ -1618,11 +1118,7 @@ void uArmClass::runCommand(String cmnd){
 
     //gPolS#R#H#--------------------------------------------------------------
     if(cmd == "gPol"){
-#ifdef PRODUCT_MKII
       get_current_xyz(&cur_rot, &cur_left, &cur_right, &g_current_x, &g_current_y, &g_current_z, true);
-#else
-      get_current_xyz(&cur_rot, &cur_left, &cur_right, &g_current_x, &g_current_y, &g_current_z, true);
-#endif
       double stretch;
       stretch = sqrt(g_current_x * g_current_x + g_current_y * g_current_y);
       char letters[3] = {'S','R','H'};
@@ -1632,35 +1128,6 @@ void uArmClass::runCommand(String cmnd){
       printf(true, values, letters, 3);
     }else
 
-#ifdef PRODUCT_MKII
-    //gPump---------------------------------------------------------------------
-    //if(cmnd.indexOf(F("gPum")) >= 0){
-    if(cmd == "gPum"){
-      switch(pump_status())
-      {
-        case GRABBING:Serial.println(S0);
-                       break;
-        case WORKING: Serial.println(S1);
-                       break;
-        case STOP:    Serial.println(S2);
-                       break;
-      }
-    }else
-
-    //gGipper-------------------------------------------------------------------
-    //if(cmnd.indexOf(F("gGri")) >= 0){
-    if(cmd == "gGri"){
-      switch(gripper_status())
-      {
-        case GRABBING:Serial.println(S0);
-                       break;
-        case WORKING: Serial.println(S1);
-                       break;
-        case STOP:    Serial.println(S2);
-                       break;
-      }
-    }else
-#endif
     //gAng---------------------------------------------------------------------
     //if(cmnd.indexOf(F("gAng")) >= 0){
     if(cmd == "gAng"){
@@ -1674,7 +1141,7 @@ void uArmClass::runCommand(String cmnd){
       printf(true, values, letters, 4);
       //Serial.println("ST" + String(cur_rot) + "L" + String(cur_left) + "R" + String(cur_right) + "F" + String(cur_hand) + "");
     }else
-#ifndef PRODUCT_MKII
+    
     //gSer---------------------------------------------------------------------
     if(cmd == "gSer"){
       values[0] = read_servo_angle(SERVO_ROT_NUM, false);
@@ -1685,7 +1152,7 @@ void uArmClass::runCommand(String cmnd){
       printf(true, values, letters, 4);
       //Serial.println("ST" + String(cur_rot) + "L" + String(cur_left) + "R" + String(cur_right) + "F" + String(cur_hand) + "");
     }else
-#endif
+
     //gIKX#Y#Z#----------------------------------------------------------------
     //if(cmnd.indexOf(F("gIK")) >= 0){
     if(cmd == "gIKX"){
@@ -1765,16 +1232,6 @@ void uArmClass::runCommand(String cmnd){
         Serial.println(S1);
       }
     }else
-#ifdef PRODUCT_MKII
-    //gPow-----------------------------------------------------------------------
-    //if(cmnd.indexOf(F("gPow")) >= 0){
-    if(cmd == "gPow"){
-      if(analogRead(POW_DET) > 512)
-        Serial.println(SS);
-      else
-        Serial.println(FF);
-    }else
-#endif
 
     // gDigN# Command----------------------------------------------------------
     if(cmd == "gDig"){
@@ -2042,16 +1499,6 @@ void uArmClass::delay_us(){}
 
 void uArmClass::iic_start()
 {
-#ifdef PRODUCT_MKII
-  PORTB |= 0x01;// SCL=1
-  delay_us();
-  PORTB |= 0x02;// SDA=1
-  delay_us();
-  PORTB &= 0xFD;// SDA=0
-  delay_us();
-  PORTB &= 0xFE;// SCL=0
-  delay_us();
-#else
   PORTC |= 0x20;//  SCL=1
   delay_us();
   PORTC |= 0x10;//  SDA=1
@@ -2060,21 +1507,10 @@ void uArmClass::iic_start()
   delay_us();
   PORTC &= 0xDF;//  SCL=0
   delay_us();
-#endif
 }
 
 void uArmClass::iic_stop()
 {
-#ifdef PRODUCT_MKII
-  PORTB &= 0xFE;// SCL=0
-  delay_us();
-  PORTB &= 0xFD;// SDA=0
-  delay_us();
-  PORTB |= 0x01;// SCL=1
-  delay_us();
-  PORTB |= 0x02;// SDA=1
-  delay_us();
-#else
   PORTC &= 0xDF;//  SCL=0
   delay_us();
   PORTC &= 0xEF;//  SDA=0
@@ -2083,7 +1519,6 @@ void uArmClass::iic_stop()
   delay_us();
   PORTC |= 0x10;//  SDA=1
   delay_us();
-#endif
 }
 
 //return 0:ACK=0
@@ -2091,25 +1526,6 @@ void uArmClass::iic_stop()
 unsigned char uArmClass::read_ack()
 {
   unsigned char old_state;
-#ifdef PRODUCT_MKII
-  old_state = DDRB;
-  DDRB = DDRB & 0xFD;//SDA INPUT
-  PORTB |= 0x02;// SDA=1
-  delay_us();
-  PORTB |= 0x01;// SCL=1
-  delay_us();
-  if((PINB&0x02) == 0x02) // if(SDA)
-  {
-    PORTB &= 0xFE;// SCL=0
-    iic_stop();
-    return 1;
-  }
-  else{
-    PORTB &= 0xFE;// SCL=0
-    DDRB = old_state;
-    return 0;
-  }
-#else
   old_state = DDRC;
   DDRC = DDRC & 0xEF;//SDA INPUT
   PORTC |= 0x10;//  SDA = 1;
@@ -2127,7 +1543,6 @@ unsigned char uArmClass::read_ack()
     DDRC = old_state;
     return 0;
   }
-#endif
 }
 
 //ack=0:send ack
@@ -2135,19 +1550,6 @@ unsigned char uArmClass::read_ack()
 void uArmClass::send_ack()
 {
   unsigned char old_state;
-#ifdef PRODUCT_MKII
-  old_state = DDRB;
-  DDRB = DDRB | 0x02;//SDA OUTPUT
-  PORTB &= 0xFD;// SDA=0
-  delay_us();
-  PORTB |= 0x01;// SCL=1
-  delay_us();
-  PORTB &= 0xFE;// SCL=0
-  delay_us();
-  DDRB = old_state;
-  PORTB |= 0x02;// SDA=1
-  delay_us();
-#else
   old_state = DDRC;
   DDRC = DDRC | 0x10;//SDA OUTPUT
   PORTC &= 0xEF;//  SDA=0
@@ -2159,7 +1561,6 @@ void uArmClass::send_ack()
   DDRC = old_state;
   PORTC |= 0x10;//  SDA=1
   delay_us();
-#endif
 }
 
 void uArmClass::iic_sendbyte(unsigned char dat)
@@ -2167,17 +1568,6 @@ void uArmClass::iic_sendbyte(unsigned char dat)
   unsigned char i;
   for(i = 0;i < 8;i++)
   {
-#ifdef PRODUCT_MKII
-    if(dat & 0x80)
-      PORTB |= 0x02;// SDA=1
-    else
-      PORTB &= 0xFD;// SDA=0
-    dat <<= 1;
-    delay_us();
-    PORTB |= 0x01;// SCL=1
-    delay_us();
-    PORTB &= 0xFE;// SCL=0
-#else
     if(dat & 0x80)
       PORTC |= 0x10;//  SDA = 1;
     else
@@ -2187,7 +1577,6 @@ void uArmClass::iic_sendbyte(unsigned char dat)
     PORTC |= 0x20;//  SCL=1
     delay_us();
     PORTC &= 0xDF;//  SCL=0
-#endif
   }
 }
 
@@ -2195,26 +1584,10 @@ unsigned char uArmClass::iic_receivebyte()
 {
   unsigned char i,byte = 0;
   unsigned char old_state;
-#ifdef PRODUCT_MKII
-  old_state = DDRB;
-  DDRB = DDRB & 0xFD;//SDA INPUT
-#else
   old_state = DDRC;
   DDRC = DDRC & 0xEF;//SDA INPUT
-#endif
   for(i = 0;i < 8;i++)
   {
-#ifdef PRODUCT_MKII
-    PORTB |= 0x01;// SCL=1
-    delay_us();
-    byte <<= 1;
-    if((PINB&0x02) == 0x02) // if(SDA)
-      byte |= 0x01;
-    delay_us();
-    PORTB &= 0xFE;// SCL=0
-    DDRB = old_state;
-    delay_us();
-#else
     PORTC |= 0x20;//  SCL=1
     delay_us();
     byte <<= 1;
@@ -2224,20 +1597,14 @@ unsigned char uArmClass::iic_receivebyte()
     PORTC &= 0xDF;//  SCL=0
     DDRC = old_state;
     delay_us();
-#endif
   }
   return byte;
 }
 
 unsigned char uArmClass::iic_writebuf(unsigned char *buf,unsigned char device_addr,unsigned int addr,unsigned char len)
 {
-#ifdef PRODUCT_MKII
-  DDRB = DDRB | 0x03;
-  PORTB = PORTB | 0x03;
-#else
   DDRC = DDRC | 0x30;
   PORTC = PORTC | 0x30;
-#endif
   unsigned char length_of_data=0;//page write
   length_of_data = len;
   iic_start();
@@ -2261,13 +1628,8 @@ unsigned char uArmClass::iic_writebuf(unsigned char *buf,unsigned char device_ad
 
 unsigned char uArmClass::iic_readbuf(unsigned char *buf,unsigned char device_addr,unsigned int addr,unsigned char len)
 {
-#ifdef PRODUCT_MKII
-  DDRB = DDRB | 0x03;
-  PORTB = PORTB | 0x03;
-#else
   DDRC = DDRC | 0x30;
   PORTC = PORTC | 0x30;
-#endif
   unsigned char length_of_data=0;
   length_of_data = len;
   iic_start();
@@ -2301,11 +1663,7 @@ bool uArmClass::play()
         recording_read(addr, data, 5);
         if(data[0]!=255)
         {
-#ifdef PRODUCT_MKII
-		write_servos_angle((double)data[2], (double)data[0], (double)data[1]);
-#else
                 write_servo_angle((double)data[2] - ROT_SERVO_OFFSET, (double)data[0] - LEFT_SERVO_OFFSET, (double)data[1] - RIGHT_SERVO_OFFSET);
-#endif
         }
         else
         {
@@ -2323,21 +1681,11 @@ bool uArmClass::record()
                 unsigned char data[5]; // 0: L  1: R  2: Rotation 3: hand rotation 4:gripper
                 if((addr != 65530)&&(sys_status != LEARNING_MODE_STOP))
                 {
-#ifdef PRODUCT_MKII
-      read_servo_angle(SERVO_ROT_NUM, true);
-      read_servo_angle(SERVO_LEFT_NUM, true);
-      read_servo_angle(SERVO_RIGHT_NUM, true);
-#else
                         get_current_rotleftright();
-#endif
                         data[0] = (unsigned char)cur_left;
                         data[1] = (unsigned char)cur_right;
                         data[2] = (unsigned char)cur_rot;
                         //data[3] = (unsigned char)cur_hand;
-#ifdef	PRODUCT_MKII
-                        data[4] = (digitalRead(PUMP_GRI_EN) == LOW) ? 0x00 : 0x01;//get the gri and pump status - deleted since NO PUMP_GRI_EN - John Feng
-#endif
-
                 }
                 else
                 {

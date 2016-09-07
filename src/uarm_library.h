@@ -28,24 +28,14 @@
 //for the record() function to stop recording
 #define LEARNING_MODE_STOP          5
 
-// for the external eeprom
-#ifdef PRODUCT_MKII
-   #define EXTERNAL_EEPROM_SYS_ADDRESS 0xA2
-   #define EXTERNAL_EEPROM_USER_ADDRESS 0xA0
-#else
-   // EEPROM for learning mode - John Feng
-   #define EXTERNAL_EEPROM_USER_ADDRESS  0xA0
-#endif
+// EEPROM for learning mode - John Feng
+#define EXTERNAL_EEPROM_USER_ADDRESS  0xA0
 #define DATA_LENGTH  0x20
 #define LEFT_SERVO_ADDRESS   0x0000
 #define RIGHT_SERVO_ADDRESS  0x02D0
 #define ROT_SERVO_ADDRESS    0x05A0
 
-#ifdef PRODUCT_MKII
-	#define current_ver         "vH3-2.0.10"
-#else
-   #define current_ver         "vH2-2.0.10"
-#endif
+#define current_ver         "vH2-2.0.10"
 
 #define SERVO_ROT_NUM           0
 #define SERVO_LEFT_NUM          1
@@ -79,19 +69,10 @@
 #define BTN_D4                  4    // LOW = Pressed
 #define BTN_D7                  7    // LOW = Pressed
 
-
-#ifdef PRODUCT_MKII
-    #define POW_DET                 A6   // power detection
-    #define PUMP_GRI_STATUS         A7   // pump status feedback
-    #define PUMP_GRI_EN             5    // HIGH = Pump ON
-    #define SYS_LED                 6
-    #define BT_DETEC                3    //share the port with buzzer
-#else
-    #define PUMP_EN                 6    // HIGH = Valve OPEN
-    #define VALVE_EN                5    // HIGH = Pump ON
-    #define GRIPPER                 9    // LOW = Catch
-    #define GRIPPER_FEEDBACK        A6
-#endif
+#define PUMP_EN                 6    // HIGH = Valve OPEN
+#define VALVE_EN                5    // HIGH = Pump ON
+#define GRIPPER                 9    // LOW = Catch
+#define GRIPPER_FEEDBACK        A6
 #define MATH_PI 3.141592653589793238463
 #define MATH_TRANS  57.2958
 #define MATH_L1 90.00
@@ -113,11 +94,7 @@
 #define WORKING         1
 #define STOP            2
 #define PUMP_GRABBING_CURRENT 55
-#ifdef PRODUCT_MKII
-#define SERVO_9G_MAX    460
-#define SERVO_9G_MIN    98
 
-#else
 // Calibration Flag & OFFSET EEPROM ADDRESS
 #define CALIBRATION_FLAG                    10
 #define CALIBRATION_LINEAR_FLAG             11
@@ -134,9 +111,6 @@
 
 #define CONFIRM_FLAG                        0x80
 
-#endif
-
-
 // movement path types
 #define PATH_LINEAR     0   // path based on linear interpolation
 #define PATH_ANGLES     1   // path based on interpolation of servo angles
@@ -146,7 +120,6 @@
 #define RELATIVE  1
 //#define F_HAND_RELATIVE 2   // standard relative, current + hand parameter
 //#define F_HAND_ROT_REL  4   // hand keeps orientation relative to rotationxn servo (+/- hand parameter)
-
 
 // interpolation types
 #define INTERP_EASE_INOUT_CUBIC 0  // original cubic ease in/out
@@ -205,15 +178,7 @@ public:
 
     unsigned char get_current_xyz(double *cur_rot, double *cur_left, double *cur_right, double *g_current_x, double *g_current_y, double *g_current_z, bool for_movement );
     void get_current_rotleftright();
-#ifdef PRODUCT_MKII
-    void calibration_data_to_servo_angle(double *data,unsigned int address);
-    void read_servo_angle(byte servo_number, bool original_data);
-    void read_servo_angle(byte servo_number)
-    {
-        read_servo_angle(servo_number, false);
-    }
-
-#else
+    
 	int write_servo_angle(double servo_rot_angle, double servo_left_angle, double servo_right_angle);
 	void write_servo_angle(byte servo_num, double servo_angle,  boolean with_offset);
 	double read_servo_angle(byte servo_num);
@@ -222,10 +187,7 @@ public:
 	void read_linear_offset(byte servo_num, double& intercept_val, double& slope_val);
 	//void get_current_xyz();
     //void get_current_xyz(double theta_1, double theta_2, double theta_3);
-#endif
-
     unsigned char coordinate_to_angle(double x, double y, double z, double *theta_1, double *theta_2, double *theta_3);
-
     void interpolate(double start_val, double end_val, double *interp_vals, byte ease_type);
 
     void gripper_catch(bool value);
@@ -277,15 +239,9 @@ protected:
     double cur_right = 90;
     double cur_hand = 90;
 
-    #ifdef PRODUCT_MKII
-    	double g_current_x = 0;
-    	double g_current_y = 200;
-    	double g_current_z = 100;
-    #else
-    	double g_current_x = 10;
-    	double g_current_y = 100;
-    	double g_current_z = 150;
-	#endif
+    double g_current_x = 10;
+    double g_current_y = 100;
+    double g_current_z = 150;
 
     boolean move_to_the_closest_point = false;
 
@@ -302,16 +258,10 @@ protected:
     double hand_speed=10;//to save the memory
 
     //offset of assembling
-    #ifdef PRODUCT_MKII
-	    float LEFT_SERVO_OFFSET  =   1;//3.8ALEX//1mine//18.6liebao   //2.6Degree
-    	float RIGHT_SERVO_OFFSET =   5.6;//12.5ALEX//5.6mine//-1liebao   //1.8Degree
-    	float ROT_SERVO_OFFSET   =   0;//7ALEX//0mine//-7liebao
-    #else
-    	double RIGHT_SERVO_OFFSET;
-    	double LEFT_SERVO_OFFSET;
-    	double ROT_SERVO_OFFSET;
-    	double HAND_ROT_SERVO_OFFSET;
-    #endif
+    double RIGHT_SERVO_OFFSET;
+    double LEFT_SERVO_OFFSET;
+    double ROT_SERVO_OFFSET;
+    double HAND_ROT_SERVO_OFFSET;
 
     //sys status
     unsigned char sys_status = NORMAL_MODE;
