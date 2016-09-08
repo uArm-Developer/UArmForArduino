@@ -1,5 +1,10 @@
 # uArm Arduino Library Release Note
 
+## [2.0.11] - 2016-09-08
+
+## Fix
+- Fix Attach issue when unplug DC adapter
+
 ## [2.0.9] - 2016-09-01
 
 ## Changes

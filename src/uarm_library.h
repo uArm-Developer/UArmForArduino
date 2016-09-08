@@ -34,7 +34,7 @@
 #define RIGHT_SERVO_ADDRESS  0x02D0
 #define ROT_SERVO_ADDRESS    0x05A0
 
-#define current_ver         "H2-2.0.10"
+#define current_ver         "H2-2.0.11"
 
 #define SERVO_ROT_NUM           0
 #define SERVO_LEFT_NUM          1
@@ -183,8 +183,9 @@ public:
 
         int write_servo_angle(double servo_rot_angle, double servo_left_angle, double servo_right_angle);
         void write_servo_angle(byte servo_num, double servo_angle,  boolean with_offset);
+        // void read_servo_angle(byte servo_num) {read_servo_angle(servo_num, true);};
+        // void read_servo_angle(byte servo_num, boolean with_offset);
         void read_servo_angle(byte servo_num);
-        void read_servo_angle(byte servo_num, boolean with_offset);
         // double analog_to_angle(int input_angle, byte servo_num, bool with_offset);
         void read_linear_offset(byte servo_num, double& intercept_val, double& slope_val);
         //void get_current_xyz();

@@ -40,7 +40,7 @@ void uArmClass::arm_process_commands()
         if(Serial.available())
         {
                 message = Serial.readStringUntil(']');
-                message.trim();
+                // message.trim();
                 message += ']';
                 runCommand(message); // Run the command and send back the response
         }
@@ -91,10 +91,10 @@ void uArmClass::arm_process_commands()
                         case NORMAL_BT_CONNECTED_MODE:
                                 sys_status = LEARNING_MODE;
                                 addr = 0;//recording/playing address
-                                        g_servo_rot.detach();
-                                        g_servo_left.detach();
-                                        g_servo_right.detach();
-                                        g_servo_hand_rot.detach();
+                                g_servo_rot.detach();
+                                g_servo_left.detach();
+                                g_servo_right.detach();
+                                g_servo_hand_rot.detach();
                                 break;
                         case LEARNING_MODE:
                                 //LEARNING_MODE_STOP is just used to notificate record() function to stop, once record() get it then change the sys_status to normal_mode
@@ -240,7 +240,7 @@ int uArmClass::write_servo_angle(double servo_rot_angle, double servo_left_angle
  */
 void uArmClass::write_servo_angle(byte servo_number, double servo_angle)
 {
-        write_servo_angle(servo_number,servo_angle,true);
+        write_servo_angle(servo_number,servo_angle,false);
 }
 
 /*!
@@ -297,10 +297,11 @@ void uArmClass::attach_servo(byte servo_number)
         switch(servo_number) {
         case SERVO_ROT_NUM:
                 // if (is_linear_calibrated == true) {
-                uarm.g_servo_rot.attach(SERVO_ROT_PIN);
-                read_servo_angle(SERVO_ROT_NUM);
-                //Serial.println(cur_rot);
-                uarm.g_servo_rot.write(cur_rot);
+                if (analogRead(SERVO_ROT_ANALOG_PIN) > 50) { // Servo Protection
+                        uarm.g_servo_rot.attach(SERVO_ROT_PIN);
+                        read_servo_angle(SERVO_ROT_NUM);
+                        uarm.g_servo_rot.write(cur_rot);
+                }
                 // }
                 // else{
                 //         uarm.g_servo_rot.attach(SERVO_ROT_PIN);
@@ -309,9 +310,11 @@ void uArmClass::attach_servo(byte servo_number)
                 break;
         case SERVO_LEFT_NUM:
                 // if (is_linear_calibrated == true) {
-                uarm.g_servo_left.attach(SERVO_LEFT_PIN);
-                uarm.read_servo_angle(SERVO_LEFT_NUM);
-                uarm.g_servo_left.write(cur_left);
+                if (analogRead(SERVO_LEFT_ANALOG_PIN) > 50) { // Servo Protection
+                        uarm.g_servo_left.attach(SERVO_LEFT_PIN);
+                        uarm.read_servo_angle(SERVO_LEFT_NUM);
+                        uarm.g_servo_left.write(cur_left);
+                }
                 // }
                 // else{
                 //         uarm.g_servo_left.attach(SERVO_LEFT_PIN);
@@ -320,9 +323,11 @@ void uArmClass::attach_servo(byte servo_number)
                 break;
         case SERVO_RIGHT_NUM:
                 // if (is_linear_calibrated == true) {
-                uarm.g_servo_right.attach(SERVO_RIGHT_PIN);
-                uarm.read_servo_angle(SERVO_RIGHT_NUM);
-                uarm.g_servo_right.write(cur_right);
+                if (analogRead(SERVO_RIGHT_ANALOG_PIN) > 50) { // Servo Protection
+                        uarm.g_servo_right.attach(SERVO_RIGHT_PIN);
+                        uarm.read_servo_angle(SERVO_RIGHT_NUM);
+                        uarm.g_servo_right.write(cur_right);
+                }
                 // }
                 // else{
                 //         uarm.g_servo_right.attach(SERVO_RIGHT_PIN);
@@ -331,9 +336,11 @@ void uArmClass::attach_servo(byte servo_number)
                 break;
         case SERVO_HAND_ROT_NUM:
                 // if (is_linear_calibrated == true) {
-                uarm.g_servo_hand_rot.attach(SERVO_HAND_ROT_PIN,600,2400);
-                uarm.read_servo_angle(SERVO_HAND_ROT_NUM);
-                uarm.g_servo_hand_rot.write(cur_hand);
+                if (analogRead(SERVO_HAND_ROT_ANALOG_PIN) > 50) { // Servo Protection
+                        uarm.g_servo_hand_rot.attach(SERVO_HAND_ROT_PIN,600,2400);
+                        uarm.read_servo_angle(SERVO_HAND_ROT_NUM);
+                        uarm.g_servo_hand_rot.write(cur_hand);
+                }
                 // }
                 break;
         }
@@ -560,7 +567,7 @@ void uArmClass::get_current_rotleftright()
         read_servo_angle(SERVO_HAND_ROT_NUM);
 }
 
-void uArmClass::read_servo_angle(byte servo_number, bool original_data)
+void uArmClass::read_servo_angle(byte servo_number)
 {
         double angle = 0;
         // unsigned int address;
@@ -644,10 +651,10 @@ void uArmClass::read_servo_angle(byte servo_number, bool original_data)
    \param servo_num SERVO_ROT_NUM, SERVO_LEFT_NUM, SERVO_RIGHT_NUM, SERVO_HAND_ROT_NUM
    \return Return servo_num Angle
  */
-void uArmClass::read_servo_angle(byte servo_num)
-{
-        read_servo_angle(servo_num, false);
-}
+// void uArmClass::read_servo_angle(byte servo_num)
+// {
+//         read_servo_angle(servo_num, true);
+// }
 
 /*!
    \brief read Angle by servo_num
@@ -1227,16 +1234,17 @@ void uArmClass::runCommand(String cmnd){
                 get_current_rotleftright();
                 // read_servo_angle(SERVO_HAND_ROT_NUM);
                 char letters[4] = {'B','L','R','H'};
-                values[0] = cur_rot + ROT_SERVO_OFFSET;
-                values[1] = cur_left + LEFT_SERVO_OFFSET;
-                values[2] = cur_right + RIGHT_SERVO_OFFSET;
-                values[3] = cur_hand + HAND_ROT_SERVO_OFFSET;
+                values[0] = cur_rot;
+                values[1] = cur_left;
+                values[2] = cur_right;
+                values[3] = cur_hand;
                 printf(true, values, letters, 4);
                 //Serial.println("ST" + String(cur_rot) + "L" + String(cur_left) + "R" + String(cur_right) + "F" + String(cur_hand) + "");
         }else
 
         //gSer---------------------------------------------------------------------
         if(cmd == "gSer") {
+                get_current_rotleftright();
                 values[0] = cur_rot;
                 values[1] = cur_left;
                 values[2] = cur_right;
