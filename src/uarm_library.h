@@ -6,7 +6,7 @@
    \author Joey Song, Alex Tan, Dave Corboy
    \version MKII: H3-S2.0.9a  uArm Metal: H2-S2.0.9a
    \date 08/30/2016
-*/
+ */
 #include <Arduino.h>
 #include <EEPROM.h>
 #include <Wire.h>
@@ -34,8 +34,7 @@
 #define RIGHT_SERVO_ADDRESS  0x02D0
 #define ROT_SERVO_ADDRESS    0x05A0
 
-	#define current_ver         "vH3-2.0.10"
-   #define current_ver         "sH2-2.0.10"
+#define current_ver         "H2-2.0.10"
 
 #define SERVO_ROT_NUM           0
 #define SERVO_LEFT_NUM          1
@@ -152,124 +151,128 @@
 #define F0  "[F0]"
 #define F1  "[F1]"
 
+#define SERVO_9G_MAX    460
+#define SERVO_9G_MIN    98
+
 class uArmClass
 {
 public:
-    uArmClass();
-    void arm_setup();
-    double read_servo_offset(byte servo_num);
-    void read_servo_calibration_data(double *rot, double *left, double *right);
-    void detach_servo(byte servo_num);
-    void alert(byte times, int runt_time, int stop_time);
-    void detach_all_servos();
-    void write_servo_angle(byte servo_num, double servo_angle);
-    double analog_to_angle(int input_angle, byte servo_num);
+        uArmClass();
+        void arm_setup();
+        double read_servo_offset(byte servo_num);
+        void read_servo_calibration_data(double *rot, double *left, double *right);
+        void detach_servo(byte servo_num);
+        // void alert(byte times, int runt_time, int stop_time);
+        // void detach_all_servos();
+        void write_servo_angle(byte servo_num, double servo_angle);
+        double analog_to_angle(int input_angle, byte servo_num);
 
-    void arm_process_commands();
-    bool available();
+        void arm_process_commands();
+        bool available();
 
-    unsigned char move_to(double x, double y, double z, double hand_angle, byte relative_flags, double times, byte ease_type, boolean enable_hand, bool polar);
-    unsigned char move_to(double x, double y,double z, bool polar) {
-        return move_to(x, y, z, 0, ABSOLUTE, 1.0, INTERP_EASE_INOUT_CUBIC, false, polar);
-    }
-    unsigned char move_to(double x, double y,double z,double times, bool polar) {
-        return move_to(x, y, z, 0, ABSOLUTE, times, INTERP_EASE_INOUT_CUBIC, true, polar);
-    }
+        unsigned char move_to(double x, double y, double z, double hand_angle, byte relative_flags, double times, byte ease_type, boolean enable_hand, bool polar);
+        unsigned char move_to(double x, double y,double z, bool polar) {
+                return move_to(x, y, z, 0, ABSOLUTE, 1.0, INTERP_EASE_INOUT_CUBIC, false, polar);
+        }
+        unsigned char move_to(double x, double y,double z,double times, bool polar) {
+                return move_to(x, y, z, 0, ABSOLUTE, times, INTERP_EASE_INOUT_CUBIC, true, polar);
+        }
 
-    unsigned char get_current_xyz(double *cur_rot, double *cur_left, double *cur_right, double *g_current_x, double *g_current_y, double *g_current_z, bool for_movement );
-    void get_current_rotleftright();
-    
-	int write_servo_angle(double servo_rot_angle, double servo_left_angle, double servo_right_angle);
-	void write_servo_angle(byte servo_num, double servo_angle,  boolean with_offset);
-	double read_servo_angle(byte servo_num);
-	double read_servo_angle(byte servo_num, boolean with_offset);
-	double analog_to_angle(int input_angle, byte servo_num, bool with_offset);
-	void read_linear_offset(byte servo_num, double& intercept_val, double& slope_val);
-	//void get_current_xyz();
-    //void get_current_xyz(double theta_1, double theta_2, double theta_3);
-    unsigned char coordinate_to_angle(double x, double y, double z, double *theta_1, double *theta_2, double *theta_3);
-    void interpolate(double start_val, double end_val, double *interp_vals, byte ease_type);
+        unsigned char get_current_xyz(double *cur_rot, double *cur_left, double *cur_right, double *g_current_x, double *g_current_y, double *g_current_z, bool for_movement );
+        void get_current_rotleftright();
 
-    void gripper_catch(bool value);
-	unsigned char gripper_status();
-    void pump_catch(bool value);
-    unsigned char pump_status();
+        int write_servo_angle(double servo_rot_angle, double servo_left_angle, double servo_right_angle);
+        void write_servo_angle(byte servo_num, double servo_angle,  boolean with_offset);
+        void read_servo_angle(byte servo_num);
+        void read_servo_angle(byte servo_num, boolean with_offset);
+        // double analog_to_angle(int input_angle, byte servo_num, bool with_offset);
+        void read_linear_offset(byte servo_num, double& intercept_val, double& slope_val);
+        //void get_current_xyz();
+        //void get_current_xyz(double theta_1, double theta_2, double theta_3);
+        unsigned char coordinate_to_angle(double x, double y, double z, double *theta_1, double *theta_2, double *theta_3);
+        void interpolate(double start_val, double end_val, double *interp_vals, byte ease_type);
 
-    Servo g_servo_rot;
-    Servo g_servo_left;
-    Servo g_servo_right;
-    Servo g_servo_hand_rot;
+        void gripper_catch(bool value);
+        unsigned char gripper_status();
+        void pump_catch(bool value);
+        unsigned char pump_status();
 
-    int write_servos_angle(byte servo_rot_angle, byte servo_left_angle, byte servo_right_angle, byte servo_hand_rot_angle, byte trigger);
-    int write_servos_angle(double servo_rot_angle, double servo_left_angle, double servo_right_angle, double servo_hand_rot_angle);
-    int write_servos_angle(double servo_rot_angle, double servo_left_angle, double servo_right_angle);
-    void attach_all();
-    void attach_servo(byte servo_num);
-    void runCommand(String cmnd);
-    void printf(bool success, double *dat, char *letters, unsigned char num);
-    void printf(bool success, double dat);
-    void printf(bool success, int dat);
-	char getValue(String cmnd, const char *parameters, int parameterCount, double valueArray[]);
+        Servo g_servo_rot;
+        Servo g_servo_left;
+        Servo g_servo_right;
+        Servo g_servo_hand_rot;
 
-    // functions modified to be used for old version uArm
-    //void angle_to_coordinate(double theta_1, double theta_2, double theta_3, double& x, double& y, double &z) {
-    //    get_current_xyz(theta_1, theta_2, theta_3); x = g_current_x; y = g_current_y; z = g_current_z;
-	//void get_current_xyz(double theta_1, double theta_2, double theta_3);
+        int write_servos_angle(byte servo_rot_angle, byte servo_left_angle, byte servo_right_angle, byte servo_hand_rot_angle, byte trigger);
+        int write_servos_angle(double servo_rot_angle, double servo_left_angle, double servo_right_angle, double servo_hand_rot_angle);
+        int write_servos_angle(double servo_rot_angle, double servo_left_angle, double servo_right_angle);
+        // void attach_all();
+        void attach_servo(byte servo_num);
+        void runCommand(String cmnd);
+        void printf(bool success, double *dat, char *letters, unsigned char num);
+        void printf(bool success, double dat);
+        void printf(bool success, int dat);
+        char getValue(String cmnd, const char *parameters, int parameterCount, double valueArray[]);
+
+
+        // functions modified to be used for old version uArm
+        //void angle_to_coordinate(double theta_1, double theta_2, double theta_3, double& x, double& y, double &z) {
+        //    get_current_xyz(theta_1, theta_2, theta_3); x = g_current_x; y = g_current_y; z = g_current_z;
+        //void get_current_xyz(double theta_1, double theta_2, double theta_3);
 //	double read_servo_offset(byte servo_num);
 //	boolean set_servo_status(boolean attach_state, byte servo_num);
 
 private:
-    void delay_us();
-    void iic_start();
-    void iic_stop();
-    unsigned char read_ack();
-    void send_ack();
-    void iic_sendbyte(unsigned char dat);
-    unsigned char iic_receivebyte();
-    unsigned char iic_writebuf(unsigned char *buf,unsigned char device_addr,unsigned int addr,unsigned char len);
-    unsigned char iic_readbuf(unsigned char *buf,unsigned char device_addr,unsigned int addr,unsigned char len);
+        void delay_us();
+        void iic_start();
+        void iic_stop();
+        unsigned char read_ack();
+        void send_ack();
+        void iic_sendbyte(unsigned char dat);
+        unsigned char iic_receivebyte();
+        unsigned char iic_writebuf(unsigned char *buf,unsigned char device_addr,unsigned int addr,unsigned char len);
+        unsigned char iic_readbuf(unsigned char *buf,unsigned char device_addr,unsigned int addr,unsigned char len);
 
-    bool record();
-    bool play();
-    void recording_write(unsigned int address, unsigned char * data_array, int num);
-    void recording_read(unsigned int address, unsigned char * data_array, int num);
+        bool record();
+        bool play();
+        void recording_write(unsigned int address, unsigned char * data_array, int num);
+        void recording_read(unsigned int address, unsigned char * data_array, int num);
 protected:
-    double cur_rot = 90;
-    double cur_left = 90;
-    double cur_right = 90;
-    double cur_hand = 90;
+        double cur_rot = 90;
+        double cur_left = 90;
+        double cur_right = 90;
+        double cur_hand = 90;
 
-    double g_current_x = 10;
-    double g_current_y = 100;
-    double g_current_z = 150;
+        double g_current_x = 10;
+        double g_current_y = 100;
+        double g_current_z = 150;
 
-    boolean move_to_the_closest_point = false;
+        boolean move_to_the_closest_point = false;
 
-    unsigned int INTERP_INTVLS;
+        unsigned int INTERP_INTVLS;
 
-    unsigned char move_times = 255;//255 means no move
-    unsigned long buzzerStopTime=0;
-    unsigned long moveStartTime=0;
-    unsigned int microMoveTime=0;
-    // the arrays to store the xyz coordinates first and then change to the rot left right angles
-    double x_array[61];
-    double y_array[61];
-    double z_array[61];
-    double hand_speed=10;//to save the memory
+        unsigned char move_times = 255;//255 means no move
+        unsigned long buzzerStopTime=0;
+        unsigned long moveStartTime=0;
+        unsigned int microMoveTime=0;
+        // the arrays to store the xyz coordinates first and then change to the rot left right angles
+        double x_array[61];
+        double y_array[61];
+        double z_array[61];
+        double hand_speed=10;//to save the memory
 
-    //offset of assembling
-    double RIGHT_SERVO_OFFSET;
-    double LEFT_SERVO_OFFSET;
-    double ROT_SERVO_OFFSET;
-    double HAND_ROT_SERVO_OFFSET;
+        //offset of assembling
+        double RIGHT_SERVO_OFFSET;
+        double LEFT_SERVO_OFFSET;
+        double ROT_SERVO_OFFSET;
+        double HAND_ROT_SERVO_OFFSET;
 
-    //sys status
-    unsigned char sys_status = NORMAL_MODE;
-    unsigned char time_50ms = 0;//used to change the led blink time
-    unsigned char time_ticks = 0;
+        //sys status
+        unsigned char sys_status = NORMAL_MODE;
+        unsigned char time_50ms = 0;//used to change the led blink time
+        unsigned char time_ticks = 0;
 
-    //learning mode
-    unsigned int addr = 0;
+        //learning mode
+        unsigned int addr = 0;
 
 };
 
