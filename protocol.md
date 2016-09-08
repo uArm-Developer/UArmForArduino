@@ -56,12 +56,12 @@
 				  Send Example:   \[gGri\]\\n
 				  Return Example: \[S0\]\\n or \[S1\]\\n or \[S2\]\\n   S0:GRAB THE THINGS   S1:GRIPPER ON   S2:GRIPPER OFF
 
-  - \[sAttS#\]        Attach servo #. Same as servo #'s in uarm_library.h
-				  Send Example:   \[sAttS1\]\\n
+  - \[sAttN#\]        Attach servo #. Same as servo #'s in uarm_library.h
+				  Send Example:   \[sAttN1\]\\n
 				  Return Example: \[S\]\\n or \[F\]\\n  S:SUCCESS   F:WRONG NUMBER
 
- - \[sDetS#\]      Detach servo #. Same as servo #'s in uarm_library.h
-				  Send Example:   \[sDetS1\]\\n
+ - \[sDetN#\]      Detach servo #. Same as servo #'s in uarm_library.h
+				  Send Example:   \[sDetN1\]\\n
 				  Return Example: \[S\]\\n or \[F\]\\n   S:SUCCESS   F:WRONG NUMBER
 
   - \[gCrd\]          Returns the XYZ coordinate position of the robot
@@ -70,11 +70,11 @@
 
   - \[gAng\]          Returns the servo angles with offset of all the servos in the robot and returns them as angleA#B#C#D# where ABCD are servos 0,1,2,3 respectively
 				  Send Example:   \[gAng\]\\n
-				  Return Example: \[ST#L#R#F#\]
+				  Return Example: \[SB#L#R#H#\]
 
 	- \[gSer\]          Returns the RAW angle no offset of all the servos in the robot and returns them as angleA#B#C#D# where ABCD are servos 0,1,2,3 respectively
 				  Send Example:   \[gAng\]\\n
-				  Return Example: \[ST#L#R#F#\]					
+				  Return Example: \[SB#L#R#H#\]					
 
  - \[gIKX#Y#Z#\]     Returns the inverse kinematics for XYZ point in the form A#B#C# where ABC are servos 0,1,2 respectively
 				  Send Example:   \[gIKX0Y150Z150\]\\n

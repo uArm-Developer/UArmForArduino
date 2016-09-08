@@ -4,6 +4,7 @@
 
 ## Fix
 - Fix Attach issue when unplug DC adapter
+- Change sAtt sDet paramenter to 'N'
 
 ## [2.0.9] - 2016-09-01
 

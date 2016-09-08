@@ -207,7 +207,8 @@ void uArmClass::arm_setup()
         ROT_SERVO_OFFSET = read_servo_offset(SERVO_ROT_NUM);
         HAND_ROT_SERVO_OFFSET = read_servo_offset(SERVO_HAND_ROT_NUM);
         // attach_all();
-        // uarm.move_to(10,100,150,false);
+        // move_to(10,100,150,false);
+        delay(1000);
         attach_servo(SERVO_ROT_NUM);
         attach_servo(SERVO_LEFT_NUM);
         attach_servo(SERVO_RIGHT_NUM);
@@ -298,48 +299,48 @@ void uArmClass::attach_servo(byte servo_number)
         case SERVO_ROT_NUM:
                 // if (is_linear_calibrated == true) {
                 if (analogRead(SERVO_ROT_ANALOG_PIN) > 50) { // Servo Protection
-                        uarm.g_servo_rot.attach(SERVO_ROT_PIN);
+                        g_servo_rot.attach(SERVO_ROT_PIN);
                         read_servo_angle(SERVO_ROT_NUM);
-                        uarm.g_servo_rot.write(cur_rot);
+                        g_servo_rot.write(cur_rot);
                 }
                 // }
                 // else{
-                //         uarm.g_servo_rot.attach(SERVO_ROT_PIN);
-                //         uarm.g_servo_rot.write(90);
+                //         g_servo_rot.attach(SERVO_ROT_PIN);
+                //         g_servo_rot.write(90);
                 // }
                 break;
         case SERVO_LEFT_NUM:
                 // if (is_linear_calibrated == true) {
                 if (analogRead(SERVO_LEFT_ANALOG_PIN) > 50) { // Servo Protection
-                        uarm.g_servo_left.attach(SERVO_LEFT_PIN);
-                        uarm.read_servo_angle(SERVO_LEFT_NUM);
-                        uarm.g_servo_left.write(cur_left);
+                        g_servo_left.attach(SERVO_LEFT_PIN);
+                        read_servo_angle(SERVO_LEFT_NUM);
+                        g_servo_left.write(cur_left);
                 }
                 // }
                 // else{
-                //         uarm.g_servo_left.attach(SERVO_LEFT_PIN);
-                //         uarm.g_servo_left.write(100);
+                //         g_servo_left.attach(SERVO_LEFT_PIN);
+                //         g_servo_left.write(100);
                 // }
                 break;
         case SERVO_RIGHT_NUM:
                 // if (is_linear_calibrated == true) {
                 if (analogRead(SERVO_RIGHT_ANALOG_PIN) > 50) { // Servo Protection
-                        uarm.g_servo_right.attach(SERVO_RIGHT_PIN);
-                        uarm.read_servo_angle(SERVO_RIGHT_NUM);
-                        uarm.g_servo_right.write(cur_right);
+                        g_servo_right.attach(SERVO_RIGHT_PIN);
+                        read_servo_angle(SERVO_RIGHT_NUM);
+                        g_servo_right.write(cur_right);
                 }
                 // }
                 // else{
-                //         uarm.g_servo_right.attach(SERVO_RIGHT_PIN);
-                //         uarm.g_servo_right.write(60);
+                //         g_servo_right.attach(SERVO_RIGHT_PIN);
+                //         g_servo_right.write(60);
                 // }
                 break;
         case SERVO_HAND_ROT_NUM:
                 // if (is_linear_calibrated == true) {
-                if (analogRead(SERVO_HAND_ROT_ANALOG_PIN) > 50) { // Servo Protection
-                        uarm.g_servo_hand_rot.attach(SERVO_HAND_ROT_PIN,600,2400);
-                        uarm.read_servo_angle(SERVO_HAND_ROT_NUM);
-                        uarm.g_servo_hand_rot.write(cur_hand);
+                if (analogRead(SERVO_HAND_ROT_ANALOG_PIN) > 100) { // Servo Protection
+                        g_servo_hand_rot.attach(SERVO_HAND_ROT_PIN,600,2400);
+                        read_servo_angle(SERVO_HAND_ROT_NUM);
+                        g_servo_hand_rot.write(cur_hand);
                 }
                 // }
                 break;
@@ -533,9 +534,9 @@ unsigned char uArmClass::coordinate_to_angle(double x, double y, double z, doubl
 /*
    void uArmClass::get_current_xyz()
    {
-       double theta_1 = uarm.analog_to_angle(analogRead(SERVO_ROT_ANALOG_PIN),SERVO_ROT_NUM, false);
-       double theta_2 = uarm.analog_to_angle(analogRead(SERVO_LEFT_ANALOG_PIN),SERVO_LEFT_NUM, false);
-       double theta_3 = uarm.analog_to_angle(analogRead(SERVO_RIGHT_ANALOG_PIN),SERVO_RIGHT_NUM, false);
+       double theta_1 = analog_to_angle(analogRead(SERVO_ROT_ANALOG_PIN),SERVO_ROT_NUM, false);
+       double theta_2 = analog_to_angle(analogRead(SERVO_LEFT_ANALOG_PIN),SERVO_LEFT_NUM, false);
+       double theta_3 = analog_to_angle(analogRead(SERVO_RIGHT_ANALOG_PIN),SERVO_RIGHT_NUM, false);
        get_current_xyz(theta_1, theta_2, theta_3);
    }
 
@@ -567,7 +568,7 @@ void uArmClass::get_current_rotleftright()
         read_servo_angle(SERVO_HAND_ROT_NUM);
 }
 
-void uArmClass::read_servo_angle(byte servo_number)
+void uArmClass::read_servo_angle(byte servo_number, boolean with_offset)
 {
         double angle = 0;
         // unsigned int address;
@@ -615,35 +616,21 @@ void uArmClass::read_servo_angle(byte servo_number)
         }
         switch(servo_number)
         {
-        case SERVO_ROT_NUM: (*data) = uarm.analog_to_angle((dat[2]+dat[3]+dat[4]+dat[5])/4,SERVO_ROT_NUM); break;
-        case SERVO_LEFT_NUM: (*data) = uarm.analog_to_angle((dat[2]+dat[3]+dat[4]+dat[5])/4,SERVO_LEFT_NUM); break;
-        case SERVO_RIGHT_NUM: (*data) = uarm.analog_to_angle((dat[2]+dat[3]+dat[4]+dat[5])/4,SERVO_RIGHT_NUM); break;
+        case SERVO_ROT_NUM: (*data) = analog_to_angle((dat[2]+dat[3]+dat[4]+dat[5])/4,SERVO_ROT_NUM); break;
+        case SERVO_LEFT_NUM: (*data) = analog_to_angle((dat[2]+dat[3]+dat[4]+dat[5])/4,SERVO_LEFT_NUM); break;
+        case SERVO_RIGHT_NUM: (*data) = analog_to_angle((dat[2]+dat[3]+dat[4]+dat[5])/4,SERVO_RIGHT_NUM); break;
         default: break;
         }
-        // Serial.println(cur_rot);
-        // Serial.println(cur_left);
-        // Serial.println(cur_right);
-        // if((original_data == false)&&(servo_number != SERVO_HAND_ROT_NUM))//servo hand do not have the calibration data, jump over!
-        // {
-        //         //check the external eeprom and transfer the real angle to ideal angle
-        //         // unsigned char ideal_angle[4];
-        //         // iic_readbuf(ideal_angle, EXTERNAL_EEPROM_SYS_ADDRESS, address + (((unsigned int)(*data) - 1) << 1), 4);
-        //         // (*data) = (double)(((ideal_angle[2] << 8) + ideal_angle[3]) - ((ideal_angle[0] << 8) + ideal_angle[1])) * ((*data) - (unsigned int)(*data)) + ((ideal_angle[0] << 8) + ideal_angle[1]);
-        //         // (*data) = (*data) / 10.0;
-        //         switch(servo_number) {
-        //         case SERVO_ROT_NUM:
-        //                 (*data) -= ROT_SERVO_OFFSET;
-        //                 break;
-        //         case SERVO_LEFT_NUM:
-        //                 (*data) -= LEFT_SERVO_OFFSET;
-        //                 break;
-        //         case SERVO_RIGHT_NUM:
-        //                 (*data) -= RIGHT_SERVO_OFFSET;
-        //                 break;
-        //         default:
-        //                 break;
-        //         }
-        // }
+        if (with_offset == true)
+        {
+                switch(servo_number) {
+                case SERVO_ROT_NUM:       cur_rot   -= ROT_SERVO_OFFSET;      break;
+                case SERVO_LEFT_NUM:      cur_left  -= LEFT_SERVO_OFFSET;     break;
+                case SERVO_RIGHT_NUM:     cur_right -= RIGHT_SERVO_OFFSET;    break;
+                case SERVO_HAND_ROT_NUM:  cur_hand  -= HAND_ROT_SERVO_OFFSET; break;
+
+                }
+        }
 }
 
 /*!
@@ -787,42 +774,8 @@ void uArmClass::interpolate(double start_val, double end_val, double *interp_val
         // }
         double delta = end_val - start_val;
         for (byte f = 0; f < INTERP_INTVLS; f++) {
-                // switch (ease_type) {
-                /*case INTERP_LINEAR://linear moving
-                 *(interp_vals+f) = delta * f / INTERP_INTVLS + start_val;
-                        break;
-                   case INTERP_EASE_INOUT://
-                   {
-                        float t = f / (INTERP_INTVLS / 2.0);
-                        if (t < 1) {
-                 *(interp_vals+f) = delta / 2 * t * t + start_val;
-                        } else {
-                                t--;
-                 *(interp_vals+f)= -delta / 2 * (t * (t - 2) - 1) + start_val;
-                        }
-                   }
-                   break;
-                 */
-                /*case INTERP_EASE_IN:
-                   {
-                        float t = (float)f / INTERP_INTVLS;
-                 *(interp_vals+f) = delta * t * t + start_val;
-                   }
-                   break;
-                   case INTERP_EASE_OUT:
-                   {
-                        float t = (float)f / INTERP_INTVLS;
-                 *(interp_vals+f) = -delta * t * (t - 2) + start_val;
-                   }
-                   break;*/
-                // case INTERP_EASE_INOUT_CUBIC: // this is a compact version of Joey's original cubic ease-in/out
-                // {
                 float t = (float)f / INTERP_INTVLS;
-                //*(interp_vals+f) = 10.0*(start_val + (3 * delta) * (t * t) + (-2 * delta) * (t * t * t));
                 *(interp_vals+f) = 10.0 * (start_val + t* t * delta * (3 + (-2) * t));
-                // }
-                // break;
-                // }
         }
 }
 
@@ -1012,15 +965,6 @@ unsigned char uArmClass::gripper_status()
 void uArmClass::runCommand(String cmnd){
 
         // To save memory, create the "OK" and "]\n" right now, in flash memory
-        //   String S   = F("[S]");
-        //  String S0  = F("[S0]");
-        //  String S1  = F("[S1]");
-        //  String S2  = F("[S2]");
-        //  String F   = F("[F]");
-        //  String F0  = F("[F0]");
-        //  String F1  = F("[F1]");
-        // char command[50];
-        // cmnd.toCharArray(command, 50);
         // //get the first 4 command and compare it below
         String cmd = cmnd.substring(1,5);
         // Serial.println(cmd);
@@ -1060,26 +1004,28 @@ void uArmClass::runCommand(String cmnd){
         // sAttachS#----------------------------------------------------------------
         //if(cmnd.indexOf(F("sAtt")) >= 0){
         if(cmd == "sAtt") {
-                const char parameters[1] = {'S'};
+                const char parameters[1] = {'N'};
                 //String errorResponse        = getValues(cmnd, parameters, 1, values);
                 if(getValue(cmnd, parameters, 1, values) == OK) {
                         Serial.println(SS);// successful feedback send it immediately
                         attach_servo(values[0]);
-                        get_current_xyz(&cur_rot, &cur_left, &cur_right, &g_current_x, &g_current_y, &g_current_z, true);
-                        double rot, left, right;
+                        // get_current_xyz(&cur_rot, &cur_left, &cur_right, &g_current_x, &g_current_y, &g_current_z, false);
+                        // double rot, left, right;
                         // if(coordinate_to_angle(g_current_x, g_current_y, g_current_z, &rot, &left, &right) == OUT_OF_RANGE)
                         // {
-                        //         // alert(50, 10, 10);
-                        //         cur_rot = 90;
-                        //         cur_left = 90;
-                        //         cur_right = 90;
-                        //         cur_hand = 90;
-                        //         g_current_x = 10;
-                        //         g_current_y = 100;
-                        //         g_current_z = 150;
-                        //         uarm.move_to(10,100,150,false);
-                        //         //Serial.println("TEST");
-                        //         attach_all();
+                        // //         // alert(50, 10, 10);
+                        // //         cur_rot = 90;
+                        // //         cur_left = 90;
+                        // //         cur_right = 90;
+                        // //         cur_hand = 90;
+                        // //         g_current_x = 10;
+                        // //         g_current_y = 100;
+                        // //         g_current_z = 150;
+                        //         move_to_the_closest_point = true;
+                        //         move_to(g_current_x,g_current_x,g_current_x,false);
+                        //         move_to_the_closest_point = false;
+                        // //         //Serial.println("TEST");
+                        // //         attach_all();
                         // }
                 }
         }else
@@ -1087,7 +1033,7 @@ void uArmClass::runCommand(String cmnd){
         // sDetachS#----------------------------------------------------------------
         //if(cmnd.indexOf(F("sDet")) >= 0){
         if(cmd == "sDet") {
-                const char parameters[1] = {'S'};
+                const char parameters[1] = {'N'};
                 //String errorResponse        = getValues(cmnd, parameters, 1, values);
                 if(getValue(cmnd, parameters, 1, values) == OK) {
                         Serial.println(SS);// successful feedback send it immediately
@@ -1101,7 +1047,7 @@ void uArmClass::runCommand(String cmnd){
                 if(getValue(cmnd, parameters, 2, values) == OK) {
                         Serial.println(SS);// successful feedback send it immediately
                         // in write_servo_angle function, add offset
-                        uarm.write_servo_angle(byte(values[0]), values[1], false);
+                        write_servo_angle(byte(values[0]), values[1], false);
                 }
         }
         // sAngN#V#--------------------------------------------------------------
@@ -1111,7 +1057,7 @@ void uArmClass::runCommand(String cmnd){
                 if(getValue(cmnd, parameters, 2, values) == OK) {
                         Serial.println(SS);// successful feedback send it immediately
                         // in write_servo_angle function, add offset
-                        uarm.write_servo_angle(byte(values[0]), values[1], true);
+                        write_servo_angle(byte(values[0]), values[1], true);
                 }
         }else
 
@@ -1244,7 +1190,11 @@ void uArmClass::runCommand(String cmnd){
 
         //gSer---------------------------------------------------------------------
         if(cmd == "gSer") {
-                get_current_rotleftright();
+                // get_current_rotleftright();
+                read_servo_angle(SERVO_ROT_NUM, false);
+                read_servo_angle(SERVO_LEFT_NUM, false);
+                read_servo_angle(SERVO_RIGHT_NUM, false);
+                read_servo_angle(SERVO_HAND_ROT_NUM, false);
                 values[0] = cur_rot;
                 values[1] = cur_left;
                 values[2] = cur_right;
@@ -1485,52 +1435,6 @@ void uArmClass::printf(bool success, int dat)
  */
 char uArmClass::getValue(String cmnd, const char *parameters, int parameterCount, double valueArray[])
 {
-        // int index[parameterCount + 1];
-        // unsigned int p, q, minus_flag = 0;
-
-        // delay(1);
-        // for(p = 0; p < parameterCount; p++)
-        // {
-        //   //find the matched letter of parameter
-        //   while(cmnd[q]!=']')
-        //   {
-        //     if(cmnd[q] == parameters[p])
-        //     {
-        //       break;
-        //     }
-        //     q++;
-        //   }
-        //   //if not find the matched parameter
-        //   if(cmnd[q] == ']')
-        //   {
-        //     return ERR1;
-        //   }
-        //   //record the position of the parameter
-        //   else
-        //   {
-        //     index[p] = q;
-        //     //get the length of the string at the last position
-        //     if(p == (parameterCount - 1))
-        //     {
-        //       q = 0;
-        //       while(cmnd[q]!=']')
-        //       {
-        //         q=q+1;
-        //       }
-        //       index[p + 1] = q;
-        //     }
-        //   }
-        // }
-        //  Check that there is something between each parameter (AKA, the value)
-        // String s = cmnd;
-        // s = s.substring(1, s.length() -1 );
-        // Serial.println(cmnd);
-        //   char last_index = cmnd.indexOf(F(""));
-        //   if (last_index == -1)
-        //   {
-        //     Serial.println(F("F1"));
-        //     return ERR1;
-        //   }
         for (byte i = 0; i < parameterCount; i++) {
                 char start_index = cmnd.indexOf(parameters[i]) + 1;
                 if (start_index == -1)
@@ -1552,43 +1456,6 @@ char uArmClass::getValue(String cmnd, const char *parameters, int parameterCount
                 }
                 valueArray[i] = cmnd.substring(start_index, end_index).toFloat();
         }
-        // for(p = 0; p < parameterCount; p++)
-        // {
-        //   if((index[p + 1] - index[p]) == 1)
-        //   {
-        //     return ERR2;
-        //   }
-        //   // clear the data first and be ready for the multiple
-        //   valueArray[p] = 0;
-        //   for(q = 1; q < (index[p + 1] - index[p]); q++)
-        //   {
-        //     //break if detect the point, ignore the point
-        //     if(cmnd[index[p] + q] == '.')
-        //     {
-        //       if(minus_flag == 1)
-        //       {
-        //         minus_flag = 0;
-        //         valueArray[p] = -valueArray[p];
-        //       }
-        //       break;
-        //     }
-        //     //mark the minus flag
-        //     if(cmnd[index[p] + q] == '-')
-        //     {
-        //       minus_flag = 1;
-        //       continue;
-        //     }
-        //
-        //     valueArray[p] *= 10;
-        //     valueArray[p] += cmnd[index[p] + q] - 48;
-        //     //set the minus symbol, must do it on the last time of loop
-        //     if((minus_flag == 1)&&(q == (index[p + 1] - index[p] - 1)))
-        //     {
-        //       minus_flag = 0;
-        //       valueArray[p] = -valueArray[p];
-        //     }
-        //   }
-        // }
         return OK;
 }
 
