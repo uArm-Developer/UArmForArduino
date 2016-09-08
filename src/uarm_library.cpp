@@ -154,7 +154,7 @@ boolean uArmClass::set_servo_status(boolean setAttached, byte servoNum){
         double angleBefore = 90;
         if(servoNum == SERVO_ROT_NUM) {
                 if(setAttached) {
-                        if (is_linear_calibrated == true) {
+                        if (is_linear_calibrated == true && analogRead(SERVO_ROT_ANALOG_PIN) > 50) {
                                 angleBefore = read_servo_angle(SERVO_ROT_NUM);
                                 // Serial.println("New angle" + String(angleBefore));
                                 uarm.g_servo_rot.attach(SERVO_ROT_PIN);
@@ -170,7 +170,7 @@ boolean uArmClass::set_servo_status(boolean setAttached, byte servoNum){
                 }
         }else if(servoNum == SERVO_LEFT_NUM) {
                 if(setAttached) {
-                        if (is_linear_calibrated == true) {
+                        if (is_linear_calibrated == true && analogRead(SERVO_LEFT_ANALOG_PIN) > 50) {
                                 angleBefore = uarm.read_servo_angle(SERVO_LEFT_NUM);
                                 uarm.g_servo_left.attach(SERVO_LEFT_PIN);
                                 uarm.g_servo_left.write(angleBefore);
@@ -185,7 +185,7 @@ boolean uArmClass::set_servo_status(boolean setAttached, byte servoNum){
                 }
         }else if(servoNum == SERVO_RIGHT_NUM) {
                 if(setAttached) {
-                        if (is_linear_calibrated == true) {
+                        if (is_linear_calibrated == true && analogRead(SERVO_RIGHT_ANALOG_PIN) > 50) {
                                 angleBefore = uarm.read_servo_angle(SERVO_RIGHT_NUM);
                                 uarm.g_servo_right.attach(SERVO_RIGHT_PIN);
                                 uarm.g_servo_right.write(angleBefore);
@@ -200,7 +200,7 @@ boolean uArmClass::set_servo_status(boolean setAttached, byte servoNum){
                 }
         }else if(servoNum == SERVO_HAND_ROT_NUM) {
                 if(setAttached) {
-                        if (is_linear_calibrated == true) {
+                        if (is_linear_calibrated == true && analogRead(SERVO_HAND_ROT_ANALOG_PIN) >100 ) {
                                 angleBefore = uarm.read_servo_angle(SERVO_HAND_ROT_NUM);
                                 uarm.g_servo_hand_rot.attach(SERVO_HAND_PIN);
                                 uarm.g_servo_hand_rot.write(angleBefore);

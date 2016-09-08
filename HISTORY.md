@@ -1,5 +1,10 @@
 # uArm Arduino Library Release Note
 
+## [1.7.4] - 2016-09-08
+
+### Fix
+- Fix uArm, if connect USB before plug DC adapter.
+
 ## [1.7.3] - 2016-07-07
 
 ### Fix
