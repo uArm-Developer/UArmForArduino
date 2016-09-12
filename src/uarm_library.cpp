@@ -274,18 +274,6 @@ void uArmClass::write_servo_angle(byte servo_number, double servo_angle, boolean
 }
 
 /*!
-   \brief Attach All Servo
-   \note Warning, if you attach left servo & right servo without a movement, it might be caused a demage
- */
-// void uArmClass::attach_all()
-// {
-//         attach_servo(SERVO_ROT_NUM);
-//         attach_servo(SERVO_LEFT_NUM);
-//         attach_servo(SERVO_RIGHT_NUM);
-//         attach_servo(SERVO_HAND_ROT_NUM);
-// }
-
-/*!
    \brief Attach Servo, if servo has not been attached, attach the servo, and read the current Angle
    \param servo_number SERVO_ROT_NUM, SERVO_LEFT_NUM, SERVO_RIGHT_NUM, SERVO_HAND_ROT_NUM
  */
@@ -293,71 +281,39 @@ void uArmClass::attach_servo(byte servo_number)
 {
         if (EEPROM.read(CALIBRATION_LINEAR_FLAG) != CONFIRM_FLAG)
         {
-                return FAILED;
+                return;
         }
         switch(servo_number) {
         case SERVO_ROT_NUM:
-                // if (is_linear_calibrated == true) {
                 if (analogRead(SERVO_ROT_ANALOG_PIN) > 50) { // Servo Protection
                         g_servo_rot.attach(SERVO_ROT_PIN);
                         read_servo_angle(SERVO_ROT_NUM);
                         g_servo_rot.write(cur_rot);
                 }
-                // }
-                // else{
-                //         g_servo_rot.attach(SERVO_ROT_PIN);
-                //         g_servo_rot.write(90);
-                // }
                 break;
         case SERVO_LEFT_NUM:
-                // if (is_linear_calibrated == true) {
                 if (analogRead(SERVO_LEFT_ANALOG_PIN) > 50) { // Servo Protection
                         g_servo_left.attach(SERVO_LEFT_PIN);
                         read_servo_angle(SERVO_LEFT_NUM);
                         g_servo_left.write(cur_left);
                 }
-                // }
-                // else{
-                //         g_servo_left.attach(SERVO_LEFT_PIN);
-                //         g_servo_left.write(100);
-                // }
                 break;
         case SERVO_RIGHT_NUM:
-                // if (is_linear_calibrated == true) {
                 if (analogRead(SERVO_RIGHT_ANALOG_PIN) > 50) { // Servo Protection
                         g_servo_right.attach(SERVO_RIGHT_PIN);
                         read_servo_angle(SERVO_RIGHT_NUM);
                         g_servo_right.write(cur_right);
                 }
-                // }
-                // else{
-                //         g_servo_right.attach(SERVO_RIGHT_PIN);
-                //         g_servo_right.write(60);
-                // }
                 break;
         case SERVO_HAND_ROT_NUM:
-                // if (is_linear_calibrated == true) {
                 if (analogRead(SERVO_HAND_ROT_ANALOG_PIN) > 100) { // Servo Protection
                         g_servo_hand_rot.attach(SERVO_HAND_ROT_PIN,600,2400);
                         read_servo_angle(SERVO_HAND_ROT_NUM);
                         g_servo_hand_rot.write(cur_hand);
                 }
-                // }
                 break;
         }
 }
-
-
-/*!
-   \brief Detach All servo, you could move the arm
- */
-// void uArmClass::detach_all_servos()
-// {
-//         g_servo_rot.detach();
-//         g_servo_left.detach();
-//         g_servo_right.detach();
-//         g_servo_hand_rot.detach();
-// }
 
 /*!
    \brief Detach Servo by Servo Number, SERVO_ROT_NUM, SERVO_LEFT_NUM, SERVO_RIGHT_NUM, SERVO_HAND_ROT_NUM
@@ -380,18 +336,6 @@ void uArmClass::detach_servo(byte servo_number)
                 break;
         }
 }
-
-/*!
-   \brief Convert the Analog to Servo Angle
-   \param input_analog Analog Value
-   \param servo_num SERVO_ROT_NUM, SERVO_LEFT_NUM, SERVO_RIGHT_NUM, SERVO_HAND_ROT_NUM
-   \return Servo Angle
- */
-
-// double uArmClass::analog_to_angle(int input_analog, byte servo_num)
-// {
-//         analog_to_angle(input_analog, servo_num, true);
-// }
 
 /*!
    \brief Convert the Analog to Servo Angle, by this formatter, angle = intercept + slope * analog
@@ -570,7 +514,7 @@ void uArmClass::get_current_rotleftright()
 
 void uArmClass::read_servo_angle(byte servo_number, boolean with_offset)
 {
-        double angle = 0;
+        // double angle = 0;
         // unsigned int address;
         double *data;
 
