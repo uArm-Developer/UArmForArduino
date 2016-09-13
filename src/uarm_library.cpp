@@ -52,6 +52,13 @@ void uArmClass::arm_process_commands()
                 //if(move_times <= INTERP_INTVLS)--------------------------------------------------------------
                 if((millis() - moveStartTime) >= (move_times * microMoveTime))// detect if it's time to move
                 {
+                        cur_rot = x_array[move_times];
+                        cur_left = y_array[move_times];
+                        cur_right = z_array[move_times];
+                        //add offset
+                        y_array[move_times] = y_array[move_times] - LEFT_SERVO_OFFSET; //assembling offset
+                        z_array[move_times] = z_array[move_times] - RIGHT_SERVO_OFFSET; //assembling offset
+                        x_array[move_times] = x_array[move_times] - ROT_SERVO_OFFSET; //rot offset
                         write_servo_angle(x_array[move_times], y_array[move_times], z_array[move_times]);// let servo run - John Feng
 
                         //hand rot as hand rot do not have the smooth array
@@ -61,7 +68,7 @@ void uArmClass::arm_process_commands()
                         }
 
                         move_times++;
-                        if(move_times > INTERP_INTVLS)
+                        if(move_times >= INTERP_INTVLS)
                         {
                                 move_times = 255;//disable the move
                         }
@@ -364,29 +371,27 @@ double uArmClass::analog_to_angle(int input_analog, byte servo_num)
    \param theta_3 SERVO_RIGHT_NUM servo angles
    \return IN_RANGE, OUT_OF_RANGE
  */
-unsigned char uArmClass::coordinate_to_angle(double x, double y, double z, double *theta_1, double *theta_2, double *theta_3)//theta_1:rotation angle   theta_2:the angle of lower arm and horizon   theta_3:the angle of upper arm and horizon
+unsigned char uArmClass::coordinate_to_angle(double x, double y, double z, double *theta_1, double *theta_2, double *theta_3, bool data_constrain)//theta_1:rotation angle   theta_2:the angle of lower arm and horizon   theta_3:the angle of upper arm and horizon
 {
         double x_in = 0.0;
         double z_in = 0.0;
         double right_all = 0.0;
         double sqrt_z_x = 0.0;
         double phi = 0.0;
-        x = (double)((int)(x*100)/100.0);
-        y = (double)((int)(y*100)/100.0);
-        z = (double)((int)(z*100)/100.0);
+        x = constrain(x,-3276,3276);
+        y = constrain(y,-3276,3276);
+        z = constrain(z,-3276,3276);
+        x = (double)((int)(x*10)/10.0);
+        y = (double)((int)(y*10)/10.0);
+        z = (double)((int)(z*10)/10.0);
 
-        z_in = (z - MATH_L1) / MATH_L3;
+        z_in = (z - MATH_L1) / MATH_LOWER_ARM;
         if(move_to_the_closest_point == false)//if need the move to closest point we have to jump over the return function
         {
                 //check the range of x
                 if(y<0)
                 {
-                        return OUT_OF_RANGE;
-                }
-                //check the range of z
-                if((z<ARM_HEIGHT_MIN)||(z>ARM_HEIGHT_MAX))
-                {
-                        return OUT_OF_RANGE;
+                        return OUT_OF_RANGE_NO_SOLUTION;
                 }
         }
         // Calculate value of theta 1: the rotation angle
@@ -396,29 +401,23 @@ unsigned char uArmClass::coordinate_to_angle(double x, double y, double z, doubl
         }
         else
         {
-                //theta_1 = atan(y / x)*MATH_TRANS;
-
                 if (x > 0)
                 {
                         *theta_1 = atan(y / x)*MATH_TRANS;//angle tranfer 0-180 CCW
-
                 }
                 if (x < 0)
                 {
                         (*theta_1) = 180 + atan(y / x)*MATH_TRANS;//angle tranfer  0-180 CCW
-
                 }
-
         }
-
         // Calculate value of theta 3
         if((*theta_1)!=90)//x_in is the stretch
         {
-                x_in = (x / cos((*theta_1) / MATH_TRANS) - MATH_L2) / MATH_L3;
+                x_in = (x / cos((*theta_1) / MATH_TRANS) - MATH_L2 - MATH_FRONT_HEADER) / MATH_LOWER_ARM;
         }
         else
         {
-                x_in = (y - MATH_L2) / MATH_L3;
+                x_in = (y - MATH_L2 - MATH_FRONT_HEADER) / MATH_LOWER_ARM;
         }
 
         /*if(write_stretch_height_rot(x_in,z_in,theta_1,theta_2,theta_3)==IN_RANGE)
@@ -433,37 +432,35 @@ unsigned char uArmClass::coordinate_to_angle(double x, double y, double z, doubl
 
         sqrt_z_x = sqrt(z_in*z_in + x_in*x_in);
 
-        right_all = (sqrt_z_x*sqrt_z_x + MATH_L43*MATH_L43 - 1) / (2 * MATH_L43 * sqrt_z_x);//cosin law
+        right_all = (sqrt_z_x*sqrt_z_x + MATH_UPPER_LOWER * MATH_UPPER_LOWER  - 1) / (2 * MATH_UPPER_LOWER  * sqrt_z_x);//cosin law
         (*theta_3) = acos(right_all)*MATH_TRANS;//cosin law
 
         // Calculate value of theta 2
-        right_all = (sqrt_z_x*sqrt_z_x + 1 - MATH_L43*MATH_L43) / (2 * sqrt_z_x);//cosin law
+        right_all = (sqrt_z_x*sqrt_z_x + 1 - MATH_UPPER_LOWER * MATH_UPPER_LOWER ) / (2 * sqrt_z_x);//cosin law
         (*theta_2) = acos(right_all)*MATH_TRANS;//cosin law
 
         (*theta_2) = (*theta_2) + phi;
         (*theta_3) = (*theta_3) - phi;
         //determine if the angle can be reached
-        if(isnan((*theta_1))||isnan((*theta_2))||isnan((*theta_3)))
+        return limit_range(theta_1, theta_2, theta_3, data_constrain);
+}
+
+unsigned char uArmClass::limit_range(double *rot, double *left, double *right, bool data_constrain)
+{
+        //determine if the angle can be reached
+        if(isnan(*rot)||isnan(*right)||isnan(*left))
+        {
+                return OUT_OF_RANGE_NO_SOLUTION;
+        }
+        if(((*left - LEFT_SERVO_OFFSET) < LOWER_ARM_MIN_ANGLE)||((*left - LEFT_SERVO_OFFSET) > LOWER_ARM_MAX_ANGLE))//check the right in range
         {
                 return OUT_OF_RANGE;
         }
-        if((z_in <= ARM_HEIGHT_MIN) || (z_in >= (ARM_HEIGHT_MAX - MATH_L1) / MATH_L3))//check if height is in range
+        if(((*right - RIGHT_SERVO_OFFSET) < UPPER_ARM_MIN_ANGLE)||((*right - RIGHT_SERVO_OFFSET) > UPPER_ARM_MAX_ANGLE))//check the left in range
         {
                 return OUT_OF_RANGE;
         }
-        if((x_in <= ARM_STRETCH_MIN) || (x_in >= (double)(ARM_STRETCH_MAX - MATH_L2) / MATH_L3)) //check if stretch is in range
-        {
-                return OUT_OF_RANGE;
-        }
-        if((((*theta_2) - LEFT_SERVO_OFFSET) < L3_MIN_ANGLE)||(((*theta_2) - LEFT_SERVO_OFFSET) > L3_MAX_ANGLE))//check the (*theta_2) in range
-        {
-                return OUT_OF_RANGE;
-        }
-        if((((*theta_3) - RIGHT_SERVO_OFFSET) < L4_MIN_ANGLE)||(((*theta_3) - RIGHT_SERVO_OFFSET) > L4_MAX_ANGLE))//check the (*theta_3) in range
-        {
-                return OUT_OF_RANGE;
-        }
-        if(((180 - (*theta_3) - (*theta_2))>L4L3_MAX_ANGLE)||((180 - (*theta_3) - (*theta_2))<L4L3_MIN_ANGLE))//check the angle of upper arm and lowe arm in range
+        if(((180 - *left - *right)>LOWER_UPPER_MAX_ANGLE)||((180 - *left - *right)<LOWER_UPPER_MIN_ANGLE))//check the angle of upper arm and lowe arm in range
         {
                 return OUT_OF_RANGE;
         }
@@ -679,8 +676,8 @@ unsigned char uArmClass::get_current_xyz(double *cur_rot, double *cur_left, doub
         if(for_movement==true) {
                 get_current_rotleftright();
         }
-        double stretch = MATH_L3 * cos((*cur_left) / MATH_TRANS) + MATH_L4 * cos((*cur_right) / MATH_TRANS) + MATH_L2;
-        double height = MATH_L3 * sin((*cur_left) / MATH_TRANS) - MATH_L4 * sin((*cur_right) / MATH_TRANS) + MATH_L1;
+        double stretch = MATH_LOWER_ARM * cos((*cur_left) / MATH_TRANS) + MATH_UPPER_ARM * cos((*cur_right) / MATH_TRANS) + MATH_L2;
+        double height = MATH_LOWER_ARM * sin((*cur_left) / MATH_TRANS) - MATH_UPPER_ARM * sin((*cur_right) / MATH_TRANS) + MATH_L1;
         *g_current_x = stretch * cos((*cur_rot) / MATH_TRANS);
         *g_current_y = stretch * sin((*cur_rot) / MATH_TRANS);
         *g_current_z = height;
@@ -688,18 +685,7 @@ unsigned char uArmClass::get_current_xyz(double *cur_rot, double *cur_left, doub
         //used in FK
         if(for_movement == false)
         {
-                if((stretch < ARM_STRETCH_MIN)||(stretch > ARM_STRETCH_MAX))
-                {
-                        return OUT_OF_RANGE;
-                }
-                if((height < ARM_HEIGHT_MIN)||(height > ARM_HEIGHT_MAX))
-                {
-                        return OUT_OF_RANGE;
-                }
-                if((*cur_rot < 0)||(*cur_rot > 180))
-                {
-                        return OUT_OF_RANGE;
-                }
+
         }
         return IN_RANGE;
 }
@@ -710,16 +696,18 @@ unsigned char uArmClass::get_current_xyz(double *cur_rot, double *cur_left, doub
    \param interp_vals interpolation array
    \param ease_type INTERP_EASE_INOUT_CUBIC, INTERP_LINEAR, INTERP_EASE_INOUT, INTERP_EASE_IN, INTERP_EASE_OUT
  */
-void uArmClass::interpolate(double start_val, double end_val, double *interp_vals, byte ease_type) {
-        // if(ease_type == INTERP_EASE_INOUT_CUBIC)// make sure all the data are still in range
-        // {
+void uArmClass::interpolate(double start_val, double end_val, double *interp_vals, byte ease_type)
+{
+
         start_val = start_val/10.0;
         end_val = end_val/10.0;
-        // }
+
         double delta = end_val - start_val;
-        for (byte f = 0; f < INTERP_INTVLS; f++) {
+        for (byte f = 1; f <= INTERP_INTVLS; f++)
+        {
                 float t = (float)f / INTERP_INTVLS;
-                *(interp_vals+f) = 10.0 * (start_val + t* t * delta * (3 + (-2) * t));
+                //*(interp_vals+f) = 10.0*(start_val + (3 * delta) * (t * t) + (-2 * delta) * (t * t * t));
+                *(interp_vals+f-1) = 10.0 * (start_val + t* t * delta * (3 + (-2) * t));
         }
 }
 
@@ -774,80 +762,94 @@ unsigned char uArmClass::move_to(double x, double y, double z, double hand_angle
         double tgt_left;
         double tgt_right;
 
+        unsigned char destination_status = 0;
         //  detect if the xyz coordinate are in the range
-        if(coordinate_to_angle(x, y, z, &tgt_rot, &tgt_left, &tgt_right) == OUT_OF_RANGE)
+        destination_status = coordinate_to_angle(x, y, z, &tgt_rot, &tgt_left, &tgt_right, false);
+        if(destination_status != IN_RANGE)
         {
                 //check if need to check the out_of_range
                 if(move_to_the_closest_point==false) {
-                        return OUT_OF_RANGE_IN_DST;
+                        return OUT_OF_RANGE;
                 }
         }
-
-        //calculate the length and use the longest to determine the numbers of interpolation
-        unsigned int delta_rot=abs(tgt_rot-cur_rot);
-        unsigned int delta_left=abs(tgt_left-cur_left);
-        unsigned int delta_right=abs(tgt_right-cur_right);
-
-        INTERP_INTVLS = max(delta_rot,delta_left);
-        INTERP_INTVLS = max(INTERP_INTVLS,delta_right);
-
-        INTERP_INTVLS = (INTERP_INTVLS<60) ? INTERP_INTVLS : 60;
-        //INTERP_INTVLS =1;// INTERP_INTVLS * (10 / times);// speed determine the number of interpolation
-        times = constrain(times, 100, 1000);
-        hand_speed = times;//set the had rot speed
-
-        interpolate(g_current_x, x, x_array, ease_type);// /10 means to make sure the t*t*t is still in the range
-        interpolate(g_current_y, y, y_array, ease_type);
-        interpolate(g_current_z, z, z_array, ease_type);
-
-
-        //give the final destination value to the array
-        x_array[INTERP_INTVLS] = x;
-        y_array[INTERP_INTVLS] = y;
-        z_array[INTERP_INTVLS] = z;
-
-        double rot, left, right;
-        double x_backup, y_backup, z_backup;
-        for (byte i = 0; i <= INTERP_INTVLS; i++)
+        if(destination_status != OUT_OF_RANGE_NO_SOLUTION)
         {
-                //check if all the data in range and give the tlr angles to the xyz array
-                if(coordinate_to_angle(x_array[i], y_array[i], z_array[i], &rot, &left, &right) == OUT_OF_RANGE)
-                {
-                        if(move_to_the_closest_point==false) {
-                                return OUT_OF_RANGE_IN_PATH;
-                        }
-                        else{
-                                //find the last available xyz coordinates and change it to the destination
-                                INTERP_INTVLS = (i <= 1) ? 0 : (i - 1);
-                                // give the late avaiable xyz coordinates to the variable
-                                x = x_backup;
-                                y = y_backup;
-                                z = z_backup;
+                //calculate the length and use the longest to determine the numbers of interpolation
+                unsigned int delta_rot=abs(tgt_rot-cur_rot);
+                unsigned int delta_left=abs(tgt_left-cur_left);
+                unsigned int delta_right=abs(tgt_right-cur_right);
 
-                                break;//get out of the for(;;) cycle
+                INTERP_INTVLS = max(delta_rot,delta_left);
+                INTERP_INTVLS = max(INTERP_INTVLS,delta_right);
+
+                INTERP_INTVLS = (INTERP_INTVLS<60) ? INTERP_INTVLS : 60;
+                //INTERP_INTVLS =1;// INTERP_INTVLS * (10 / times);// speed determine the number of interpolation
+                times = constrain(times, 100, 1000);
+                hand_speed = times;//set the had rot speed
+
+                interpolate(g_current_x, x, x_array, ease_type);// /10 means to make sure the t*t*t is still in the range
+                interpolate(g_current_y, y, y_array, ease_type);
+                interpolate(g_current_z, z, z_array, ease_type);
+
+
+                double rot, left, right;
+                double x_backup, y_backup, z_backup;
+                unsigned char i, status;
+                for (i = 0; i < INTERP_INTVLS; i++)//planning the line trajectory
+                {
+                        //check if all the data in range and give the tlr angles to the xyz array
+                        status = coordinate_to_angle(x_array[i], y_array[i], z_array[i], &rot, &left, &right, true);
+                        if(status != IN_RANGE)
+                        {
+                                i = 0;
+                                break;//break the for loop since there are some poisition unreachable, and use point to point method to move
+                        }
+                        else
+                        {
+                                //change to the rot/left/right angles
+                                x_array[i] = rot;
+                                y_array[i] = left;
+                                z_array[i] = right;
                         }
                 }
-                else
+
+                for (; i < INTERP_INTVLS; i++)//planning the p2p trajectory
                 {
-                        //backup the old xyz coordinates data first
-                        x_backup = x_array[i];
-                        y_backup = y_array[i];
-                        z_backup = z_array[i];
-                        //change to the rot/left/right angles
-                        x_array[i] = rot;
-                        y_array[i] = left;
-                        z_array[i] = right;
+                        if(i == 0)//do the interpolation in first cycle
+                        {
+                                interpolate(cur_rot, tgt_rot, x_array, ease_type);
+                                interpolate(cur_left, tgt_left, y_array, ease_type);
+                                interpolate(cur_right, tgt_right, z_array, ease_type);
+                        }
+                        status = limit_range(&x_array[i], &y_array[i], &z_array[i], true);
+                        if(status != IN_RANGE)
+                        {
+                                //if out of range then break and adjust the value of INTERP_INTVLS
+                                INTERP_INTVLS = i;
+                                break;
+                        }
                 }
+                //caculate the distance from the destination
+                double distance = sqrt((x-g_current_x) * (x-g_current_x) + (y-g_current_y) * (y-g_current_y) + (z-g_current_z) * (z-g_current_z));
+                moveStartTime = millis();// Speed of the robot in mm/s
+                microMoveTime = distance / times * 1000.0 / INTERP_INTVLS;//the time for every step
         }
-        //caculate the distance from the destination
-        double distance = pow(pow(x-g_current_x, 2) + pow(y-g_current_y, 2) + pow(z-g_current_z, 2), 0.5);
-        moveStartTime = millis();// Speed of the robot in mm/s
-        microMoveTime = distance / times * 1000.0 / INTERP_INTVLS;//the time for every step
+        else
+        {
+                INTERP_INTVLS = 0;//no solution no move
+        }
+        if(INTERP_INTVLS > 0)
+        {
+                g_current_x = x;
+                g_current_y = y;
+                g_current_z = z;
+                move_times = 0;//start the moving
+        }
+        else
+        {
+                move_times = 255;
+        }
 
-        g_current_x = x;
-        g_current_y = y;
-        g_current_z = z;
-        move_times = 0;//start to caculate the movement
         return IN_RANGE;
 }
 
@@ -953,24 +955,11 @@ void uArmClass::runCommand(String cmnd){
                 if(getValue(cmnd, parameters, 1, values) == OK) {
                         Serial.println(SS);// successful feedback send it immediately
                         attach_servo(values[0]);
-                        // get_current_xyz(&cur_rot, &cur_left, &cur_right, &g_current_x, &g_current_y, &g_current_z, false);
-                        // double rot, left, right;
-                        // if(coordinate_to_angle(g_current_x, g_current_y, g_current_z, &rot, &left, &right) == OUT_OF_RANGE)
-                        // {
-                        // //         // alert(50, 10, 10);
-                        // //         cur_rot = 90;
-                        // //         cur_left = 90;
-                        // //         cur_right = 90;
-                        // //         cur_hand = 90;
-                        // //         g_current_x = 10;
-                        // //         g_current_y = 100;
-                        // //         g_current_z = 150;
-                        //         move_to_the_closest_point = true;
-                        //         move_to(g_current_x,g_current_x,g_current_x,false);
-                        //         move_to_the_closest_point = false;
-                        // //         //Serial.println("TEST");
-                        // //         attach_all();
-                        // }
+                        if((g_servo_rot.attached())&&(g_servo_left.attached())&&(g_servo_right.attached()))
+                        {
+                                Serial.println("Attached");
+                                get_current_xyz(&cur_rot, &cur_left, &cur_right, &g_current_x, &g_current_y, &g_current_z, true);
+                        }
                 }
         }else
 
@@ -1063,7 +1052,7 @@ void uArmClass::runCommand(String cmnd){
         //gVer----------------------------------------------------------------------
         //if(cmnd.indexOf(F("gVer")) >= 0){
         if(cmd == "gVer") {
-                Serial.println("[" + String(current_ver) + "]");
+                Serial.println(current_ver);
                 // Serial.print(F("["));
                 // Serial.print(current_ver);
                 // Serial.println(F("]"));
@@ -1087,9 +1076,9 @@ void uArmClass::runCommand(String cmnd){
                         {
                         case IN_RANGE: Serial.println(S0);
                                 break;
-                        case OUT_OF_RANGE_IN_PATH: Serial.println(F0);
+                        case OUT_OF_RANGE: Serial.println(F0);
                                 break;
-                        case OUT_OF_RANGE_IN_DST: Serial.println(F1);
+                        case OUT_OF_RANGE_NO_SOLUTION: Serial.println(F1);
                                 break;
                         default:                break;
                         }
@@ -1157,7 +1146,7 @@ void uArmClass::runCommand(String cmnd){
 
                         double rot, left, right;
                         move_to_the_closest_point = false;
-                        if(coordinate_to_angle(values[0], values[1], values[2], &rot, &left, &right) == OUT_OF_RANGE)
+                        if(coordinate_to_angle(values[0], values[1], values[2], &rot, &left, &right, false) != IN_RANGE)
                         {
                                 success = false;
                         }

@@ -1,5 +1,11 @@
 # uArm Arduino Library Release Note
 
+## [2.0.12] - 2016-09-13
+
+## Fix
+- Fix uArm in extreme position.
+- Encapsulate limit_range function to validate if coordinate is out of range.
+
 ## [2.0.11] - 2016-09-08
 
 ## Fix

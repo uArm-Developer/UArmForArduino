@@ -34,7 +34,7 @@
 #define RIGHT_SERVO_ADDRESS  0x02D0
 #define ROT_SERVO_ADDRESS    0x05A0
 
-#define current_ver         "H2-2.0.11"
+#define current_ver         "[SH2-2.0.12]"
 
 #define SERVO_ROT_NUM           0
 #define SERVO_LEFT_NUM          1
@@ -56,12 +56,12 @@
 #define ARM_STRETCH_MAX   300
 #define ARM_HEIGHT_MIN    -100
 #define ARM_HEIGHT_MAX    250
-#define L3_MAX_ANGLE      120
-#define L3_MIN_ANGLE      5
-#define L4_MAX_ANGLE      120
-#define L4_MIN_ANGLE      5
-#define L4L3_MAX_ANGLE    150
-#define L4L3_MIN_ANGLE    30
+#define LOWER_ARM_MAX_ANGLE      120
+#define LOWER_ARM_MIN_ANGLE      5
+#define UPPER_ARM_MAX_ANGLE      120
+#define UPPER_ARM_MIN_ANGLE      5
+#define LOWER_UPPER_MAX_ANGLE    150
+#define LOWER_UPPER_MIN_ANGLE    30
 
 #define LIMIT_SW                2    // LIMIT Switch Button
 #define BUZZER                  3    // HIGH = ON
@@ -76,14 +76,13 @@
 #define MATH_TRANS  57.2958
 #define MATH_L1 90.00
 #define MATH_L2 21.17
-#define MATH_L3 148.25
-#define MATH_L4 160.2
-#define MATH_L43 MATH_L4/MATH_L3
-
+#define MATH_LOWER_ARM 148.25
+#define MATH_UPPER_ARM 160.2
+#define MATH_FRONT_HEADER 25.00// the distance between wrist to the front point we use
+#define MATH_UPPER_LOWER MATH_UPPER_ARM/MATH_LOWER_ARM
 //for the move_to function
-#define IN_RANGE             0
-#define OUT_OF_RANGE_IN_DST  1
-#define OUT_OF_RANGE_IN_PATH 2
+#define IN_RANGE             1
+#define OUT_OF_RANGE_NO_SOLUTION 2
 #define OUT_OF_RANGE         3
 
 //#define RELATIVE 1
@@ -185,12 +184,15 @@ public:
         void write_servo_angle(byte servo_num, double servo_angle,  boolean with_offset);
         // void read_servo_angle(byte servo_num) {read_servo_angle(servo_num, true);};
         void read_servo_angle(byte servo_num, boolean with_offset);
-        void read_servo_angle(byte servo_num) { read_servo_angle(servo_num, false);};
+        void read_servo_angle(byte servo_num) {
+                read_servo_angle(servo_num, false);
+        };
         // double analog_to_angle(int input_angle, byte servo_num, bool with_offset);
         void read_linear_offset(byte servo_num, double& intercept_val, double& slope_val);
         //void get_current_xyz();
         //void get_current_xyz(double theta_1, double theta_2, double theta_3);
-        unsigned char coordinate_to_angle(double x, double y, double z, double *theta_1, double *theta_2, double *theta_3);
+        unsigned char coordinate_to_angle(double x, double y, double z, double *theta_1, double *theta_2, double *theta_3, bool data_constrain);
+        unsigned char limit_range(double *rot, double *left, double *right, bool data_constrain);
         void interpolate(double start_val, double end_val, double *interp_vals, byte ease_type);
 
         void gripper_catch(bool value);
@@ -243,9 +245,9 @@ protected:
         double cur_right = 90;
         double cur_hand = 90;
 
-        double g_current_x = 10;
-        double g_current_y = 100;
-        double g_current_z = 150;
+        double g_current_x = 0;
+        double g_current_y = 200;
+        double g_current_z = 100;
 
         boolean move_to_the_closest_point = false;
 
@@ -256,9 +258,9 @@ protected:
         unsigned long moveStartTime=0;
         unsigned int microMoveTime=0;
         // the arrays to store the xyz coordinates first and then change to the rot left right angles
-        double x_array[61];
-        double y_array[61];
-        double z_array[61];
+        double x_array[60];
+        double y_array[60];
+        double z_array[60];
         double hand_speed=10;//to save the memory
 
         //offset of assembling
