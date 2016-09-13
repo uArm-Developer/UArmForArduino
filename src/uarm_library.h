@@ -273,6 +273,7 @@ protected:
         unsigned char sys_status = NORMAL_MODE;
         unsigned char time_50ms = 0;//used to change the led blink time
         unsigned char time_ticks = 0;
+        bool mechanical_valid_coordinates = false;//used in changing the attach and detach status
 
         //learning mode
         unsigned int addr = 0;
