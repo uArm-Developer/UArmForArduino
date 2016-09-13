@@ -682,6 +682,7 @@ unsigned char uArmClass::get_current_xyz(double *cur_rot, double *cur_left, doub
         *g_current_y = stretch * sin((*cur_rot) / MATH_TRANS);
         *g_current_z = height;
 
+        mechanical_valid_coordinates = true;
         //used in FK
         if(for_movement == false)
         {
@@ -822,7 +823,7 @@ unsigned char uArmClass::move_to(double x, double y, double z, double hand_angle
                                 interpolate(cur_right, tgt_right, z_array, ease_type);
                         }
                         status = limit_range(&x_array[i], &y_array[i], &z_array[i], true);
-                        if(status != IN_RANGE)
+                        if((status != IN_RANGE)&&(mechanical_valid_coordinates == false))
                         {
                                 //if out of range then break and adjust the value of INTERP_INTVLS
                                 INTERP_INTVLS = i;
@@ -843,6 +844,7 @@ unsigned char uArmClass::move_to(double x, double y, double z, double hand_angle
                 g_current_x = x;
                 g_current_y = y;
                 g_current_z = z;
+                mechanical_valid_coordinates = false;
                 move_times = 0;//start the moving
         }
         else
@@ -957,7 +959,7 @@ void uArmClass::runCommand(String cmnd){
                         attach_servo(values[0]);
                         if((g_servo_rot.attached())&&(g_servo_left.attached())&&(g_servo_right.attached()))
                         {
-                                Serial.println("Attached");
+                                //Serial.println("Attached");
                                 get_current_xyz(&cur_rot, &cur_left, &cur_right, &g_current_x, &g_current_y, &g_current_z, true);
                         }
                 }
