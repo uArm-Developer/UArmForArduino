@@ -1,5 +1,10 @@
 # uArm Arduino Library Release Note
 
+## [2.0.13] - 2016-09-23
+
+## Fix
+- Fix Attach issue when calibrating
+
 ## [2.0.12] - 2016-09-13
 
 ## Fix

@@ -286,37 +286,51 @@ void uArmClass::write_servo_angle(byte servo_number, double servo_angle, boolean
  */
 void uArmClass::attach_servo(byte servo_number)
 {
+        byte default_angle = 60;
+        boolean calibration_linear_flag = true;
         if (EEPROM.read(CALIBRATION_LINEAR_FLAG) != CONFIRM_FLAG)
         {
-                return;
+                calibration_linear_flag = false;
         }
         switch(servo_number) {
         case SERVO_ROT_NUM:
                 if (analogRead(SERVO_ROT_ANALOG_PIN) > 50) { // Servo Protection
                         g_servo_rot.attach(SERVO_ROT_PIN);
-                        read_servo_angle(SERVO_ROT_NUM);
-                        g_servo_rot.write(cur_rot);
+                        read_servo_angle(SERVO_ROT_NUM, false);
+                        if (calibration_linear_flag)
+                          g_servo_rot.write(cur_rot);
+                        else
+                          g_servo_rot.write(default_angle);
                 }
                 break;
         case SERVO_LEFT_NUM:
                 if (analogRead(SERVO_LEFT_ANALOG_PIN) > 50) { // Servo Protection
                         g_servo_left.attach(SERVO_LEFT_PIN);
-                        read_servo_angle(SERVO_LEFT_NUM);
-                        g_servo_left.write(cur_left);
+                        read_servo_angle(SERVO_LEFT_NUM, false);
+                        if (calibration_linear_flag)
+                          g_servo_left.write(cur_left);
+                        else
+                          g_servo_left.write(default_angle);
                 }
                 break;
         case SERVO_RIGHT_NUM:
                 if (analogRead(SERVO_RIGHT_ANALOG_PIN) > 50) { // Servo Protection
                         g_servo_right.attach(SERVO_RIGHT_PIN);
-                        read_servo_angle(SERVO_RIGHT_NUM);
-                        g_servo_right.write(cur_right);
+                        read_servo_angle(SERVO_RIGHT_NUM, false);
+                        if (calibration_linear_flag)
+                          g_servo_right.write(cur_right);
+                        else
+                          g_servo_right.write(default_angle);
                 }
                 break;
         case SERVO_HAND_ROT_NUM:
                 if (analogRead(SERVO_HAND_ROT_ANALOG_PIN) > 100) { // Servo Protection
                         g_servo_hand_rot.attach(SERVO_HAND_ROT_PIN,600,2400);
-                        read_servo_angle(SERVO_HAND_ROT_NUM);
-                        g_servo_hand_rot.write(cur_hand);
+                        read_servo_angle(SERVO_HAND_ROT_NUM, false);
+                        if (calibration_linear_flag)
+                          g_servo_hand_rot.write(cur_hand);
+                        else
+                          g_servo_hand_rot.write(default_angle);
                 }
                 break;
         }

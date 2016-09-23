@@ -34,7 +34,7 @@
 #define RIGHT_SERVO_ADDRESS  0x02D0
 #define ROT_SERVO_ADDRESS    0x05A0
 
-#define current_ver         "[SH2-2.0.12]"
+#define current_ver         "[SH2-2.0.13]"
 
 #define SERVO_ROT_NUM           0
 #define SERVO_LEFT_NUM          1
