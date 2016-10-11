@@ -23,7 +23,7 @@
 	- Return Example: `[SS100R50H100]\n`   S&H MEANS STRETCH AND HEIGHT(in mm),R MEANS ROT(in degree)  
 
 
-- `[gSimX#Y#Z#V#]`  - Validate the coordinate  
+- `[gSimX#Y#Z#]`  - Validate the coordinate  
 	Where # is a double, This will caculate if the robot can arrive the XYZ position
 	- Send Example:   `[gSimX0Y120Z100V0]\n`          
 	V1 MEANS THE POLAR COORDINATES TRUE(stretch height and rot)
