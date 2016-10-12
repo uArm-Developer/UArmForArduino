@@ -1,0 +1,11 @@
+v2.1.1  2016/10/12
+
+	bugs fixed:
+	#27. change wrist servo's pulse width to 600~2400
+	#30. [gAng] return the angles according to current position, but [gSer] return the original angles read from servo. 
+	#31. [gCrd] return the current position.
+
+
+v2.1.0	2016/10/11
+	refactor the code for metal
+

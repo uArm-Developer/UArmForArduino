@@ -48,7 +48,9 @@ public:
   	static void cmdSetDigitValue(double value[4]);  	
   	static void cmdGetAnalogValue(double value[4]);  	
   	static void cmdGetE2PROMData(double value[4]);  	
-  	static void cmdSetE2PROMData(double value[4]);  
+  	static void cmdSetE2PROMData(double value[4]); 
+
+    static void cmdGetServoAnalogData(double value[4]); 
 
   	static void run();	
 

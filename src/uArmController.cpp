@@ -76,8 +76,15 @@ double uArmController::readServoAngle(byte servoNum, boolean withOffset = true)
 {
 	double angle;
 
-	angle = analogToAngle(servoNum, getServoAnalogData(servoNum)); 
-
+    if (servoNum == SERVO_HAND_ROT_NUM)
+    {
+        angle = map(getServoAnalogData(SERVO_HAND_ROT_ANALOG_PIN), SERVO_9G_MIN, SERVO_9G_MAX, 0, 180);
+    }
+    else
+    {
+        angle = analogToAngle(servoNum, getServoAnalogData(servoNum)); 
+    }
+	
 
 	if (withOffset)
 	{
@@ -89,13 +96,16 @@ double uArmController::readServoAngle(byte servoNum, boolean withOffset = true)
 	return angle;
 }
 
+/*
 double uArmController::getServoAngle(byte servoNum)
 {
 	return mCurAngle[servoNum];
 }
+*/
 
 double uArmController::getServoAngles(double& servoRotAngle, double& servoLeftAngle, double& servoRightAngle)
 {
+    updateAllServoAngle();
     servoRotAngle = mCurAngle[SERVO_ROT_NUM];
     servoLeftAngle = mCurAngle[SERVO_LEFT_NUM];
     servoRightAngle = mCurAngle[SERVO_RIGHT_NUM];
@@ -105,7 +115,7 @@ double uArmController::getServoAngles(double& servoRotAngle, double& servoLeftAn
 void uArmController::updateAllServoAngle(boolean withOffset = true)
 {
 	
-	for (unsigned char servoNum = SERVO_ROT_NUM; servoNum < SERVO_COUNT-1; servoNum++)
+	for (unsigned char servoNum = SERVO_ROT_NUM; servoNum < SERVO_COUNT; servoNum++)
 	{
 		mCurAngle[servoNum] = readServoAngle(servoNum, withOffset); 	
 	}
@@ -130,7 +140,7 @@ unsigned char uArmController::gripperStatus()
     }
     else
     {
-        if(analogRead(GRIPPER_FEEDBACK) > 600)
+        if(getServoAnalogData(GRIPPER_FEEDBACK) > 600)
         {
             return WORKING;
         }
@@ -174,6 +184,7 @@ unsigned char uArmController::moveTo(double x, double y, double z, boolean allow
 
 unsigned char uArmController::getCurrentXYZ(double& x, double& y, double& z)
 {
+    updateAllServoAngle();
 	// 在XY平面的投影长度
     double stretch = MATH_LOWER_ARM * cos(mCurAngle[SERVO_LEFT_NUM] / MATH_TRANS) + MATH_UPPER_ARM * cos(mCurAngle[SERVO_RIGHT_NUM] / MATH_TRANS) + MATH_L2 + MATH_FRONT_HEADER;
 
@@ -325,10 +336,7 @@ double uArmController::analogToAngle(byte servoNum, int inputAnalog)
     double angle = intercept + slope * inputAnalog;  
 
 #ifdef DEBUG
-    if (servoNum == 2)
-    {
-        debugPrint("analogToAngle: inter:%s, slo:%s, inpu:%d, angle:%s", D(intercept), D(slope), inputAnalog, D(angle));
-    }
+    debugPrint("analogToAngle: inter:%s, slo:%s, inpu:%d, angle:%s", D(intercept), D(slope), inputAnalog, D(angle));
 #endif // DEBUG
 
     return angle;
@@ -383,7 +391,7 @@ void uArmController::moveToStartPos(byte servoNum)
 {
 	if (servoNum == SERVO_HAND_ROT_NUM)
 	{
-		mCurAngle[SERVO_HAND_ROT_NUM] = map(analogRead(SERVO_HAND_ROT_ANALOG_PIN), SERVO_9G_MIN, SERVO_9G_MAX, 0, 180);
+		mCurAngle[SERVO_HAND_ROT_NUM] = map(getServoAnalogData(SERVO_HAND_ROT_ANALOG_PIN), SERVO_9G_MIN, SERVO_9G_MAX, 0, 180);
 	}
 	else
 	{
@@ -403,9 +411,18 @@ void uArmController::moveToStartPos(byte servoNum)
 
 void uArmController::attachServo(byte servoNum, byte pin, int valueMin)
 {
-	if (analogRead(SERVO_ANALOG_PIN[servoNum]) > valueMin) // Servo Protection
+
+	if (getServoAnalogData(SERVO_ANALOG_PIN[servoNum]) > valueMin) // Servo Protection
 	{ 
-		mServo[servoNum].attach(pin);
+        if (servoNum == SERVO_HAND_ROT_NUM)
+        {
+            mServo[servoNum].attach(pin, 600, 2400);
+        }
+        else
+        {
+            mServo[servoNum].attach(pin);
+        }
+		
 		moveToStartPos(servoNum);
 	}	
 }

@@ -21,7 +21,7 @@ struct Command
 	void (*execute)(double value[4]);
 };
 
-const Command command[25] PROGMEM= {
+const Command command[] PROGMEM= {
 	{"sMov", 4, {'X', 'Y', 'Z', 'V'}, &gComm.cmdMove},
 	{"sPol", 4, {'S', 'R', 'H', 'V'}, &gComm.cmdMovePol},
 	{"sAtt", 1, {'N'}, &gComm.cmdSetAttachServo},
@@ -50,7 +50,10 @@ const Command command[25] PROGMEM= {
 	{"sDig", 2, {'N', 'V'}, &gComm.cmdSetDigitValue},
 	{"gAna", 1, {'N'}, &gComm.cmdGetAnalogValue},
 	{"gEEP", 2, {'A', 'T'}, &gComm.cmdGetE2PROMData},
-	{"sEEP", 3, {'A', 'T', 'V'}, &gComm.cmdSetE2PROMData}
+	{"sEEP", 3, {'A', 'T', 'V'}, &gComm.cmdSetE2PROMData},
+
+    {"gSAD", 1, {'N'}, &gComm.cmdGetServoAnalogData}
+    
 	
 };
 
@@ -210,20 +213,20 @@ static void uArmComm::cmdGetCurrentPosPol(double value[4])
 static void uArmComm::cmdGetCurrentAngle(double value[4])
 {
     char letters[4] = {'B','L','R','H'};
-    value[0] = uArm.mController.readServoAngle(SERVO_ROT_NUM);
-    value[1] = uArm.mController.readServoAngle(SERVO_LEFT_NUM);
-    value[2] = uArm.mController.readServoAngle(SERVO_RIGHT_NUM);
-    value[3] = uArm.mController.readServoAngle(SERVO_HAND_ROT_NUM);
+    value[0] = uArm.mController.readServoAngle(SERVO_ROT_NUM, true);
+    value[1] = uArm.mController.readServoAngle(SERVO_LEFT_NUM, true);
+    value[2] = uArm.mController.readServoAngle(SERVO_RIGHT_NUM, true);
+    value[3] = uArm.mController.readServoAngle(SERVO_HAND_ROT_NUM, true);
     printf(true, value, letters, 4);
 }
 
 static void uArmComm::cmdGetServoAngle(double value[4])
 {
     char letters[4] = {'B','L','R','H'};
-    value[0] = uArm.mController.readServoAngle(SERVO_ROT_NUM);
-    value[1] = uArm.mController.readServoAngle(SERVO_LEFT_NUM);
-    value[2] = uArm.mController.readServoAngle(SERVO_RIGHT_NUM);
-    value[3] = uArm.mController.readServoAngle(SERVO_HAND_ROT_NUM);
+    value[0] = uArm.mController.readServoAngle(SERVO_ROT_NUM, false);
+    value[1] = uArm.mController.readServoAngle(SERVO_LEFT_NUM, false);
+    value[2] = uArm.mController.readServoAngle(SERVO_RIGHT_NUM, false);
+    value[3] = uArm.mController.readServoAngle(SERVO_HAND_ROT_NUM, false);
     printf(true, value, letters, 4);
 }
 
@@ -370,6 +373,14 @@ static void uArmComm::cmdSetE2PROMData(double value[4])
 
 
 
+static void uArmComm::cmdGetServoAnalogData(double value[4])
+{
+    unsigned int data = uArm.mController.getServoAnalogData(value[0]);
+    Serial.println(data);
+}
+
+
+
 static char uArmComm::parseParam(String cmnd, const char *parameters, int parameterCount, double valueArray[])
 {
     for (byte i = 0; i < parameterCount; i++) 
@@ -399,10 +410,7 @@ static char uArmComm::parseParam(String cmnd, const char *parameters, int parame
 
         valueArray[i] = cmnd.substring(startIndex, endIndex).toFloat();
 
-#ifdef DEBUG
-        Serial.println(cmnd.substring(startIndex, endIndex));
-        debugPrint("n:%s", D(valueArray[i]));
-#endif // DEBUG
+
     }
 
     return OK;
@@ -510,3 +518,5 @@ static void uArmComm::printf(bool success, int dat)
     Serial.print(dat);
     Serial.println(F("]"));
 }
+
+

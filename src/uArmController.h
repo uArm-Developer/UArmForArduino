@@ -81,7 +81,7 @@ public:
 	double readServoAngle(byte servoNum, boolean withOffset = true);
 	void updateAllServoAngle(boolean withOffset = true);
 
-	double getServoAngle(byte servoNum);
+	//double getServoAngle(byte servoNum);
 	double getServoAngles(double& servoRotAngle, double& servoLeftAngle, double& servoRightAngle);
 
 	void gripperCatch();
@@ -119,7 +119,7 @@ protected:
 	
 	const byte SERVO_CONTROL_PIN[SERVO_COUNT] = {SERVO_ROT_PIN, SERVO_LEFT_PIN, SERVO_RIGHT_PIN, SERVO_HAND_ROT_PIN};
 	const byte SERVO_ANALOG_PIN[SERVO_COUNT] = {SERVO_ROT_ANALOG_PIN, SERVO_LEFT_ANALOG_PIN, SERVO_RIGHT_ANALOG_PIN, SERVO_HAND_ROT_ANALOG_PIN};
-	const byte SERVO_ANALOG_MIN_VALUE[SERVO_COUNT] = {50, 50, 50, 100};
+	const byte SERVO_ANALOG_MIN_VALUE[SERVO_COUNT] = {50, 50, 50, 50};
 
 	//double mCurrentX = 0;
 	//double mCurrentY = 200;

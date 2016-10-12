@@ -35,11 +35,22 @@ void uArmClass::initHardware()
 
 void uArmClass::setup()
 {
+
+/*  
+    double handServoOffset = 0;
+    EEPROM.put(MANUAL_OFFSET_ADDRESS + SERVO_HAND_ROT_NUM * sizeof(handServoOffset), handServoOffset);
+    EEPROM.get(MANUAL_OFFSET_ADDRESS + SERVO_HAND_ROT_NUM * sizeof(handServoOffset), handServoOffset);   
+
+    debugPrint("hand offset=%s", D(handServoOffset));
+*/
+
 	initHardware();
 	mController.init();
 
     mCurStep = -1;
     mTotalSteps = -1;    
+
+
 }
 
 
