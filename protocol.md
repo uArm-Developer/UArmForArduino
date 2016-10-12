@@ -23,7 +23,7 @@
 	- Return Example: `[SS100R50H100]\n`   S&H MEANS STRETCH AND HEIGHT(in mm),R MEANS ROT(in degree)  
 
 
-- `[gSimX#Y#Z#]`  - Validate the coordinate  
+- `[gSimX#Y#Z#V#]`  - Validate the coordinate  
 	Where # is a double, This will caculate if the robot can arrive the XYZ position
 	- Send Example:   `[gSimX0Y120Z100V0]\n`          
 	V1 MEANS THE POLAR COORDINATES TRUE(stretch height and rot)
@@ -37,7 +37,7 @@
 
 
 - `[sSerN#V#]`      - Set Raw Servo Angle no offset  
-	Where S# is the servo number and V# is an angle between 0 and 180. This will set the angle of that particular servo
+	Where N# is the servo number and V# is an angle between 0 and 180. This will set the angle of that particular servo
 	- Send Example:   `[sSerN1V10]\n`
 	- Return Example: `[S]`  
 
@@ -123,7 +123,7 @@
 	- Return Example: `[S0]` or `[S1]`  S0:OFF S1:ON
 
 - `[sBuzF#T#]`      
-	Set the buzzer to F Frequency for T time
+	Set the buzzer to F Frequency for T time. Time is in miliseconds. Frequency is in Hz.
 	- Send Example:   `[sBuzzF1000T1]\n`
 	- Return Example: `[S]` or `[F]`  
 	S:SUCCESS  F:WRONG NUMBER  
