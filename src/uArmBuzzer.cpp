@@ -13,33 +13,19 @@
 
 uArmBuzzer::uArmBuzzer()
 {
-	mStopTime = 0;
+
 }
 
-void uArmBuzzer::buzz(unsigned int frequency, unsigned int duration)
+void uArmBuzzer::buzz(unsigned int frequency, unsigned long duration)
 {
 	if (duration <= 0)
 		return;
 
-	mStopTime = millis() + duration;
-
-	tone(BUZZER, frequency);
+	tone(BUZZER, frequency, duration);
 }
 
-void uArmBuzzer::run()
-{
-	if (mStopTime > 0)
-	{
-		if (millis() >= mStopTime)
-		{
-			noTone(BUZZER);
-			mStopTime = 0;
-		}
-	}
-}
 
 void uArmBuzzer::stop()
 {
-	noTone(BUZZER);
-	mStopTime = 0;	
+	noTone(BUZZER);	
 }

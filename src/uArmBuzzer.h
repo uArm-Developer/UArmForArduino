@@ -15,18 +15,16 @@
 #include <Arduino.h>
 #include "uArmConfig.h"
 
+#define BUZZER                  3    // HIGH = ON
+
 class uArmBuzzer
 {
 public:
     uArmBuzzer();
 
-    void buzz(unsigned int frequency, unsigned int duration);
+    void buzz(unsigned int frequency, unsigned long duration);
     void stop();
-    void run();
 
-private:
-
-    unsigned long mStopTime = 0;
 };
 
 #endif // _UARMBUZZER_H_

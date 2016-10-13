@@ -20,7 +20,17 @@ void uArmController::init()
 {
 	for (int i = SERVO_ROT_NUM; i < SERVO_COUNT; i++)
 	{
-		mServoAngleOffset[i] = readServoAngleOffset(i);
+        double handServoOffset = 0;
+
+		handServoOffset = readServoAngleOffset(i);
+        
+        if (isnan(handServoOffset))
+        {
+            handServoOffset = 0;
+            EEPROM.put(MANUAL_OFFSET_ADDRESS + i * sizeof(handServoOffset), handServoOffset);
+        }
+        
+        mServoAngleOffset[i] = handServoOffset;
         debugPrint("offset[%d]: %s\n", i, D(mServoAngleOffset[i]));
 	}
 
@@ -63,7 +73,7 @@ void uArmController::writeServoAngle(double servoRotAngle, double servoLeftAngle
     writeServoAngle(SERVO_RIGHT_NUM, servoRightAngle);
 }
 
-void uArmController::writeServoAngle(byte servoNum, double servoAngle, boolean writeWithOffset = true)
+void uArmController::writeServoAngle(byte servoNum, double servoAngle, boolean writeWithOffset )
 {
 
 	mCurAngle[servoNum] = servoAngle;
@@ -72,7 +82,7 @@ void uArmController::writeServoAngle(byte servoNum, double servoAngle, boolean w
     mServo[servoNum].write(servoAngle);
 }
 
-double uArmController::readServoAngle(byte servoNum, boolean withOffset = true)
+double uArmController::readServoAngle(byte servoNum, boolean withOffset )
 {
 	double angle;
 
@@ -96,12 +106,6 @@ double uArmController::readServoAngle(byte servoNum, boolean withOffset = true)
 	return angle;
 }
 
-/*
-double uArmController::getServoAngle(byte servoNum)
-{
-	return mCurAngle[servoNum];
-}
-*/
 
 double uArmController::getServoAngles(double& servoRotAngle, double& servoLeftAngle, double& servoRightAngle)
 {
@@ -112,7 +116,7 @@ double uArmController::getServoAngles(double& servoRotAngle, double& servoLeftAn
 
 }
 
-void uArmController::updateAllServoAngle(boolean withOffset = true)
+void uArmController::updateAllServoAngle(boolean withOffset)
 {
 	
 	for (unsigned char servoNum = SERVO_ROT_NUM; servoNum < SERVO_COUNT; servoNum++)
@@ -162,25 +166,6 @@ void uArmController::pumpOff()
     digitalWrite(PUMP_EN, LOW); 
     digitalWrite(VALVE_EN, HIGH);
 }
-
-unsigned char uArmController::moveTo(double x, double y, double z, boolean allowApproximate = true)
-{
-	// convert to angle
-	double angleRot = 0, angleLeft = 0, angleRight = 0;
-	unsigned char destinationStatus = coordianteToAngle(x, y, z, angleRot, angleLeft, angleRight, allowApproximate);
-
-	if (destinationStatus == OUT_OF_RANGE_NO_SOLUTION || (!allowApproximate))
-	{	
-		return OUT_OF_RANGE_NO_SOLUTION;
-	}
-
-	//mCurrentX = x;
-	//mCurrentY = y;
-	//mCurrentZ = z;
-
-	writeServoAngle(angleRot, angleLeft, angleRight);
-}
-
 
 unsigned char uArmController::getCurrentXYZ(double& x, double& y, double& z)
 {

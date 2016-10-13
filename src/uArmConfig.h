@@ -22,7 +22,7 @@
 	#define debugPrint
 #endif
 
-#define current_ver         "[SH2-2.1.1]"
+#define current_ver         "[SH2-2.1.2]"
 
 #define OK                      0
 #define ERR1                    1
@@ -49,7 +49,7 @@
 #define SERIAL_NUMBER_ADDRESS               100
 
 #define LIMIT_SW                2    // LIMIT Switch Button
-#define BUZZER                  3    // HIGH = ON
+
 #define BTN_D4                  4    // LOW = Pressed
 #define BTN_D7                  7    // LOW = Pressed
 

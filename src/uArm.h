@@ -40,10 +40,9 @@ class uArmClass
 {
 public:
 	uArmClass();
+
 	void setup();
 	void run();
-
-	void systemRun();
 
 	unsigned char moveTo(double x, double y, double z, double speed = 100);
 	bool isMoving();
@@ -59,6 +58,7 @@ private:
 	char parseParam(String cmnd, const char *parameters, int parameterCount, double valueArray[]);
 	void interpolate(double startVal, double endVal, double *interpVals, int steps, byte easeType);
 	void controllerRun();
+	void systemRun();
 	bool play();
 	bool record();
 

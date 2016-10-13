@@ -27,11 +27,11 @@ private:
 	void delay_us();
 	void iic_start();
 
-	void uArmRecorder::iic_stop();
+	void iic_stop();
 
 	//return 0:ACK=0
 	//return 1:NACK=1
-	unsigned char uArmRecorder::read_ack();
+	unsigned char read_ack();
 
 	//ack=0:send ack
 	//ack=1:do not send ack

@@ -81,7 +81,6 @@ public:
 	double readServoAngle(byte servoNum, boolean withOffset = true);
 	void updateAllServoAngle(boolean withOffset = true);
 
-	//double getServoAngle(byte servoNum);
 	double getServoAngles(double& servoRotAngle, double& servoLeftAngle, double& servoRightAngle);
 
 	void gripperCatch();
@@ -90,7 +89,6 @@ public:
 	void pumpOn();
 	void pumpOff();
 
-	unsigned char moveTo(double x, double y, double z, boolean allowApproximate = true);
 	unsigned char getCurrentXYZ(double& x, double& y, double& z);
 	unsigned char getXYZFromPolar(double& x, double& y, double& z, double s, double r, double h);
 	unsigned char getXYZFromAngle(double& x, double& y, double& z, double rot, double left, double right);
@@ -120,10 +118,6 @@ protected:
 	const byte SERVO_CONTROL_PIN[SERVO_COUNT] = {SERVO_ROT_PIN, SERVO_LEFT_PIN, SERVO_RIGHT_PIN, SERVO_HAND_ROT_PIN};
 	const byte SERVO_ANALOG_PIN[SERVO_COUNT] = {SERVO_ROT_ANALOG_PIN, SERVO_LEFT_ANALOG_PIN, SERVO_RIGHT_ANALOG_PIN, SERVO_HAND_ROT_ANALOG_PIN};
 	const byte SERVO_ANALOG_MIN_VALUE[SERVO_COUNT] = {50, 50, 50, 50};
-
-	//double mCurrentX = 0;
-	//double mCurrentY = 200;
-	//double mCurrentZ = 100;
 
 
 };

@@ -59,7 +59,7 @@ const Command command[] PROGMEM= {
 
 
 
-static void uArmComm::cmdMove(double value[4])
+void uArmComm::cmdMove(double value[4])
 {
 
 	debugPrint("cmdMove x:%s, y:%s, z:%s, v:%s\n\n", D(value[0]), D(value[1]), D(value[2]), D(value[3]));
@@ -75,7 +75,7 @@ static void uArmComm::cmdMove(double value[4])
 	}
 }
 
-static void uArmComm::cmdMovePol(double value[4])
+void uArmComm::cmdMovePol(double value[4])
 {
 	double x, y, z;
 
@@ -84,31 +84,31 @@ static void uArmComm::cmdMovePol(double value[4])
 	uArm.moveTo(x, y, z, value[3]);	
 }
 
-static void uArmComm::cmdSetAttachServo(double value[4])
+void uArmComm::cmdSetAttachServo(double value[4])
 {
 	Serial.println(SS);// successful feedback send it immediately
 	uArm.mController.attachServo(value[0]);
 }
 
-static void uArmComm::cmdSetDetachServo(double value[4])
+void uArmComm::cmdSetDetachServo(double value[4])
 {
 	Serial.println(SS);// successful feedback send it immediately
 	uArm.mController.detachServo(value[0]);
 }
 
-static void uArmComm::cmdSetServoAngle(double value[4])
+void uArmComm::cmdSetServoAngle(double value[4])
 {
 	Serial.println(SS);// successful feedback send it immediately
 	uArm.mController.writeServoAngle(byte(value[0]), value[1], false);
 }
 
-static void uArmComm::cmdSetServoAngleWithOffset(double value[4])
+void uArmComm::cmdSetServoAngleWithOffset(double value[4])
 {
 	Serial.println(SS);// successful feedback send it immediately
 	uArm.mController.writeServoAngle(byte(value[0]), value[1], true);
 }
 
-static void uArmComm::cmdSetPump(double value[4])
+void uArmComm::cmdSetPump(double value[4])
 {
 	Serial.println(SS);// successful feedback send it immediately
     if (value[0] == 0)//off
@@ -121,7 +121,7 @@ static void uArmComm::cmdSetPump(double value[4])
     }
 }
 
-static void uArmComm::cmdSetGripper(double value[4])
+void uArmComm::cmdSetGripper(double value[4])
 {
 	Serial.println(SS);// successful feedback send it immediately
     if (value[0]==0)//release
@@ -134,24 +134,24 @@ static void uArmComm::cmdSetGripper(double value[4])
     }
 }
 
-static void uArmComm::cmdSetBuzz(double value[4])
+void uArmComm::cmdSetBuzz(double value[4])
 {
 	Serial.println(SS);// successful feedback send it immediately
-	uArm.mBuzzer.buzz(value[0], value[1]);
+	uArm.mBuzzer.buzz(value[0], value[1]*1000);    // convert to ms
 }
 
-static void uArmComm::cmdStopMove(double value[4])
+void uArmComm::cmdStopMove(double value[4])
 {
 	Serial.println(SS);// successful feedback send it immediately
 	uArm.stopMove();
 }
 
-static void uArmComm::cmdGetVersion(double value[4])
+void uArmComm::cmdGetVersion(double value[4])
 {
 	Serial.println(current_ver);
 }
 
-static void uArmComm::cmdSimulatePos(double value[4])
+void uArmComm::cmdSimulatePos(double value[4])
 {
 	double angleRot, angleLeft, angleRight;
 
@@ -184,7 +184,7 @@ static void uArmComm::cmdSimulatePos(double value[4])
     }
 }
 
-static void uArmComm::cmdGetCurrentXYZ(double value[4])
+void uArmComm::cmdGetCurrentXYZ(double value[4])
 {
     char letters[3] = {'X','Y','Z'};
 
@@ -194,7 +194,7 @@ static void uArmComm::cmdGetCurrentXYZ(double value[4])
     printf(true, value, letters, 3);	
 }
 
-static void uArmComm::cmdGetCurrentPosPol(double value[4])
+void uArmComm::cmdGetCurrentPosPol(double value[4])
 {
 	double angleRot, angleLeft, angleRight;
 	double x, y, z;
@@ -210,7 +210,7 @@ static void uArmComm::cmdGetCurrentPosPol(double value[4])
     printf(true, value, letters, 3);
 }
 
-static void uArmComm::cmdGetCurrentAngle(double value[4])
+void uArmComm::cmdGetCurrentAngle(double value[4])
 {
     char letters[4] = {'B','L','R','H'};
     value[0] = uArm.mController.readServoAngle(SERVO_ROT_NUM, true);
@@ -220,7 +220,7 @@ static void uArmComm::cmdGetCurrentAngle(double value[4])
     printf(true, value, letters, 4);
 }
 
-static void uArmComm::cmdGetServoAngle(double value[4])
+void uArmComm::cmdGetServoAngle(double value[4])
 {
     char letters[4] = {'B','L','R','H'};
     value[0] = uArm.mController.readServoAngle(SERVO_ROT_NUM, false);
@@ -230,7 +230,7 @@ static void uArmComm::cmdGetServoAngle(double value[4])
     printf(true, value, letters, 4);
 }
 
-static void uArmComm::cmdCoordinateToAngle(double value[4])
+void uArmComm::cmdCoordinateToAngle(double value[4])
 {
     double rot, left, right;
     bool success;
@@ -244,7 +244,7 @@ static void uArmComm::cmdCoordinateToAngle(double value[4])
     printf(success,value,letters,3);
 }
 
-static void uArmComm::cmdAngleToXYZ(double value[4])
+void uArmComm::cmdAngleToXYZ(double value[4])
 {
     double x, y, z;
     bool success;
@@ -266,7 +266,7 @@ static void uArmComm::cmdAngleToXYZ(double value[4])
     printf(success,value,letters,3);
 }
 
-static void uArmComm::cmdIsMoving(double value[4])
+void uArmComm::cmdIsMoving(double value[4])
 {
 	if(uArm.isMoving())
 	{
@@ -278,7 +278,7 @@ static void uArmComm::cmdIsMoving(double value[4])
 	}
 }
 
-static void uArmComm::cmdGetTip(double value[4])
+void uArmComm::cmdGetTip(double value[4])
 {
     if(digitalRead(LIMIT_SW))
     {
@@ -290,28 +290,28 @@ static void uArmComm::cmdGetTip(double value[4])
     }
 }
 
-static void uArmComm::cmdGetDigitValue(double value[4])
+void uArmComm::cmdGetDigitValue(double value[4])
 {
     int val = digitalRead(value[0]);
    
     printf(true, val);
 }
 
-static void uArmComm::cmdSetDigitValue(double value[4])
+void uArmComm::cmdSetDigitValue(double value[4])
 {
     Serial.println(SS);// successful feedback send it immediately
     // write the digit value
     value[1] == 1 ? digitalWrite(value[0], HIGH) : digitalWrite(value[0], LOW);
 }
 
-static void uArmComm::cmdGetAnalogValue(double value[4])
+void uArmComm::cmdGetAnalogValue(double value[4])
 {
     int val = analogRead(value[0]);
 
     printf(true, val);
 }
 
-static void uArmComm::cmdGetE2PROMData(double value[4])
+void uArmComm::cmdGetE2PROMData(double value[4])
 {
     switch(int(value[1]))
     {
@@ -340,7 +340,7 @@ static void uArmComm::cmdGetE2PROMData(double value[4])
     }
 }
 
-static void uArmComm::cmdSetE2PROMData(double value[4])
+void uArmComm::cmdSetE2PROMData(double value[4])
 {
     Serial.println(SS);// successful feedback send it immediately
     // write the EEPROM value
@@ -373,7 +373,7 @@ static void uArmComm::cmdSetE2PROMData(double value[4])
 
 
 
-static void uArmComm::cmdGetServoAnalogData(double value[4])
+void uArmComm::cmdGetServoAnalogData(double value[4])
 {
     unsigned int data = uArm.mController.getServoAnalogData(value[0]);
     Serial.println(data);
@@ -381,7 +381,7 @@ static void uArmComm::cmdGetServoAnalogData(double value[4])
 
 
 
-static char uArmComm::parseParam(String cmnd, const char *parameters, int parameterCount, double valueArray[])
+char uArmComm::parseParam(String cmnd, const char *parameters, int parameterCount, double valueArray[])
 {
     for (byte i = 0; i < parameterCount; i++) 
     {
@@ -417,7 +417,7 @@ static char uArmComm::parseParam(String cmnd, const char *parameters, int parame
 }
 
 
-static void uArmComm::runCommand(String message)
+void uArmComm::runCommand(String message)
 {
 	
 	String cmdStr = message.substring(1, 5);
@@ -464,7 +464,7 @@ static void uArmComm::runCommand(String message)
 	
 }
 
-static void uArmComm::SerialCmdRun()
+void uArmComm::SerialCmdRun()
 {
     if (Serial.available())
     {
@@ -475,12 +475,12 @@ static void uArmComm::SerialCmdRun()
     }	
 }
 
-static void uArmComm::run()
+void uArmComm::run()
 {
 	SerialCmdRun();
 }
 
-static void uArmComm::printf(bool success, double *dat, char *letters, unsigned char num)
+void uArmComm::printf(bool success, double *dat, char *letters, unsigned char num)
 {
     if(success == true)
         Serial.print(F("[S"));
@@ -496,7 +496,7 @@ static void uArmComm::printf(bool success, double *dat, char *letters, unsigned 
 
 }
 
-static void uArmComm::printf(bool success, double dat)
+void uArmComm::printf(bool success, double dat)
 {
     if(success == true)
         Serial.print(F("[S"));
@@ -508,7 +508,7 @@ static void uArmComm::printf(bool success, double dat)
 
 }
 
-static void uArmComm::printf(bool success, int dat)
+void uArmComm::printf(bool success, int dat)
 {
     if(success == true)
         Serial.print(F("[S"));

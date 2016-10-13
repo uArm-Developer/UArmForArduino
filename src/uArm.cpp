@@ -36,20 +36,11 @@ void uArmClass::initHardware()
 void uArmClass::setup()
 {
 
-/*  
-    double handServoOffset = 0;
-    EEPROM.put(MANUAL_OFFSET_ADDRESS + SERVO_HAND_ROT_NUM * sizeof(handServoOffset), handServoOffset);
-    EEPROM.get(MANUAL_OFFSET_ADDRESS + SERVO_HAND_ROT_NUM * sizeof(handServoOffset), handServoOffset);   
-
-    debugPrint("hand offset=%s", D(handServoOffset));
-*/
-
 	initHardware();
 	mController.init();
 
     mCurStep = -1;
     mTotalSteps = -1;    
-
 
 }
 
@@ -60,6 +51,7 @@ void uArmClass::controllerRun()
 	{
 		if((millis() - mStartTime) >= (mCurStep * mTimePerStep))
 		{
+            // ignore the point if cannot reach
 			if (mController.limitRange(mPathX[mCurStep], mPathY[mCurStep], mPathZ[mCurStep]) != OUT_OF_RANGE_NO_SOLUTION)
 			{
 				debugPrint("curStep:%d, %s, %s, %s", mCurStep, D(mPathX[mCurStep]), D(mPathY[mCurStep]), D(mPathZ[mCurStep]));
@@ -123,15 +115,15 @@ void uArmClass::systemRun()
             {
             case NORMAL_MODE:
             case NORMAL_BT_CONNECTED_MODE:
-            	delay(100);
-            	mBuzzer.stop();
-                delay(900);
+
+                delay(1000);    // delay 1s to detect long pressed
+
                 mRecordAddr = 0;//recording/playing address
 
-                if(digitalRead(BTN_D7)==LOW)		// ??延时1秒后,如果还是低,循环播放
+                if(digitalRead(BTN_D7)==LOW)		// long pressed for loop play mode
                     mSysStatus = LOOP_PLAY_MODE;
                 else
-                    mSysStatus = SINGLE_PLAY_MODE;
+                    mSysStatus = SINGLE_PLAY_MODE;  // or play just one time
                 break;
 
             case SINGLE_PLAY_MODE:
@@ -192,7 +184,6 @@ void uArmClass::systemRun()
 void uArmClass::run()
 {
 	gComm.run();
-	mBuzzer.run();
 	controllerRun();
 	systemRun();
 }
@@ -220,6 +211,18 @@ bool uArmClass::play()
     if(data[0] != 255)
     {
     	mController.writeServoAngle((double)data[2], (double)data[0], (double)data[1]);
+        mController.writeServoAngle(SERVO_HAND_ROT_NUM, (double)data[3]);
+        if (digitalRead(PUMP_EN) != data[4])
+        {
+            if (data[4])
+            {
+                mController.pumpOn();
+            }
+            else
+            {
+                mController.pumpOff();
+            }   
+        }
     }
     else
     {
@@ -246,7 +249,8 @@ bool uArmClass::record()
 			data[0] = (unsigned char)left;
 			data[1] = (unsigned char)right;
             data[2] = (unsigned char)rot;
-            //data[3] = (unsigned char)cur_hand;
+            data[3] = (unsigned char)mController.readServoAngle(SERVO_HAND_ROT_NUM);
+            data[4] = (unsigned char)digitalRead(PUMP_EN);
 
             debugPrint("l=%d, r=%d, r= %d", data[0], data[1], data[2]);
         }
@@ -285,7 +289,7 @@ void uArmClass::interpolate(double startVal, double endVal, double *interpVals, 
     }
 }
 
-unsigned char uArmClass::moveTo(double x, double y, double z, double speed = 100)
+unsigned char uArmClass::moveTo(double x, double y, double z, double speed)
 {
 	
 	double angleRot = 0, angleLeft = 0, angleRight = 0;
