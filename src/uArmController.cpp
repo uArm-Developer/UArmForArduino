@@ -117,7 +117,7 @@ double uArmController::readServoAngle(byte servoNum, boolean withOffset )
 }
 
 
-double uArmController::readServoAngles(double& servoRotAngle, double& servoLeftAngle, double& servoRightAngle, boolean withOffset = true)
+double uArmController::readServoAngles(double& servoRotAngle, double& servoLeftAngle, double& servoRightAngle, boolean withOffset)
 {
     servoRotAngle = readServoAngle(SERVO_ROT_NUM, withOffset);
     servoLeftAngle = readServoAngle(SERVO_LEFT_NUM, withOffset);

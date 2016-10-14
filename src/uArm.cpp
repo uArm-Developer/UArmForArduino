@@ -63,6 +63,8 @@ void uArmClass::controllerRun()
 			}
               
             mCurStep++;
+
+
            	if (mCurStep >= mTotalSteps)       
            	{
            		mCurStep = -1;
