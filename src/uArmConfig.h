@@ -22,7 +22,7 @@
 	#define debugPrint
 #endif
 
-#define current_ver         "[SH2-2.1.2]"
+#define current_ver         "[SH2-2.1.3]"
 
 #define OK                      0
 #define ERR1                    1

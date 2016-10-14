@@ -38,6 +38,16 @@ void uArmController::init()
 
 	attachAllServo();  
 
+    updatePosition();
+
+}
+
+void uArmController::updatePosition()
+{
+    for (int i = SERVO_ROT_NUM; i < SERVO_COUNT; i++)
+    {
+        updatePosition(i);
+    }   
 }
 
 void uArmController::attachAllServo()
@@ -107,13 +117,26 @@ double uArmController::readServoAngle(byte servoNum, boolean withOffset )
 }
 
 
+double uArmController::readServoAngles(double& servoRotAngle, double& servoLeftAngle, double& servoRightAngle, boolean withOffset = true)
+{
+    servoRotAngle = readServoAngle(SERVO_ROT_NUM, withOffset);
+    servoLeftAngle = readServoAngle(SERVO_LEFT_NUM, withOffset);
+    servoRightAngle = readServoAngle(SERVO_RIGHT_NUM, withOffset);
+}
+
+
 double uArmController::getServoAngles(double& servoRotAngle, double& servoLeftAngle, double& servoRightAngle)
 {
-    updateAllServoAngle();
+
     servoRotAngle = mCurAngle[SERVO_ROT_NUM];
     servoLeftAngle = mCurAngle[SERVO_LEFT_NUM];
     servoRightAngle = mCurAngle[SERVO_RIGHT_NUM];
 
+}
+
+double uArmController::getServeAngle(byte servoNum)
+{
+    return mCurAngle[servoNum];
 }
 
 void uArmController::updateAllServoAngle(boolean withOffset)
@@ -169,7 +192,7 @@ void uArmController::pumpOff()
 
 unsigned char uArmController::getCurrentXYZ(double& x, double& y, double& z)
 {
-    updateAllServoAngle();
+
 	// 在XY平面的投影长度
     double stretch = MATH_LOWER_ARM * cos(mCurAngle[SERVO_LEFT_NUM] / MATH_TRANS) + MATH_UPPER_ARM * cos(mCurAngle[SERVO_RIGHT_NUM] / MATH_TRANS) + MATH_L2 + MATH_FRONT_HEADER;
 
@@ -372,7 +395,7 @@ double uArmController::readServoAngleOffset(byte servoNum)
 	return manualServoOffset;	
 }
 
-void uArmController::moveToStartPos(byte servoNum)
+void uArmController::updatePosition(byte servoNum)
 {
 	if (servoNum == SERVO_HAND_ROT_NUM)
 	{
@@ -408,6 +431,6 @@ void uArmController::attachServo(byte servoNum, byte pin, int valueMin)
             mServo[servoNum].attach(pin);
         }
 		
-		moveToStartPos(servoNum);
+		
 	}	
 }

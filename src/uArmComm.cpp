@@ -190,6 +190,7 @@ void uArmComm::cmdGetCurrentXYZ(double value[4])
 
     debugPrint("cmdGetCurrentXYZ");
 
+    uArm.mController.updateAllServoAngle();
     uArm.mController.getCurrentXYZ(value[0], value[1], value[2]);
     printf(true, value, letters, 3);	
 }
@@ -199,6 +200,7 @@ void uArmComm::cmdGetCurrentPosPol(double value[4])
 	double angleRot, angleLeft, angleRight;
 	double x, y, z;
 
+    uArm.mController.updateAllServoAngle();
 	uArm.mController.getCurrentXYZ(x, y, z);
 	uArm.mController.getServoAngles(angleRot, angleLeft, angleRight);
     double stretch;
@@ -469,7 +471,7 @@ void uArmComm::SerialCmdRun()
     if (Serial.available())
     {
         String message = Serial.readStringUntil(']');
-
+        message.trim();
         message += ']';
         runCommand(message); // Run the command and send back the response
     }	

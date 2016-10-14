@@ -36,6 +36,8 @@
 #define LOOP_PLAY_MODE              4
 #define LEARNING_MODE_STOP          5
 
+#define STEP_MAX_TIME				20	// ms
+
 class uArmClass
 {
 public:

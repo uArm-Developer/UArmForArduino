@@ -47,10 +47,14 @@ void uArmClass::setup()
 
 void uArmClass::controllerRun()
 {
+
+
 	if (mCurStep >= 0 && mCurStep < mTotalSteps)
 	{
-		if((millis() - mStartTime) >= (mCurStep * mTimePerStep))
+
+		if((millis() - mStartTime) >= (mCurStep * mTimePerStep)) 
 		{
+
             // ignore the point if cannot reach
 			if (mController.limitRange(mPathX[mCurStep], mPathY[mCurStep], mPathZ[mCurStep]) != OUT_OF_RANGE_NO_SOLUTION)
 			{
@@ -62,12 +66,14 @@ void uArmClass::controllerRun()
            	if (mCurStep >= mTotalSteps)       
            	{
            		mCurStep = -1;
+               
            	}  
 		}	
 	}
     else
     {
         mCurStep = -1;
+
     }
 }
 
@@ -94,6 +100,9 @@ void uArmClass::systemRun()
             case LEARNING_MODE:
                 //LEARNING_MODE_STOP is just used to notificate record() function to stop, once record() get it then change the sys_status to normal_mode
                 mSysStatus = LEARNING_MODE_STOP;//do not detec if BT is connected here, will do it seperatly
+                
+                mController.pumpOff();
+             
                 break;
 
             default: break;
@@ -132,6 +141,14 @@ void uArmClass::systemRun()
                 break;
 
             case LEARNING_MODE:
+                if (digitalRead(PUMP_EN))
+                {
+                    mController.pumpOff();
+                }
+                else
+                {
+                    mController.pumpOn();
+                }    
                 break;
             }
         } 
@@ -169,7 +186,9 @@ void uArmClass::systemRun()
                 {
                         mSysStatus = NORMAL_MODE;
                         mRecordAddr = 0;
+                   
                         mController.attachAllServo();
+
                 }
                 break;
 
@@ -226,7 +245,10 @@ bool uArmClass::play()
     }
     else
     {
-            return false;
+
+        mController.pumpOff();
+         
+        return false;
     }
 
     mRecordAddr += 5;
@@ -244,8 +266,8 @@ bool uArmClass::record()
         if((mRecordAddr != 65530) && (mSysStatus != LEARNING_MODE_STOP))
         {
     		double rot, left, right;
-    		mController.updateAllServoAngle();
-            mController.getServoAngles(rot, left, right);
+    		//mController.updateAllServoAngle();
+            mController.readServoAngles(rot, left, right);
 			data[0] = (unsigned char)left;
 			data[1] = (unsigned char)right;
             data[2] = (unsigned char)rot;
@@ -302,6 +324,7 @@ unsigned char uArmClass::moveTo(double x, double y, double z, double speed)
     double curZ = 0;
     int i = 0;
     int totalSteps = 0;
+    unsigned int timePerStep;
 
     unsigned char status = 0;
 
@@ -316,20 +339,45 @@ unsigned char uArmClass::moveTo(double x, double y, double z, double speed)
 
     // get current angles
     mController.getServoAngles(curRot, curLeft, curRight);
+    // get current xyz
+    mController.getCurrentXYZ(curX, curY, curZ);
 
     // calculate max steps
     totalSteps = max(abs(targetRot - curRot), abs(targetLeft - curLeft));
     totalSteps = max(totalSteps, abs(targetRight - curRight));
 
+    if (totalSteps <= 0)
+        return OUT_OF_RANGE_NO_SOLUTION;
+
     totalSteps = totalSteps < STEP_MAX ? totalSteps : STEP_MAX;
 
-    if (totalSteps <= 0)
-    	return OUT_OF_RANGE_NO_SOLUTION;
+    // calculate step time
+    double distance = sqrt((x-curX) * (x-curX) + (y-curY) * (y-curY) + (z-curZ) * (z-curZ));
+    speed = constrain(speed, 100, 1000);
+    timePerStep = distance / speed * 1000.0 / totalSteps;
+
+
+    // keep timePerStep <= STEP_MAX_TIME
+    if (timePerStep > STEP_MAX_TIME)
+    {
+        double ratio = double(timePerStep) / STEP_MAX_TIME;
+
+        if (totalSteps * ratio < STEP_MAX)
+        {
+            totalSteps *= ratio;
+            timePerStep = STEP_MAX_TIME;
+        }
+        else
+        {
+            totalSteps = STEP_MAX;
+            timePerStep = STEP_MAX_TIME;
+        }
+    }
+
+
+    totalSteps = totalSteps < STEP_MAX ? totalSteps : STEP_MAX;
 
     debugPrint("totalSteps= %d\n", totalSteps);
-
-    // get current xyz
-    mController.getCurrentXYZ(curX, curY, curZ);
 
     // trajectory planning
     interpolate(curX, x, mPathX, totalSteps, INTERP_EASE_INOUT_CUBIC);
@@ -375,11 +423,7 @@ unsigned char uArmClass::moveTo(double x, double y, double z, double speed)
     }
 #endif   
 
-
-    // calculate step time
-    double distance = sqrt((x-curX) * (x-curX) + (y-curY) * (y-curY) + (z-curZ) * (z-curZ));
-    speed = constrain(speed, 100, 1000);
-    mTimePerStep = distance / speed * 1000.0 / totalSteps;
+    mTimePerStep = timePerStep;
     mTotalSteps = totalSteps;
     mCurStep = 0;
     mStartTime = millis();

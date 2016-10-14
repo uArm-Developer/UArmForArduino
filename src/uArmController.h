@@ -64,6 +64,9 @@
 #define LOWER_UPPER_MAX_ANGLE    150
 #define LOWER_UPPER_MIN_ANGLE    30
 
+
+
+
 class uArmController
 {
 public:
@@ -79,9 +82,11 @@ public:
 	void writeServoAngle(double servoRotAngle, double servoLeftAngle, double servoRightAngle);
 	void writeServoAngle(byte servoNum, double servoAngle, boolean writeWithOffset = true);
 	double readServoAngle(byte servoNum, boolean withOffset = true);
+	double readServoAngles(double& servoRotAngle, double& servoLeftAngle, double& servoRightAngle, boolean withOffset = true);	
 	void updateAllServoAngle(boolean withOffset = true);
 
 	double getServoAngles(double& servoRotAngle, double& servoLeftAngle, double& servoRightAngle);
+	double getServeAngle(byte servoNum);
 
 	void gripperCatch();
 	void gripperRelease();
@@ -97,11 +102,16 @@ public:
 	unsigned char coordianteToAngle(double x, double y, double z, double& angleRot, double& angleLeft, double& angleRight, boolean allowApproximate = true);
 	unsigned char limitRange(double& angleRot, double& angleLeft, double& angleRight);
 
+
+	
+	
 private:
 	double readServoAngleOffset(byte servoNum);
 	void attachServo(byte servoNum, byte pin, int valueMin);
 	
-	void moveToStartPos(byte servoNum);
+	void updatePosition(byte servoNum);
+	void updatePosition();
+
 	double analogToAngle(byte servoNum, int inputAnalog);
 	void readLinearOffset(byte servoNum, double& interceptVal, double& slopeVal);
 
