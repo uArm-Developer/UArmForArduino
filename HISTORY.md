@@ -1,5 +1,9 @@
 # uArm Arduino Library Release Note
 
+## [2.1.4] - 2016-10-31
+- Add standby message [READY]
+- Add init position
+
 ## [2.0.13] - 2016-09-23
 
 ## Fix

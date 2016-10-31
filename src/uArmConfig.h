@@ -1,7 +1,7 @@
 /**
   ******************************************************************************
   * @file	uArmConfig.h
-  * @author	David.Long	
+  * @author	David.Long
   * @email	xiaokun.long@ufactory.cc
   * @date	2016-09-28
   * @license GNU
@@ -22,7 +22,7 @@
 	#define debugPrint
 #endif
 
-#define current_ver         "[SH2-2.1.3]"
+#define current_ver         "[SH2-2.1.4]"
 
 #define OK                      0
 #define ERR1                    1
@@ -79,7 +79,7 @@ char* D(double value);
 void dprint(char *fmt, ...);
 
 
-#ifdef F 
+#ifdef F
 void dprint(const __FlashStringHelper *fmt, ...);
 #endif
 
