@@ -259,14 +259,18 @@ uint8_t Servo::attach(int pin)
   return this->attach(pin, MIN_PULSE_WIDTH, MAX_PULSE_WIDTH);
 }
 
+void Servo::setPulseWidthRange(int min, int max)
+{
+    this->min  = (MIN_PULSE_WIDTH - min)/4; //resolution of min/max is 4 uS
+    this->max  = (MAX_PULSE_WIDTH - max)/4;
+}
+
 uint8_t Servo::attach(int pin, int min, int max)
 {
   if(this->servoIndex < MAX_SERVOS ) {
     pinMode( pin, OUTPUT) ;                                   // set servo pin to output
     servos[this->servoIndex].Pin.nbr = pin;
-    // todo min/max check: abs(min - MIN_PULSE_WIDTH) /4 < 128
-    this->min  = (MIN_PULSE_WIDTH - min)/4; //resolution of min/max is 4 uS
-    this->max  = (MAX_PULSE_WIDTH - max)/4;
+    
     // initialize the timer if it has not already been initialized
     timer16_Sequence_t timer = SERVO_INDEX_TO_TIMER(servoIndex);
     if(isTimerActive(timer) == false)

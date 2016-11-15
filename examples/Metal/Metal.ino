@@ -1,19 +1,12 @@
-// test by John Feng
-
-//#define LATEST_HARDWARE
 #include "uArm.h"
 
 void setup() {
-  Serial.begin(115200);
-
+  Serial.begin(115200);  // start serial port at 115200 bps
   uArm.setup();
-  Serial.println("[READY]");
-  uArm.moveTo(0, 150, 150, 10);
 
 
 }
 
 void loop() {
   uArm.run();
-
 }

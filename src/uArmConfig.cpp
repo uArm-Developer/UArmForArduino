@@ -10,28 +10,103 @@
   */
 
 #include "uArmConfig.h" 
+#include <stdarg.h>
+
+#define ARDBUFFER 50
+
+
+
+
+int ardprintf(char *result, char *str, ...)
+{
+  int i, count=0, j=0, flag=0;
+  char temp[ARDBUFFER+1];
+  char num[ARDBUFFER+1];
+  for(i=0; str[i]!='\0';i++)  if(str[i]=='%')  count++;
+
+    result[0] = '\0';
+  va_list argv;
+  va_start(argv, count);
+  for(i=0,j=0; str[i]!='\0';i++)
+  {
+    if(str[i]=='%')
+    {
+      temp[j] = '\0';
+      strcat(result, temp);
+      j=0;
+      temp[0] = '\0';
+
+      switch(str[++i])
+      {
+        case 'd': 
+        {
+
+                  itoa(va_arg(argv, int), num, 10);
+                  strcat(result, num);
+                  break;
+        }
+
+        case 'l': ltoa(va_arg(argv, long), num, 10);
+                  strcat(result, num);
+                  break;
+
+        case 'f': 
+        {
+          char d_str[10];
+          dtostrf(va_arg(argv, double), 4, 2, d_str);
+          strcat(result, d_str);
+          break;
+        }
+
+        case 'c': num[0] = (char)va_arg(argv, int);
+                  num[1] = '\0';
+                  strcat(result, num);
+                  break;
+        case 's': strcat(result, va_arg(argv, char *));
+                  break;
+        default:  ;
+      };
+    }
+    else 
+    {
+      temp[j] = str[i];
+      j = (j+1)%ARDBUFFER;
+      if(j==0) 
+      {
+        temp[ARDBUFFER] = '\0';
+        strcat(result, temp);
+        temp[0]='\0';
+      }
+    }
+  };
+
+  return count + 1;
+}
+
+
 
 #ifdef DEBUG
 
-#include <stdarg.h>
+
 
 #define PRINT_BUF 	128
 
 
 
+// convert double value to string
 char* D(double value)
 {
 
-	static char d_str[5][7] = {0};
+  static char d_str[5][7] = {0};
 
-	static unsigned char d_index = 0;
+  static unsigned char d_index = 0;
 
-	d_index++;
-	if (d_index >= 5)
-		d_index = 0;
+  d_index++;
+  if (d_index >= 5)
+    d_index = 0;
 
-	dtostrf(value, 4, 2, d_str[d_index]);
-	return d_str[d_index];
+  dtostrf(value, 4, 2, d_str[d_index]);
+  return d_str[d_index];
 }
 
 
@@ -69,10 +144,12 @@ void dprint(const __FlashStringHelper *fmt, ...)
 
 
 #else
+
 char* D(double value)
 {
 
-	return 0; 
+  
+  return NULL;
 }
 
 #endif // DEBUG

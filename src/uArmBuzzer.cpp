@@ -11,9 +11,18 @@
 
 #include "uArmBuzzer.h" 
 
+uArmBuzzer gBuzzer;
+
+
+
 uArmBuzzer::uArmBuzzer()
 {
+  mOn = false;
+}
 
+void uArmBuzzer::setPin(unsigned char pin)
+{
+  mPin = pin;
 }
 
 void uArmBuzzer::buzz(unsigned int frequency, unsigned long duration)
@@ -21,11 +30,32 @@ void uArmBuzzer::buzz(unsigned int frequency, unsigned long duration)
 	if (duration <= 0)
 		return;
 
-	tone(BUZZER, frequency, duration);
+  mOn = true;
+  pinMode(mPin, OUTPUT);
+  mDuration = duration;
+  mStartTime = millis();
+  tone(mPin, frequency, duration);
+	//tone(mPin, frequency, duration);
+
 }
 
 
 void uArmBuzzer::stop()
 {
-	noTone(BUZZER);	
+	noTone(mPin);	
+}
+
+
+void uArmBuzzer::run()
+{
+  if (mOn && (long)((millis() - mStartTime)) >= mDuration)
+  {
+    noTone(mPin); 
+    mOn = false;
+  }
+}
+
+bool uArmBuzzer::on()
+{
+  return mOn;
 }

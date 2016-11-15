@@ -14,7 +14,14 @@
 
 #include <Arduino.h>
 
+int ardprintf(char *result, char *str, ...);
+// #define MKII
+#define METAL
+
 //#define DEBUG
+
+
+//#define METAL_MOTOR
 
 #ifdef DEBUG
 	#define debugPrint	dprint
@@ -22,62 +29,33 @@
 	#define debugPrint
 #endif
 
-#define current_ver         "[SH2-2.1.4]"
+//#define current_ver         "[SH2-2.1.3]"
 
-#define OK                      0
-#define ERR1                    1
-#define ERR2                    2
+#ifdef MKII
+  #define HW_VER  "3.1"
+  #define SW_VER  "2.2.1"
+#elif defined(METAL)
+  #define HW_VER  "2.1"
+  #define SW_VER  "2.2.1"
+#endif
 
-#define SS   "[S]"
-#define S0  "[S0]"
-#define S1  "[S1]"
-#define S2  "[S2]"
-#define FF   "[F]"
-#define F0  "[F0]"
-#define F1  "[F1]"
+#ifdef METAL
+    #define DEVICE_NAME "Metal"
+#elif defined(MKII)
+    #define DEVICE_NAME "MKII"
+#else
+    #define DEVICE_NAME "UNKNOWN"
+#endif
 
-// Calibration Flag & OFFSET EEPROM ADDRESS
-#define CALIBRATION_FLAG                    10
-#define CALIBRATION_LINEAR_FLAG             11
-#define CALIBRATION_MANUAL_FLAG             12
-#define CALIBRATION_STRETCH_FLAG            13
-
-#define LINEAR_INTERCEPT_START_ADDRESS      70
-#define LINEAR_SLOPE_START_ADDRESS          50
-#define MANUAL_OFFSET_ADDRESS               30
-#define OFFSET_STRETCH_START_ADDRESS        20
-#define SERIAL_NUMBER_ADDRESS               100
-
-#define LIMIT_SW                2    // LIMIT Switch Button
-
-#define BTN_D4                  4    // LOW = Pressed
-#define BTN_D7                  7    // LOW = Pressed
-
-#define PUMP_EN                 6    // HIGH = Valve OPEN
-#define VALVE_EN                5    // HIGH = Pump ON
-#define GRIPPER                 9    // LOW = Catch
-#define GRIPPER_FEEDBACK        A6
-
-#define SERVO_9G_MAX    460
-#define SERVO_9G_MIN    98
-
-#define CONFIRM_FLAG                        0x80
+#define TICK_INTERVAL    50    // ms
 
 
-#define SUCCESS                 1
-#define FAILED                  -1
-
-#define DATA_TYPE_BYTE          1
-#define DATA_TYPE_INTEGER       2
-#define DATA_TYPE_FLOAT         4
-
-
+// conver double value to string
 char* D(double value);
+
 #ifdef DEBUG
 
-
 void dprint(char *fmt, ...);
-
 
 #ifdef F
 void dprint(const __FlashStringHelper *fmt, ...);
@@ -86,7 +64,6 @@ void dprint(const __FlashStringHelper *fmt, ...);
 #else
 
 #endif // DEBUG
-
 
 
 #endif // _UARMCONFIG_H_
