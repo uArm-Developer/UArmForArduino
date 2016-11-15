@@ -8,7 +8,7 @@ void setup() {
 
   uArm.setup();
   Serial.println("[READY]");
-  uArm.moveTo(0, 150, 50, 10);
+  uArm.moveTo(0, 150, 150, 10);
 
 
 }
