@@ -29,7 +29,6 @@ int ardprintf(char *result, char *str, ...);
 	#define debugPrint
 #endif
 
-//#define current_ver         "[SH2-2.1.3]"
 
 #ifdef MKII
   #define HW_VER  "3.1"

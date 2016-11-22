@@ -1,5 +1,9 @@
 # uArm Arduino Library Release Note
 
+## [2.2.1] - 2016-11-22
+- Add Calibration examples
+- Compatiable with GCode Communcation
+
 ## [2.1.4] - 2016-10-31
 - Add standby message [READY]
 - Add init position
