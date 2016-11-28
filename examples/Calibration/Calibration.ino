@@ -1,10 +1,11 @@
 /*
-  Controlling a servo position using a potentiometer (variable resistor)
-  by Michal Rinott <http://people.interaction-ivrea.it/m.rinott>
+This Example is for Calibration on uArm.
 
-  modified on 8 Nov 2013
-  by Scott Fitzgerald
-  http://www.arduino.cc/en/Tutorial/Knob
+1. It will wait you press D7 to start.
+2. First it would auto detect the SERVO_LEFT maximum angle and SERVO_RIGHT minimum angle
+3. Second it would collect hundreads of point for each servo to caculate the Linear regression 
+4. Third it will wait you to move uArm to correct position to calibrate the SERVO_ROT, You could refer this picture.
+https://raw.githubusercontent.com/uArm-Developer/UArmForArduino/dev/examples/Metal/calibration.png
 */
 
 #include <Servo.h>
@@ -101,13 +102,17 @@ void loop() {
       delay(2000);
       Serial.println("[STEP]LIMITATION");
       get_limit_values();
+      delay(500);
       Serial.println("[STEP]LINEAR");
       linear_calibration();
+      delay(500);
       Serial.println("[STEP]MANUAL");
+      delay(500);
       Serial.println("[INFO]Waiting For Manual Calibration, Please Press D4 Once Completed.");
       waitingForManualCalibration();
+      delay(500);
       EEPROM.write(CALIBRATION_FLAG, CONFIRM_FLAG);
-      delay(20);
+      delay(500);
       Serial.println("[STEP]COMPLETED");
       alert(1, 500, 500);
     }
@@ -457,4 +462,3 @@ void save_linear_servo_offset(byte servo_num, double intercept_val, double slope
   EEPROM.put(LINEAR_INTERCEPT_START_ADDRESS + servo_num * sizeof(intercept_val), intercept_val);
   EEPROM.put(LINEAR_SLOPE_START_ADDRESS + servo_num * sizeof(slope_val), slope_val);
 }
-
