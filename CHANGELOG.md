@@ -19,10 +19,7 @@
 - Fix uArm in extreme position.
 - Encapsulate limit_range function to validate if coordinate is out of range.
 
-## [2.0.11] - 2016-09-08
 
-## Fix
-- Fix Attach issue when unplug DC adapter
 - Change sAtt sDet paramenter to 'N'
 
 ## [2.0.9] - 2016-09-01
