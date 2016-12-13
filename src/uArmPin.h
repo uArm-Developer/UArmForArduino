@@ -1,14 +1,14 @@
 /**
   ******************************************************************************
-  * @file	uArmHWConfig.h
+  * @file	uArmPin.h
   * @author	David.Long	
   * @email	xiaokun.long@ufactory.cc
   * @date	2016-10-17
   ******************************************************************************
   */
 
-#ifndef _UARMHWCONFIG_H_
-#define _UARMHWCONFIG_H_
+#ifndef _UARMPIN_H_
+#define _UARMPIN_H_
 
 #include "uArmConfig.h"
 
@@ -69,4 +69,4 @@
 
 #endif	// MKII
 
-#endif // _UARMHWCONFIG_H_
+#endif // _UARMPIN_H_

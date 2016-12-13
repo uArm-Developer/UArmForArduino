@@ -11,7 +11,9 @@
 
 #include "uArmRecorder.h" 
 
-uArmRecorder gRecorder;
+uArmRecorder recorder;
+
+extern void reportPos();
 
 uArmRecorder::uArmRecorder()
 {

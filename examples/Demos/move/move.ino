@@ -1,10 +1,9 @@
-
+// Demo 
 #include "uArm.h"
 
-#define USE_SERIAL_CMD	1	// 1: use serial for control	0: just use arduino to control(release ROM and RAM space)
+#define USE_SERIAL_CMD	0	// 1: use serial for control	0: just use arduino to control(release ROM and RAM space)
 
 unsigned long tickStartTime = millis(); // get timestamp;
-static void Init();
 
 void setup()
 {
@@ -14,9 +13,8 @@ void setup()
 	debugPrint("debug start"); // uncomment DEBUG in uArmConfig.h to use debug function
 	
 	// TODO
+	service.setButtonService(false);	// disable build in button service
 	moveTo(0, 150, 150);
-	Serial.println("@1");	// report ready
-
 
 }
 
@@ -25,6 +23,11 @@ void loop()
 	run(); // Don't remove
 
 	// TODO
+	moveTo(0, 150, 150);
+	moveTo(100, 150, 150);
+	pumpOn();
+	moveTo(-100, 200, 150);
+	pumpOff();
 
 }
 
@@ -36,7 +39,7 @@ void tickTimeOut()
 
 ////////////////////////////////////////////////////////////
 // DO NOT EDIT
-static void Init()
+void Init()
 {
 	uArmInit();	// Don't remove
 	service.init();

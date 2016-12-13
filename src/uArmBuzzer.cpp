@@ -11,7 +11,7 @@
 
 #include "uArmBuzzer.h" 
 
-uArmBuzzer gBuzzer;
+uArmBuzzer buzzer;
 
 
 

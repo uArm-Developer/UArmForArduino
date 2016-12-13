@@ -13,7 +13,7 @@
 #include <Arduino.h>
 
 #include "uArmConfig.h"
-#include "uArmHWConfig.h"
+#include "uArmPin.h"
 #include "uArmBuzzer.h"
 
 #define EVENT_NONE			0

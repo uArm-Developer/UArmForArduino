@@ -12,10 +12,13 @@
 #include "uArmController.h" 
 #include "uArmIIC.h"
 #include "uArmRecorder.h"
+#include "uArmAPI.h"
+
+uArmController controller;
 
 uArmController::uArmController()
 {
-	
+	mServoSpeed = 255;
 }
 
 void uArmController::init()
@@ -33,7 +36,7 @@ void uArmController::init()
         }
         
         mServoAngleOffset[i] = servoOffset;
-        debugPrint("offset[%d]: %s\n", i, D(mServoAngleOffset[i]));
+
 	}
 
     // mServoAngleOffset[0] = 6;
@@ -112,7 +115,7 @@ void uArmController::writeServoAngle(double servoRotAngle, double servoLeftAngle
 double uArmController::getReverseServoAngle(byte servoNum, double servoAngle)
 {
 #ifdef MKII
-    debugPrint("s=%d, angleIn=%s", servoNum, D(servoAngle));
+
     if (servoAngle < mCurAngle[servoNum])
     {
         unsigned char data[2];
@@ -122,11 +125,10 @@ double uArmController::getReverseServoAngle(byte servoNum, double servoAngle)
 
             addr &= 0xfffe;
 
-            //gRecorder.read(addr, data, 2);
             iic_readbuf(data, EXTERNAL_EEPROM_SYS_ADDRESS, addr, 2);
 
             i_val = (data[0] << 8) + data[1];
-            debugPrint("addr=%d,i_val=%d", addr, i_val);
+
             servoAngle = servoAngle - (i_val) - 1;
     }
 #endif
@@ -144,7 +146,6 @@ void uArmController::writeServoAngle(byte servoNum, double servoAngle, boolean w
 	mCurAngle[servoNum] = servoAngle;
     servoAngle = writeWithOffset ? (servoAngle + mServoAngleOffset[servoNum]) : servoAngle;
 
-    debugPrint("serveAngle1=%s", D(servoAngle));
 #ifdef MKII
 	
 	servoAngle = getReverseServoAngle(servoNum, servoAngle);
@@ -165,9 +166,9 @@ void uArmController::writeServoAngle(byte servoNum, double servoAngle, boolean w
 
     }
 #endif
-    debugPrint("serveAngle2=%s", D(servoAngle));
 
-    mServo[servoNum].write(servoAngle);
+
+    mServo[servoNum].write(servoAngle, mServoSpeed);
 }
 
 
@@ -199,13 +200,6 @@ void uArmController::readServoCalibrationData(unsigned int address, double& angl
         min_data_calibration_address = (((unsigned int)angle - (DATA_LENGTH >> 2)) * 2);
     }
 
-    // Serial.print("input");
-    // Serial.println(angle);
-    // Serial.print("min_data_calibration_address:");
-    // Serial.println(min_data_calibration_address);
-
-    //if (min_data_calibration_address < 0)
-    //    min_data_calibration_address = 0;
 
     unsigned char dataLen = DATA_LENGTH;
     if (min_data_calibration_address + dataLen > 360)
@@ -213,8 +207,7 @@ void uArmController::readServoCalibrationData(unsigned int address, double& angl
         dataLen = 360 - min_data_calibration_address;
     }
 
-    // Serial.print("dataLen:");
-    // Serial.println(dataLen);
+
 
     iic_readbuf(calibration_data, EXTERNAL_EEPROM_SYS_ADDRESS, address + min_data_calibration_address, dataLen);
 
@@ -237,8 +230,7 @@ void uArmController::readServoCalibrationData(unsigned int address, double& angl
         {
             another_closest_data = ((calibration_data[i_min+i_min+2]<<8) + calibration_data[3+i_min+i_min])/10.0;//bigger than closest
        
-    // Serial.print("another_closest_data1:");
-    // Serial.println(another_closest_data);
+
 
             if(abs(another_closest_data - closest_data) < 0.001)
             {
@@ -259,8 +251,7 @@ void uArmController::readServoCalibrationData(unsigned int address, double& angl
         if (i_min > 0)
         {
             another_closest_data = ((calibration_data[i_min+i_min-2]<<8) + calibration_data[i_min+i_min-1])/10.0;//smaller than closest
-    //             Serial.print("another_closest_data2:");
-    // Serial.println(another_closest_data);
+
 
             if(abs(another_closest_data - closest_data) < 0.001)
             {
@@ -277,9 +268,7 @@ void uArmController::readServoCalibrationData(unsigned int address, double& angl
         }
     }    
 
-    //angle += 1.0;
-    // Serial.print("output angle:");
-    // Serial.println(angle);
+
 
 
 }
@@ -342,110 +331,6 @@ void uArmController::updateAllServoAngle(boolean withOffset)
 	
 }
 
-void uArmController::gripperCatch()
-{
-	digitalWrite(GRIPPER, LOW); 
-}
-
-void uArmController::gripperRelease()
-{
- 	digitalWrite(GRIPPER, HIGH); 
-}
-
-unsigned char uArmController::gripperStatus()
-{
-#ifdef MKII
-    //Serial.println(getAnalogData(GRIPPER_FEEDBACK));
-    if (digitalRead(GRIPPER) == HIGH)
-    {
-        return STOP;//NOT WORKING
-    }
-    else
-    {
-        
-        if (getAnalogData(GRIPPER_FEEDBACK) > 600)
-        {
-            return WORKING;
-        }
-        else
-        {
-            return GRABBING;
-        }
-    }    
-#elif defined(METAL)    
-    if(digitalRead(GRIPPER) == HIGH)
-    {
-        return STOP;
-    }
-    else
-    {
-        if(getAnalogData(GRIPPER_FEEDBACK) > 600)
-        {
-            return WORKING;
-        }
-        else
-        {
-            return GRABBING;
-        }
-    }
-#endif
-}
-
-
-unsigned char uArmController::pumpStatus()
-{
-#ifdef MKII
-    if (digitalRead(PUMP_EN) == HIGH)
-    {
-        return STOP;
-    }
-    else
-    {
-        //Serial.println(getAnalogData(PUMP_FEEDBACK));
-        if (getAnalogData(PUMP_FEEDBACK) <= PUMP_GRABBING_CURRENT)
-        {
-            return GRABBING;
-        }
-        else
-        {
-            return WORKING;
-        }
-    }
-#elif defined (METAL)
-    if (digitalRead(PUMP_EN) == HIGH)
-    {
-        return 1;
-    }
-    else 
-    {
-        return 0;
-    }
-#endif
-}
-
-
-void uArmController::pumpOn()
-{
-    #ifdef MKII
-    digitalWrite(PUMP_EN, LOW); 
-    #elif defined(METAL)
-    digitalWrite(PUMP_EN, HIGH); 
-    digitalWrite(VALVE_EN, LOW);
-    #endif
-}
-
-void uArmController::pumpOff()
-{
-
-
-    #ifdef MKII
-    digitalWrite(PUMP_EN, HIGH); 
-    #elif defined(METAL)
-    digitalWrite(PUMP_EN, LOW); 
-    digitalWrite(VALVE_EN, HIGH);
-    #endif
-}
-
 unsigned char uArmController::getCurrentXYZ(double& x, double& y, double& z)
 {
 
@@ -461,14 +346,14 @@ unsigned char uArmController::getCurrentXYZ(double& x, double& y, double& z)
     return IN_RANGE;
 }
 
-unsigned char uArmController::getXYZFromPolar(double& x, double& y, double& z, double s, double r, double h)
-{
-    double stretch = s;
+// unsigned char uArmController::getXYZFromPolar(double& x, double& y, double& z, double s, double r, double h)
+// {
+//     double stretch = s;
     
-    z = h;  
-    x = s * cos(r / MATH_TRANS);
-    y = s * sin(r / MATH_TRANS);
-}
+//     z = h;  
+//     x = s * cos(r / MATH_TRANS);
+//     y = s * sin(r / MATH_TRANS);
+// }
 
 
 unsigned char uArmController::getXYZFromAngle(double& x, double& y, double& z, double rot, double left, double right)
@@ -485,7 +370,7 @@ unsigned char uArmController::getXYZFromAngle(double& x, double& y, double& z, d
     return IN_RANGE;    
 }
 
-unsigned char uArmController::coordianteToAngle(double x, double y, double z, double& angleRot, double& angleLeft, double& angleRight, boolean allowApproximate)
+unsigned char uArmController::xyzToAngle(double x, double y, double z, double& angleRot, double& angleLeft, double& angleRight, boolean allowApproximate)
 {
     double xIn = 0.0;
     double zIn = 0.0;
@@ -551,7 +436,7 @@ unsigned char uArmController::coordianteToAngle(double x, double y, double z, do
     angleRight = angleRight - phi;
 
 
-    //debugPrint("angle r=%s, l=%s, r=%s", D(angleRot), D(angleLeft), D(angleRight));
+
     //determine if the angle can be reached
     return limitRange(angleRot, angleLeft, angleRight);
 }
@@ -686,15 +571,11 @@ double uArmController::analogToAngle(byte servoNum, int inputAnalog)
 
     angleValue = (inputAnalog - min) * (angleMax - angleMin) / (max - min) + angleMin ;
 
-    // Serial.print("angleValue=");
-    // Serial.println(angleValue);
+
 
     return angleValue;
 
-    // els
-    // {
-    //     return 0;
-    // }
+
 
 /*    
     unsigned char adc_calibration_data[DATA_LENGTH],data[4]; //get the calibration data around the data input
@@ -792,7 +673,7 @@ double uArmController::analogToAngle(byte servoNum, int inputAnalog)
         angle = (angle_range_min + angle_range_max) / 2.0;//angle from 1-180 but the address from 0-179
     }    
 
-   //debugPrint("angle=%s", D(angle));
+
 
 
     return angle;
@@ -814,66 +695,18 @@ double uArmController::analogToAngle(byte servoNum, int inputAnalog)
     double angle = intercept + slope * inputAnalog;  
 
 
-    //debugPrint("analogToAngle: inter:%s, slo:%s, inpu:%d, angle:%s", D(intercept), D(slope), inputAnalog, D(angle));
 
 
     return angle;
 }
 #endif
 
-void uArmController::sort(unsigned int array[], unsigned int len)
-{
-	unsigned char i=0,j=0;
-	unsigned int temp = 0;
-
-	for(i = 0; i < len; i++) 
-	{
-		for(j = 0; i+j < (len-1); j++) 
-		{
-			if(array[j] > array[j+1]) 
-			{
-				temp = array[j];
-				array[j] = array[j+1];
-				array[j+1] = temp;
-			}
-		}
-	}	
-}
 
 unsigned int uArmController::getServoAnalogData(byte servoNum)
 {
-	// unsigned int dat[8];
-
-
-	// for(int i = 0; i < 8; i++)
-	// {
-	// 	dat[i] = analogRead(SERVO_ANALOG_PIN[servoNum]);
-	// }
-
-	// sort(dat, 8);
-
-	// unsigned int result = (dat[2]+dat[3]+dat[4]+dat[5])/4;
-
-	// return result;
-    return getAnalogData(SERVO_ANALOG_PIN[servoNum]);
+    return getAnalogPinValue(SERVO_ANALOG_PIN[servoNum]);
 }
 
-unsigned int uArmController::getAnalogData(byte pin)
-{
-    unsigned int dat[8];
-
-
-    for(int i = 0; i < 8; i++)
-    {
-        dat[i] = analogRead(pin);
-    }
-
-    sort(dat, 8);
-
-    unsigned int result = (dat[2]+dat[3]+dat[4]+dat[5])/4;
-
-    return result;    
-}
 
 double uArmController::readServoAngleOffset(byte servoNum)
 {
@@ -884,3 +717,7 @@ double uArmController::readServoAngleOffset(byte servoNum)
 	return manualServoOffset;	
 }
 
+unsigned char uArmController::setServoSpeed(byte servoNum, unsigned char speed)
+{
+    mServoSpeed = speed;
+}

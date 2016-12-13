@@ -14,7 +14,7 @@
 
 #include <Arduino.h>
 #include "uArmConfig.h"
-#include "uArmHWConfig.h"
+#include "uArmPin.h"
 #include "uArmIIC.h"
 
 
@@ -32,7 +32,7 @@ private:
 
 };
 
-extern uArmRecorder gRecorder;
+extern uArmRecorder recorder;
 
 
 #endif // _UARMRECORDER_H_

@@ -4,7 +4,9 @@
 #define USE_SERIAL_CMD	1	// 1: use serial for control	0: just use arduino to control(release ROM and RAM space)
 
 unsigned long tickStartTime = millis(); // get timestamp;
-static void Init();
+
+unsigned int timeOutCount = 0;
+unsigned int second = 0;
 
 void setup()
 {
@@ -14,8 +16,6 @@ void setup()
 	debugPrint("debug start"); // uncomment DEBUG in uArmConfig.h to use debug function
 	
 	// TODO
-	moveTo(0, 150, 150);
-	Serial.println("@1");	// report ready
 
 
 }
@@ -31,12 +31,22 @@ void loop()
 // time out every TICK_INTERVAL(50 ms default)
 void tickTimeOut()
 {
-	
+	timeOutCount++;
+
+	// 1s time out
+	if (timeOutCount > (1000 / TICK_INTERVAL))
+	{
+		second++;
+		timeOutCount = 0;
+		char buf[60];
+		msprintf(buf, "%d seconds elapsed\r\n", second);
+		Serial.print(buf);
+	}
 }
 
 ////////////////////////////////////////////////////////////
 // DO NOT EDIT
-static void Init()
+void Init()
 {
 	uArmInit();	// Don't remove
 	service.init();
@@ -44,7 +54,6 @@ static void Init()
 	#if USE_SERIAL_CMD == 1
 	serialCmdInit();
 	
-
 	#endif
 }
 

@@ -62,7 +62,7 @@ void uArmButton::tick()
 	case HALF_PRESSED:
 		if (isPressed())
 		{
-			gBuzzer.buzz(4000, 100);
+			buzzer.buzz(4000, 100);
 			mState = PRESSED;
 		}
 		else

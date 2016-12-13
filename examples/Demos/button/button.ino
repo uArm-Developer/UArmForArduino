@@ -1,10 +1,9 @@
-
+// Demo button
 #include "uArm.h"
 
-#define USE_SERIAL_CMD	1	// 1: use serial for control	0: just use arduino to control(release ROM and RAM space)
+#define USE_SERIAL_CMD	0	// 1: use serial for control	0: just use arduino to control(release ROM and RAM space)
 
 unsigned long tickStartTime = millis(); // get timestamp;
-static void Init();
 
 void setup()
 {
@@ -14,9 +13,7 @@ void setup()
 	debugPrint("debug start"); // uncomment DEBUG in uArmConfig.h to use debug function
 	
 	// TODO
-	moveTo(0, 150, 150);
-	Serial.println("@1");	// report ready
-
+	service.setButtonService(false);	// disable build in button service
 
 }
 
@@ -25,7 +22,29 @@ void loop()
 	run(); // Don't remove
 
 	// TODO
+	if (buttonMenu.longPressed())
+	{
+		buttonMenu.clearEvent();
+		Serial.println("menu button long pressed event");
+	}
+	else if (buttonMenu.clicked())
+	{
+		buttonMenu.clearEvent();	// manually clear event
 
+		Serial.println("menu button click event");
+	}
+
+	if (buttonPlay.longPressed())
+	{
+		buttonPlay.clearEvent();
+		Serial.println("play button long pressed event");
+	}
+	else if (buttonPlay.clicked())
+	{
+		buttonPlay.clearEvent();	// manually clear event
+
+		Serial.println("play button click event");
+	}
 }
 
 // time out every TICK_INTERVAL(50 ms default)
@@ -36,7 +55,7 @@ void tickTimeOut()
 
 ////////////////////////////////////////////////////////////
 // DO NOT EDIT
-static void Init()
+void Init()
 {
 	uArmInit();	// Don't remove
 	service.init();

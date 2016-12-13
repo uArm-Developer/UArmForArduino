@@ -17,22 +17,15 @@
 #include <Wire.h>
 #include "UFServo.h"
 #include "uArmConfig.h"
-#include "uArmHWConfig.h"
+#include "uArmPin.h"
+#include "uArmTypes.h"
 
-#define SERVO_ROT_NUM           0
-#define SERVO_LEFT_NUM          1
-#define SERVO_RIGHT_NUM         2
-#define SERVO_HAND_ROT_NUM      3
-#define SERVO_COUNT				4
 
 
 
 #define DEFAULT_ANGLE			60
 
-#define GRABBING        		2
-#define WORKING          		1
-#define STOP            		0
-#define PUMP_GRABBING_CURRENT 	55
+
 
 #ifdef MKII
 
@@ -58,9 +51,7 @@
 
 #endif
 
-#define IN_RANGE             		1
-#define OUT_OF_RANGE_NO_SOLUTION 	2
-#define OUT_OF_RANGE         		3
+
 
 
 #define LOWER_ARM_MAX_ANGLE      120
@@ -108,25 +99,17 @@ public:
 	double getServoAngles(double& servoRotAngle, double& servoLeftAngle, double& servoRightAngle);
 	double getServeAngle(byte servoNum);
 
-	void gripperCatch();
-	void gripperRelease();
-	unsigned char gripperStatus();
-	void pumpOn();
-	void pumpOff();
-
-	
-	unsigned char pumpStatus();
 	#ifdef MKII
 	void readServoCalibrationData(unsigned int address, double& angle);	
 	#endif
 
 	unsigned char getCurrentXYZ(double& x, double& y, double& z);
-	unsigned char getXYZFromPolar(double& x, double& y, double& z, double s, double r, double h);
+	//unsigned char getXYZFromPolar(double& x, double& y, double& z, double s, double r, double h);
 	unsigned char getXYZFromAngle(double& x, double& y, double& z, double rot, double left, double right);
 
-	unsigned int getAnalogData(byte pin);
+	unsigned char setServoSpeed(byte servoNum, unsigned char speed);
 	unsigned int getServoAnalogData(byte servoNum);
-	unsigned char coordianteToAngle(double x, double y, double z, double& angleRot, double& angleLeft, double& angleRight, boolean allowApproximate = true);
+	unsigned char xyzToAngle(double x, double y, double z, double& angleRot, double& angleLeft, double& angleRight, boolean allowApproximate = true);
 	unsigned char limitRange(double& angleRot, double& angleLeft, double& angleRight);
 	double analogToAngle(byte servoNum, int inputAnalog);
 	
@@ -141,6 +124,7 @@ private:
 protected:
 	Servo mServo[SERVO_COUNT];
 
+	unsigned char mServoSpeed = 255;
 	double mCurAngle[SERVO_COUNT] = {90, 90, 0, 90};
 
 	unsigned int mMaxAdcPos[SERVO_COUNT] = {180};
@@ -151,5 +135,8 @@ protected:
 	const byte SERVO_ANALOG_PIN[SERVO_COUNT] = {SERVO_ROT_ANALOG_PIN, SERVO_LEFT_ANALOG_PIN, SERVO_RIGHT_ANALOG_PIN, SERVO_HAND_ROT_ANALOG_PIN};
 
 };
+
+
+extern uArmController controller;
 
 #endif // _UARMCONTROLLER_H_

@@ -352,6 +352,15 @@ void Servo::write(float value)
    } 
 } 
 
+void Servo::setSpeed(unsigned char speed)
+{
+  byte channel = this->servoIndex; 
+  uint8_t oldSREG = SREG; 
+  cli();   
+  servos[channel].speed = speed;
+  SREG = oldSREG; 
+}  
+
 void Servo::writeMicroseconds(int value)
 {
   // calculate and store the values for the given channel

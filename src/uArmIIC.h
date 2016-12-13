@@ -12,7 +12,7 @@
 
 #include <Arduino.h>
 #include "uArmConfig.h"
-#include "uArmHWConfig.h"
+#include "uArmPin.h"
 
 
 #ifdef MKII

@@ -37,6 +37,6 @@ private:
     unsigned long mDuration;
 };
 
-extern uArmBuzzer gBuzzer;
+extern uArmBuzzer buzzer;
 
 #endif // _UARMBUZZER_H_

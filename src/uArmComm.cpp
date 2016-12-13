@@ -10,117 +10,71 @@
   */
 
 #include "uArmComm.h" 
+#include "uArmRingBuffer.h"
 
-uArmComm gComm;
 
-// unsigned char uArmComm::cmdIndex = 0;
-// CommState uArmComm::mState = IDLE;
-// unsigned char uArmComm::cmdReceived[COM_LEN_MAX];
+static CommState commState = IDLE;
+static unsigned char cmdReceived[COM_LEN_MAX];
+static unsigned char cmdIndex = 0;
 
-/*
-struct Command
+static uArmRingBuffer ringBuffer;
+
+#define RESULT_BUFFER_SIZE  50
+
+#define RING_BUFFER_SIZE    48
+uint8_t bufData[RING_BUFFER_SIZE];
+
+static void replyError(int serialNum, unsigned int errorCode)
 {
-	char cmd[5];
-	int parametersCount;
-	char parameters[4];
-	void (*execute)(double value[4]);
-};
+    if (serialNum > 0)
+    {
+        Serial.print("$");
+        Serial.print(serialNum);
+        Serial.print(" ");
+    }
 
-const Command command[] PROGMEM= {
-	{"sMov", 4, {'X', 'Y', 'Z', 'V'}, &gComm.cmdMove},     // 
-	{"sPol", 4, {'S', 'R', 'H', 'V'}, &gComm.cmdMovePol},  // 
-	{"sAtt", 1, {'N'}, &gComm.cmdSetAttachServo},          // 
-	{"sDet", 1, {'N'}, &gComm.cmdSetDetachServo},          // 
-	{"sSer", 2, {'N', 'V'}, &gComm.cmdSetServoAngle},      
-
-	{"sAng", 2, {'N', 'V'}, &gComm.cmdSetServoAngleWithOffset},    // 
-	{"sPum", 1, {'V'}, &gComm.cmdSetPump},                 // 
-	{"sGri", 1, {'V'}, &gComm.cmdSetGripper},              // 
-	{"sBuz", 2, {'F', 'T'}, &gComm.cmdSetBuzz},            // 
-	{"sStp", 0, {}, &gComm.cmdStopMove},                   // 
-
-	{"gVer", 0, {}, &gComm.cmdGetVersion},                 // 
-	{"gSim", 3, {'X', 'Y', 'Z'}, &gComm.cmdSimulatePos},   // 
-	{"gCrd", 0, {}, &gComm.cmdGetCurrentXYZ},              // 
-	{"gPol", 0, {}, &gComm.cmdGetCurrentPosPol},           // 
-	{"gAng", 0, {}, &gComm.cmdGetCurrentAngle},            // 
-
-	{"gSer", 0, {}, &gComm.cmdGetServoAngle},              
-	{"gIKX", 3, {'X', 'Y', 'Z'}, &gComm.cmdCoordinateToAngle}, //
-	{"gFKT", 3, {'T', 'L', 'R'}, &gComm.cmdAngleToXYZ},        // 
-	{"gMov", 0, {}, &gComm.cmdIsMoving},                       // 
-	{"gTip", 0, {}, &gComm.cmdGetTip},                         // 
-
-	{"gDig", 1, {'N'}, &gComm.cmdGetDigitValue},               // 
-	{"sDig", 2, {'N', 'V'}, &gComm.cmdSetDigitValue},          // 
-	{"gAna", 1, {'N'}, &gComm.cmdGetAnalogValue},              // 
-	{"gEEP", 2, {'A', 'T'}, &gComm.cmdGetE2PROMData},          // 
-	{"sEEP", 3, {'A', 'T', 'V'}, &gComm.cmdSetE2PROMData},     // 
-
-
-    {"gGri", 0, {}, &gComm.cmdGetGripperStatus},                // 
-    {"gPum", 0, {}, &gComm.cmdGetPumpStatus},                   // 
-
-#ifdef MKII     
-    {"gPow", 0, {}, &gComm.cmdGetPowerStatus},                  // 
-#endif
-
-    {"gSAD", 1, {'N'}, &gComm.cmdGetServoAnalogData}
-
-    
-	
-};
-
-*/
-uArmComm::uArmComm()
-{
-    cmdIndex = 0;
-    mState = IDLE;
-}
-
-
-
-void uArmComm::replyError(int serialNum, unsigned int errorCode)
-{
-    Serial.print("$");
-    Serial.print(serialNum);
-    Serial.print(" E");
+    Serial.print("E");
     Serial.println(errorCode);   
 }
 
-void uArmComm::replyOK(int serialNum)
+static void replyOK(int serialNum)
 {
-    Serial.print("$");
-    Serial.print(serialNum);
-    Serial.print(" ");
+    if (serialNum > 0)
+    {
+        Serial.print("$");
+        Serial.print(serialNum);
+        Serial.print(" ");
+    }
     Serial.println("OK");   
 }
 
-void uArmComm::replyResult(int serialNum, String result)
+static void replyResult(int serialNum, String result)
 {
-    Serial.print("$");
-    Serial.print(serialNum);
-    Serial.print(" OK ");
+    if (serialNum > 0)
+    {    
+        Serial.print("$");
+        Serial.print(serialNum);
+        Serial.print(" ");
+    }
+    Serial.print("OK ");
     Serial.println(result);   
 }
 
-void uArmComm::reportResult(int reportCode, String result)
+static void reportResult(int reportCode, String result)
 {
+
     Serial.print("@");
     Serial.print(reportCode);
     Serial.print(" ");
     Serial.println(result);   
 }
 
-unsigned char uArmComm::cmdMove(int serialNum, int parameterCount, double value[4])
+static unsigned char cmdMove(int serialNum, int parameterCount, double value[4])
 {
     if (parameterCount != 4)
         return PARAMETER_ERROR;
 
-	debugPrint("cmdMove x:%s, y:%s, z:%s, v:%s\n\n", D(value[0]), D(value[1]), D(value[2]), D(value[3]));
-
-
-	if (uArm.moveTo(value[0], value[1], value[2], value[3]) != OUT_OF_RANGE_NO_SOLUTION)
+	if (moveTo(value[0], value[1], value[2], value[3]) != OUT_OF_RANGE_NO_SOLUTION)
 	{
         replyOK(serialNum);
 	}
@@ -132,80 +86,102 @@ unsigned char uArmComm::cmdMove(int serialNum, int parameterCount, double value[
     return 0;
 }
 
-unsigned char uArmComm::cmdMovePol(int serialNum, int parameterCount, double value[4])
+static unsigned char cmdMovePol(int serialNum, int parameterCount, double value[4])
 {
-	double x, y, z;
-
     if (parameterCount != 4)
         return PARAMETER_ERROR;
 
-
-	uArm.mController.getXYZFromPolar(x, y, z, value[0], value[1], value[2]);
-	uArm.moveTo(x, y, z, value[3]);	
-
-    replyOK(serialNum);
+    if (moveToPol(value[0], value[1], value[2], value[3]) != OUT_OF_RANGE_NO_SOLUTION)
+    {
+        replyOK(serialNum);
+    }
+    else
+    {
+        return OUT_OF_RANGE;
+    }
+ 
     return 0;   
 }
 
-unsigned char uArmComm::cmdSetAttachServo(int serialNum, int parameterCount, double value[4])
+static unsigned char cmdSetAttachServo(int serialNum, int parameterCount, double value[4])
 {
 
     if (parameterCount != 1)
         return PARAMETER_ERROR;
 
-	uArm.mController.attachServo(value[0]);
-
-    replyOK(serialNum);
-    return 0;
+	if (attachServo(value[0]))
+    {
+        replyOK(serialNum);
+        return 0;
+    }
+    else
+    {
+        return OUT_OF_RANGE;
+    }
+  
 }
 
-unsigned char uArmComm::cmdSetDetachServo(int serialNum, int parameterCount, double value[4])
+static unsigned char cmdSetDetachServo(int serialNum, int parameterCount, double value[4])
 {
     if (parameterCount != 1)
         return PARAMETER_ERROR;
 
-	uArm.mController.detachServo(value[0]);
-    replyOK(serialNum);
+    if (detachServo(value[0]))
+    {
+        replyOK(serialNum);
+        return 0;
+    }
+    else
+    {
+        return OUT_OF_RANGE;
+    }
 
     return 0;
 }
 
-unsigned char uArmComm::cmdSetServoAngle(int serialNum, int parameterCount, double value[4])
-{
-    if (parameterCount != 2)
-        return PARAMETER_ERROR;
+// static unsigned char cmdSetServoAngle(int serialNum, int parameterCount, double value[4])
+// {
+//     if (parameterCount != 2)
+//         return PARAMETER_ERROR;
 
-	uArm.mController.writeServoAngle(byte(value[0]), value[1], false);
-    replyOK(serialNum);
+// 	uArm.mController.writeServoAngle(byte(value[0]), value[1], false);
+//     replyOK(serialNum);
 
-    return 0;
-}
+//     return 0;
+// }
 
-unsigned char uArmComm::cmdSetServoAngleWithOffset(int serialNum, int parameterCount, double value[4])
+static unsigned char cmdSetServoAngleWithOffset(int serialNum, int parameterCount, double value[4])
 {
 
     if (parameterCount != 2)
         return PARAMETER_ERROR;    
 
-	uArm.mController.writeServoAngle(byte(value[0]), value[1], true);
-    replyOK(serialNum);
+	if (setServoAngle(byte(value[0]), value[1]) == OK)
+    {
+        replyOK(serialNum);
+        return 0;
+    }
+    else
+    {
+        return PARAMETER_ERROR; 
+    }
 
-    return 0;
+    
 
 }
 
-unsigned char uArmComm::cmdSetPump(int serialNum, int parameterCount, double value[4])
+static unsigned char cmdSetPump(int serialNum, int parameterCount, double value[4])
 {
     if (parameterCount != 1)
         return PARAMETER_ERROR;
 
     if (value[0] == 0)//off
     {
-        uArm.mController.pumpOff();
+        pumpOff();
     }
     else//on
     {
-        uArm.mController.pumpOn();
+        pumpOn();
     }
 
     replyOK(serialNum);
@@ -213,7 +189,7 @@ unsigned char uArmComm::cmdSetPump(int serialNum, int parameterCount, double val
     return 0;
 }
 
-unsigned char uArmComm::cmdSetGripper(int serialNum, int parameterCount, double value[4])
+static unsigned char cmdSetGripper(int serialNum, int parameterCount, double value[4])
 {
 
     if (parameterCount != 1)
@@ -221,11 +197,11 @@ unsigned char uArmComm::cmdSetGripper(int serialNum, int parameterCount, double 
 
     if (value[0]==0)//release
     {
-        uArm.mController.gripperRelease();
+        gripperRelease();
     }
     else//catch
     {
-        uArm.mController.gripperCatch();
+        gripperCatch();
     }
 
     replyOK(serialNum);
@@ -233,37 +209,39 @@ unsigned char uArmComm::cmdSetGripper(int serialNum, int parameterCount, double 
     return 0;
 }
 
-unsigned char uArmComm::cmdSetBuzz(int serialNum, int parameterCount, double value[4])
+static unsigned char cmdSetBuzz(int serialNum, int parameterCount, double value[4])
 {
     if (parameterCount != 2)
         return PARAMETER_ERROR;
 
-	gBuzzer.buzz(value[0], value[1]*1000);    // convert to ms
+	buzzer.buzz(value[0], value[1]*1000);    // convert to ms
 
     replyOK(serialNum);
 
     return 0;
 }
 
-unsigned char uArmComm::cmdStopMove(int serialNum, int parameterCount, double value[4])
+#ifdef MKII
+static unsigned char cmdStopMove(int serialNum, int parameterCount, double value[4])
 {
     if (parameterCount != 0)
         return PARAMETER_ERROR;
 
-	uArm.stopMove();
+	stopMove();
     replyOK(serialNum);
 
     return 0;
 }
+#endif
 
-unsigned char uArmComm::cmdGetHWVersion(int serialNum, int parameterCount, double value[4])
+static unsigned char cmdGetHWVersion(int serialNum, int parameterCount, double value[4])
 {
     if (parameterCount != 0)
         return PARAMETER_ERROR;    
 
-    char result[128];
+    char result[RESULT_BUFFER_SIZE];
 
-    ardprintf(result, "V%s", HW_VER);
+    msprintf(result, "V%s", HW_VER);
 
 
 	replyResult(serialNum, result);
@@ -271,14 +249,14 @@ unsigned char uArmComm::cmdGetHWVersion(int serialNum, int parameterCount, doubl
     return 0;
 }
 
-unsigned char uArmComm::cmdGetSWVersion(int serialNum, int parameterCount, double value[4])
+static unsigned char cmdGetSWVersion(int serialNum, int parameterCount, double value[4])
 {
     if (parameterCount != 0)
         return PARAMETER_ERROR;    
 
-    char result[128];
+    char result[RESULT_BUFFER_SIZE];
 
-    ardprintf(result, "V%s", SW_VER);
+    msprintf(result, "V%s", SW_VER);
 
 
     replyResult(serialNum, result);
@@ -286,9 +264,9 @@ unsigned char uArmComm::cmdGetSWVersion(int serialNum, int parameterCount, doubl
     return 0;
 }
 
-unsigned char uArmComm::cmdSimulatePos(int serialNum, int parameterCount, double value[4])
+static unsigned char cmdSimulatePos(int serialNum, int parameterCount, double value[4])
 {
-	double angleRot, angleLeft, angleRight;
+
 
     if (parameterCount != 4)
         return PARAMETER_ERROR;
@@ -299,13 +277,13 @@ unsigned char uArmComm::cmdSimulatePos(int serialNum, int parameterCount, double
         double r = value[1];
         double h = value[2];
 
-        uArm.mController.getXYZFromPolar(value[0], value[1], value[2], s, r, h);
+        polToXYZ(s, r, h, value[0], value[1], value[2]);
     }
 
-	unsigned char status = uArm.mController.coordianteToAngle(value[0], value[1], value[2], angleRot, angleLeft, angleRight, false);
+	unsigned char status = validatePos(value[0], value[1], value[2]);
 
 
-    char result[128];
+    char result[RESULT_BUFFER_SIZE];
     switch(status)
     {
     case IN_RANGE: 
@@ -325,111 +303,69 @@ unsigned char uArmComm::cmdSimulatePos(int serialNum, int parameterCount, double
     return 0;
 }
 
-unsigned char uArmComm::cmdGetCurrentXYZ(int serialNum, int parameterCount, double value[4])
+static unsigned char cmdGetCurrentXYZ(int serialNum, int parameterCount, double value[4])
 {
-    //char letters[3] = {'X','Y','Z'};
 
     if (parameterCount != 0)
         return PARAMETER_ERROR;
-    //debugPrint("cmdGetCurrentXYZ");
 
-    uArm.mController.updateAllServoAngle();
-    uArm.mController.getCurrentXYZ(value[0], value[1], value[2]);
+    getCurrentXYZ(value[0], value[1], value[2]);
     
-    char result[128];
-    ardprintf(result, "X%f Y%f Z%f", value[0], value[1], value[2]);
+    char result[RESULT_BUFFER_SIZE];
+    msprintf(result, "X%f Y%f Z%f", value[0], value[1], value[2]);
 
     replyResult(serialNum, result);
     return 0;	
 }
 
-unsigned char uArmComm::cmdGetCurrentPosPol(int serialNum, int parameterCount, double value[4])
+static unsigned char cmdGetCurrentPosPol(int serialNum, int parameterCount, double value[4])
 {
-	double angleRot, angleLeft, angleRight;
-	double x, y, z;
-
     if (parameterCount != 0)
         return PARAMETER_ERROR;
 
+    getCurrentPosPol(value[0], value[1], value[2]);
 
-    uArm.mController.updateAllServoAngle();
-	uArm.mController.getCurrentXYZ(x, y, z);
-	uArm.mController.getServoAngles(angleRot, angleLeft, angleRight);
-    double stretch;
-    stretch = sqrt(x * x + y * y);
-    //char letters[3] = {'S','R','H'};
-    value[0] = stretch;
-    value[1] = angleRot;
-    value[2] = z;
-    //printf(true, value, letters, 3);
-
-    char result[128];
-    ardprintf(result, "S%f R%f H%f", value[0], value[1], value[2]);
+    char result[RESULT_BUFFER_SIZE];
+    msprintf(result, "S%f R%f H%f", value[0], value[1], value[2]);
 
     replyResult(serialNum, result);
 
     return 0;
 }
 
-unsigned char uArmComm::cmdGetCurrentAngle(int serialNum, int parameterCount, double value[4])
+static unsigned char cmdGetCurrentAngle(int serialNum, int parameterCount, double value[4])
 {
-    //char letters[4] = {'B','L','R','H'};
-
     if (parameterCount != 0)
         return PARAMETER_ERROR;
 
-    value[0] = uArm.mController.readServoAngle(SERVO_ROT_NUM, true);
-    value[1] = uArm.mController.readServoAngle(SERVO_LEFT_NUM, true);
-    value[2] = uArm.mController.readServoAngle(SERVO_RIGHT_NUM, true);
-    value[3] = uArm.mController.readServoAngle(SERVO_HAND_ROT_NUM, true);
-    //printf(true, value, letters, 4);
+    value[0] = getServoAngle(SERVO_ROT_NUM);
+    value[1] = getServoAngle(SERVO_LEFT_NUM);
+    value[2] = getServoAngle(SERVO_RIGHT_NUM);
+    value[3] = getServoAngle(SERVO_HAND_ROT_NUM);
 
-    char result[128];
-    ardprintf(result, "B%f L%f R%f H%f", value[0], value[1], value[2], value[3]);
+    char result[RESULT_BUFFER_SIZE];
+    msprintf(result, "B%f L%f R%f H%f", value[0], value[1], value[2], value[3]);
 
     replyResult(serialNum, result);
 
     return 0;
 }
 
-unsigned char uArmComm::cmdGetServoAngle(int serialNum, int parameterCount, double value[4])
-{
-    //char letters[4] = {'B','L','R','H'};
-
-    if (parameterCount != 0)
-        return PARAMETER_ERROR;
-
-    value[0] = uArm.mController.readServoAngle(SERVO_ROT_NUM, false);
-    value[1] = uArm.mController.readServoAngle(SERVO_LEFT_NUM, false);
-    value[2] = uArm.mController.readServoAngle(SERVO_RIGHT_NUM, false);
-    value[3] = uArm.mController.readServoAngle(SERVO_HAND_ROT_NUM, false);
-    //printf(true, value, letters, 4);
-
-    char result[128];
-    ardprintf(result, "B%f L%f R%f H%f", value[0], value[1], value[2], value[3]);
-
-    replyResult(serialNum, result);
-
-    return 0;
-}
-
-unsigned char uArmComm::cmdCoordinateToAngle(int serialNum, int parameterCount, double value[4])
+static unsigned char cmdCoordinateToAngle(int serialNum, int parameterCount, double value[4])
 {
     double rot, left, right;
-    //bool success;
 
     if (parameterCount != 3)
         return PARAMETER_ERROR;
 
-    uArm.mController.coordianteToAngle(value[0], value[1], value[2], rot, left, right);
-    //char letters[3] = {'T','L','R'};
+    xyzToAngle(value[0], value[1], value[2], rot, left, right);
+
     value[0] = rot;
     value[1] = left;
     value[2] = right;
-    //success = true;
-    //printf(success,value,letters,3);
-    char result[128];
-    ardprintf(result, "B%f L%f R%f", value[0], value[1], value[2]);
+
+    char result[RESULT_BUFFER_SIZE];
+    msprintf(result, "B%f L%f R%f", value[0], value[1], value[2]);
 
     replyResult(serialNum, result);
 
@@ -437,7 +373,7 @@ unsigned char uArmComm::cmdCoordinateToAngle(int serialNum, int parameterCount, 
     return 0;
 }
 
-unsigned char uArmComm::cmdAngleToXYZ(int serialNum, int parameterCount, double value[4])
+static unsigned char cmdAngleToXYZ(int serialNum, int parameterCount, double value[4])
 {
     double x, y, z;
     bool success;
@@ -445,7 +381,7 @@ unsigned char uArmComm::cmdAngleToXYZ(int serialNum, int parameterCount, double 
     if (parameterCount != 3)
         return PARAMETER_ERROR;
 
-    if(uArm.mController.getXYZFromAngle(x, y, z, value[0], value[1], value[2]) == OUT_OF_RANGE)
+    if(angleToXYZ(value[0], value[1], value[2], x, y, z) == OUT_OF_RANGE)
     {
         success = false;
     }
@@ -454,26 +390,25 @@ unsigned char uArmComm::cmdAngleToXYZ(int serialNum, int parameterCount, double 
         success = true;
     }
 
-    //char letters[3] = {'X','Y','Z'};
     value[0] = x;
     value[1] = y;
     value[2] = z;
 
-    //printf(success,value,letters,3);
-    char result[128];
-    ardprintf(result, "X%f Y%f Z%f", value[0], value[1], value[2]);
+    char result[RESULT_BUFFER_SIZE];
+    msprintf(result, "X%f Y%f Z%f", value[0], value[1], value[2]);
 
     replyResult(serialNum, result);
     return 0;
 }
 
-unsigned char uArmComm::cmdIsMoving(int serialNum, int parameterCount, double value[4])
+#ifdef MKII
+static unsigned char cmdIsMoving(int serialNum, int parameterCount, double value[4])
 {
     if (parameterCount != 0)
         return PARAMETER_ERROR;
 
-    char result[128];
-	if(uArm.isMoving())
+    char result[RESULT_BUFFER_SIZE];
+	if(isMoving())
 	{
         strcpy(result, "V1");
 	}
@@ -486,14 +421,17 @@ unsigned char uArmComm::cmdIsMoving(int serialNum, int parameterCount, double va
 
     return 0;
 }
+#endif
 
-unsigned char uArmComm::cmdGetTip(int serialNum, int parameterCount, double value[4])
+static unsigned char cmdGetTip(int serialNum, int parameterCount, double value[4])
 {
     if (parameterCount != 0)
         return PARAMETER_ERROR;
 
-    char result[128];
-    if(digitalRead(LIMIT_SW))
+    char result[RESULT_BUFFER_SIZE];
+
+
+    if(getTip())
     {
         strcpy(result, "V1");
     }
@@ -507,175 +445,82 @@ unsigned char uArmComm::cmdGetTip(int serialNum, int parameterCount, double valu
     return 0;
 }
 
-unsigned char uArmComm::cmdGetDigitValue(int serialNum, int parameterCount, double value[4])
+static unsigned char cmdGetDigitValue(int serialNum, int parameterCount, double value[4])
 {
     if (parameterCount != 1)
         return PARAMETER_ERROR;
 
-    int val = digitalRead(value[0]);
-   
-    //printf(true, val);
-    char result[128];
-    ardprintf(result, "V%d", val);
+    int val = getDigitalPinValue(value[0]);
+ 
+    char result[RESULT_BUFFER_SIZE];
+    msprintf(result, "V%d", val);
 
     replyResult(serialNum, result);
     return 0;
 }
 
-unsigned char uArmComm::cmdSetDigitValue(int serialNum, int parameterCount, double value[4])
+static unsigned char cmdSetDigitValue(int serialNum, int parameterCount, double value[4])
 {
 
     if (parameterCount != 2)
         return PARAMETER_ERROR;
 
-    //Serial.println(SS);// successful feedback send it immediately
-    // write the digit value
-    value[1] == 1 ? digitalWrite(value[0], HIGH) : digitalWrite(value[0], LOW);
+    setDigitalPinValue(value[0], value[1]);
 
     replyOK(serialNum);
     return 0;
 }
 
-unsigned char uArmComm::cmdGetAnalogValue(int serialNum, int parameterCount, double value[4])
+static unsigned char cmdGetAnalogValue(int serialNum, int parameterCount, double value[4])
 {
 
     if (parameterCount != 1)
         return PARAMETER_ERROR;
 
-    int val = analogRead(value[0]);
+    int val = getAnalogPinValue(value[0]);
 
-    //printf(true, val);
-    char result[128];
-    ardprintf(result, "V%d", val);
+    char result[RESULT_BUFFER_SIZE];
+    msprintf(result, "V%d", val);
 
     replyResult(serialNum, result);
     return 0;
 }
 
-unsigned char uArmComm::cmdGetE2PROMData(int serialNum, int parameterCount, double value[4])
+static unsigned char cmdGetE2PROMData(int serialNum, int parameterCount, double value[4])
 {
     if (parameterCount != 3)
         return PARAMETER_ERROR;    
 
-    char result[128];
-    uint8_t deviceAddr;
-    uint32_t addr = value[1];
+    char result[RESULT_BUFFER_SIZE];
 
-    union {
-        float fdata;
-        uint8_t data[4];
-    } FData;
     
 
     int device = int(value[0]);
     int type = value[2];
+    uint32_t addr = value[1];
 
-    switch(device)
+    double resultVal = getE2PROMData(device, addr, type);
+
+    switch(type)
     {
-
-    case 0:
-
-        switch(type)
+    case DATA_TYPE_BYTE:
         {
-        case DATA_TYPE_BYTE:
-        	{
-                int val = EEPROM.read(addr);
-                ardprintf(result, "V%d", val);
-                break;
-        	}
-        case DATA_TYPE_INTEGER:
-        	{
-                int i_val = 0;
-                EEPROM.get(addr, i_val);
-                ardprintf(result, "V%d", i_val);
-                //Serial.println("S" + String(i_val) + "");
-                break;
-        	}
-        case DATA_TYPE_FLOAT:
-        	{
-                double f_val = 0.0f;
-                EEPROM.get(addr,f_val);
-                ardprintf(result, "V%f", f_val);
-                //Serial.println("S" + String(f_val) + "");
-                break;
-        	}
+            int val = resultVal;
+            msprintf(result, "V%d", val);
+            break;
         }
-
-        break;
-
-    case 1:
-        deviceAddr = EXTERNAL_EEPROM_USER_ADDRESS;
-        break;
-
-    case 2:
-        deviceAddr = EXTERNAL_EEPROM_SYS_ADDRESS;
-        break;
-
-    default:
-        return ADDRESS_ERROR;
-    }
-
-    
-    if (device == 1 || device == 2)
-    {
-        int num = 0;
-        switch(type)
+    case DATA_TYPE_INTEGER:
         {
-        case DATA_TYPE_BYTE:
-            {
-                num = 1;
-                break;
-            }
-        case DATA_TYPE_INTEGER:
-            {
-                num = 2;
-                break;
-            }
-        case DATA_TYPE_FLOAT:
-            {
-                num = 4;
-                break;
-            }
-        default:
-            return PARAMETER_ERROR;
+            int i_val = resultVal;
+            msprintf(result, "V%d", i_val);
+            break;
         }
-
-        unsigned char i=0;
-        i = (addr % 128);
-        // Since the eeprom's sector is 128 byte, if we want to write 5 bytes per cycle we need to care about when there's less than 5 bytes left
-        if (i >= (129-num)) 
+    case DATA_TYPE_FLOAT:
         {
-            i = 128 - i;
-            iic_readbuf(FData.data, deviceAddr, addr, i);// write data
-            delay(5);
-            iic_readbuf(FData.data + i, deviceAddr, addr + i, num - i);// write data
+            double f_val = resultVal;
+            msprintf(result, "V%f", f_val);
+            break;
         }
-        //if the left bytes are greater than 5, just do it
-        else
-        {
-            iic_readbuf(FData.data, deviceAddr, addr, num);// write data
-        }      
-
-        switch(type)
-        {
-        case DATA_TYPE_BYTE:
-            {
-                ardprintf(result, "V%d", FData.data[0]);
-                break;
-            }
-        case DATA_TYPE_INTEGER:
-            {
-                ardprintf(result, "V%d", (FData.data[0] << 8) + FData.data[1]);
-                break;
-            }
-        case DATA_TYPE_FLOAT:
-            {
-                ardprintf(result, "V%f", FData.fdata);
-                break;
-            }
-        }
-       
-
     }
 
     replyResult(serialNum, result);    
@@ -684,117 +529,19 @@ unsigned char uArmComm::cmdGetE2PROMData(int serialNum, int parameterCount, doub
 
 }
 
-unsigned char uArmComm::cmdSetE2PROMData(int serialNum, int parameterCount, double value[4])
+static unsigned char cmdSetE2PROMData(int serialNum, int parameterCount, double value[4])
 {
 
     if (parameterCount != 4)
         return PARAMETER_ERROR;    
     
-    uint8_t deviceAddr;
 
-    uint32_t addr = value[1];
-
-    union {
-        float fdata;
-        uint8_t data[4];
-    } FData;
     
     int type = value[2];
     int device = int(value[0]);
+    uint32_t addr = value[1];
 
-    switch(device)
-    {
-
-    case 0:    
-        switch(type)
-        {
-        case DATA_TYPE_BYTE:
-        	{
-                byte b_val;
-                b_val = byte(value[3]);
-                EEPROM.write(addr, b_val);
-                break;
-        	}
-        case DATA_TYPE_INTEGER:
-        	{
-                int i_val = 0;
-                i_val = int(value[3]);
-                EEPROM.put(addr, i_val);
-                break;
-        	}
-        case DATA_TYPE_FLOAT:
-        	{
-        	    float f_val = 0.0f;
-                f_val = float(value[3]);
-                EEPROM.put(addr,f_val);
-                // Serial.println(f_val);
-                break;
-        	}
-        }
-        break;
-    case 1:
-        deviceAddr = EXTERNAL_EEPROM_USER_ADDRESS;
-        break;
-
-    case 2:
-        deviceAddr = EXTERNAL_EEPROM_SYS_ADDRESS;
-        break;
-
-    default:
-        return ADDRESS_ERROR;
-    }       
-
-
-    if (device == 1 || device == 2)
-    {
-        int num = 0;
-        switch(type)
-        {
-        case DATA_TYPE_BYTE:
-            {
-                FData.data[0] = byte(value[3]);
-                num = 1;
-                break;
-            }
-        case DATA_TYPE_INTEGER:
-            {
-                int i_val = 0;
-                i_val = int(value[3]); 
-                FData.data[0] = (i_val & 0xff00) >> 8;
-                FData.data[1] = i_val & 0xff;
-                num = 2;
-                break;
-            }
-        case DATA_TYPE_FLOAT:
-            {
-                FData.fdata = float(value[3]);
-                num = 4;
-                break;
-            }
-        default:
-            return PARAMETER_ERROR;
-        }
-
-        unsigned char i=0;
-        i = (addr % 128);
-        // Since the eeprom's sector is 128 byte, if we want to write 5 bytes per cycle we need to care about when there's less than 5 bytes left
-        if (i >= (129-num)) 
-        {
-            i = 128 - i;
-            iic_writebuf(FData.data, deviceAddr, addr, i);// write data
-            delay(5);
-            iic_writebuf(FData.data + i, deviceAddr, addr + i, num - i);// write data
-        }
-        //if the left bytes are greater than 5, just do it
-        else
-        {
-            iic_writebuf(FData.data, deviceAddr, addr, num);// write data
-        }      
-
-
-       
-
-    }
+    setE2PROMData(device, addr, type, value[3]);
 
     replyOK(serialNum);
 
@@ -802,43 +549,58 @@ unsigned char uArmComm::cmdSetE2PROMData(int serialNum, int parameterCount, doub
 
 }
 
-unsigned char uArmComm::cmdGetGripperStatus(int serialNum, int parameterCount, double value[4])
+static unsigned char cmdSetButtonService(int serialNum, int parameterCount, double value[4])
+{
+    if (parameterCount != 1)
+        return PARAMETER_ERROR;
+
+    if (value[0])
+    {
+        service.setButtonService(true); 
+    }
+    else
+    {
+        service.setButtonService(false); 
+    }
+
+    replyOK(serialNum);
+    return 0;
+}
+
+static unsigned char cmdGetGripperStatus(int serialNum, int parameterCount, double value[4])
 {
     if (parameterCount != 0)
         return PARAMETER_ERROR;
 
-    unsigned char status = uArm.mController.gripperStatus();
+    unsigned char status = getGripperStatus();
 
-    //String ret = "[S" + String(status) + "]";
-
-    //Serial.println(ret);
-    char result[128];
-    ardprintf(result, "V%d", status);
+    char result[RESULT_BUFFER_SIZE];
+    msprintf(result, "V%d", status);
     replyResult(serialNum, result);
     return 0;
 }
 
 
-unsigned char uArmComm::cmdGetPumpStatus(int serialNum, int parameterCount, double value[4])
+
+
+
+static unsigned char cmdGetPumpStatus(int serialNum, int parameterCount, double value[4])
 {
 
     if (parameterCount != 0)
         return PARAMETER_ERROR;
 
-    char result[128];
+    char result[RESULT_BUFFER_SIZE];
+
+    unsigned char status = getPumpStatus();
+
 #ifdef MKII     
     
-
-    unsigned char status = uArm.mController.pumpStatus();
- 
-    //String ret = "[S" + String(status) + "]";
-
-    //Serial.println(ret);
-    ardprintf(result, "V%d", status);
+    msprintf(result, "V%d", status);
 
 #elif defined(METAL)
 
-    if (uArm.mController.pumpStatus())
+    if (status)
         strcpy(result, "V1");
     else
         strcpy(result, "V0");
@@ -852,14 +614,14 @@ unsigned char uArmComm::cmdGetPumpStatus(int serialNum, int parameterCount, doub
 
 
 #ifdef MKII 
-unsigned char uArmComm::cmdGetPowerStatus(int serialNum, int parameterCount, double value[4])
+static unsigned char cmdGetPowerStatus(int serialNum, int parameterCount, double value[4])
 {
     if (parameterCount != 0)
         return PARAMETER_ERROR;
 
-    char result[128];
+    char result[RESULT_BUFFER_SIZE];
 
-    if (uArm.isPowerPlugIn())
+    if (isPowerPlugIn())
         strcpy(result, "V1");
     else
         strcpy(result, "V0");   
@@ -870,40 +632,30 @@ unsigned char uArmComm::cmdGetPowerStatus(int serialNum, int parameterCount, dou
 }
 #endif 
 
-unsigned char uArmComm::cmdGetServoAnalogData(int serialNum, int parameterCount, double value[4])
-{
-    if (parameterCount != 1)
-        return PARAMETER_ERROR;
+// static unsigned char cmdGetServoAnalogData(int serialNum, int parameterCount, double value[4])
+// {
+//     if (parameterCount != 1)
+//         return PARAMETER_ERROR;
 
-    unsigned int data = uArm.mController.getServoAnalogData(value[0]);
-    //Serial.println(data);
-    char result[128];
-
-
-    ardprintf(result, "V%d", result);   
-
-    replyResult(serialNum, result);
-
-    return 0;
-}
+//     unsigned int data = uArm.mController.getServoAnalogData(value[0]);
+//     //Serial.println(data);
+//     char result[RESULT_BUFFER_SIZE];
 
 
-unsigned char uArmComm::cmdRelativeMove(int serialNum, int parameterCount, double value[4])
+//     msprintf(result, "V%d", result);   
+
+//     replyResult(serialNum, result);
+
+//     return 0;
+// }
+
+
+static unsigned char cmdRelativeMove(int serialNum, int parameterCount, double value[4])
 {
     if (parameterCount != 4)
         return PARAMETER_ERROR;
 
-    debugPrint("cmdRelativeMove x:%s, y:%s, z:%s, v:%s\n\n", D(value[0]), D(value[1]), D(value[2]), D(value[3]));
-
-    double x, y, z;
-    // get cur xyz
-    uArm.mController.getCurrentXYZ(x, y, z);
-
-    value[0] += x;
-    value[1] += y;
-    value[2] += z;
-
-    if (uArm.moveTo(value[0], value[1], value[2], value[3]) != OUT_OF_RANGE_NO_SOLUTION)
+    if (relativeMove(value[0], value[1], value[2], value[3]) != OUT_OF_RANGE_NO_SOLUTION)
     {
         replyOK(serialNum);
     }
@@ -916,13 +668,13 @@ unsigned char uArmComm::cmdRelativeMove(int serialNum, int parameterCount, doubl
 }
 
 
-unsigned char uArmComm::cmdSetReportInterval(int serialNum, int parameterCount, double value[4])
+static unsigned char cmdSetReportInterval(int serialNum, int parameterCount, double value[4])
 {
     if (parameterCount != 1)
         return PARAMETER_ERROR;
 
 
-    uArm.setReportInterval(value[0]*1000);
+    service.setReportInterval(value[0]*1000);
 
     replyOK(serialNum);
 
@@ -930,14 +682,14 @@ unsigned char uArmComm::cmdSetReportInterval(int serialNum, int parameterCount, 
     return 0;
 }
 
-unsigned char uArmComm::cmdGetDeviceName(int serialNum, int parameterCount, double value[4])
+static unsigned char cmdGetDeviceName(int serialNum, int parameterCount, double value[4])
 {
     if (parameterCount != 0)
         return PARAMETER_ERROR;
 
-    char result[128];
+    char result[RESULT_BUFFER_SIZE];
 
-    ardprintf(result, "V%s", DEVICE_NAME);
+    msprintf(result, "V%s", DEVICE_NAME);
  
 
     replyResult(serialNum, result);
@@ -945,14 +697,14 @@ unsigned char uArmComm::cmdGetDeviceName(int serialNum, int parameterCount, doub
     return 0;
 }
 
-unsigned char uArmComm::cmdGetAPIVersion(int serialNum, int parameterCount, double value[4])
+static unsigned char cmdGetAPIVersion(int serialNum, int parameterCount, double value[4])
 {
     if (parameterCount != 0)
         return PARAMETER_ERROR;
 
-    char result[128];
+    char result[RESULT_BUFFER_SIZE];
 
-    ardprintf(result, "V%s", SW_VER);
+    msprintf(result, "V%s", SW_VER);
  
 
     replyResult(serialNum, result);
@@ -960,13 +712,13 @@ unsigned char uArmComm::cmdGetAPIVersion(int serialNum, int parameterCount, doub
     return 0;
 }
 
-unsigned char uArmComm::cmdGetDeviceUUID(int serialNum, int parameterCount, double value[4])
+static unsigned char cmdGetDeviceUUID(int serialNum, int parameterCount, double value[4])
 {
     if (parameterCount != 0)
         return PARAMETER_ERROR;
 
 
-    char result[128];
+    char result[RESULT_BUFFER_SIZE];
 
     strcpy(result, "V1234567890");   
 
@@ -975,104 +727,30 @@ unsigned char uArmComm::cmdGetDeviceUUID(int serialNum, int parameterCount, doub
     return 0;
 }
 
-
-void uArmComm::reportPos()
+void reportButtonEvent(unsigned char buttonId, unsigned char event)
 {
-    double x, y, z;
+    char result[RESULT_BUFFER_SIZE];
+    msprintf(result, "B%d V%d", buttonId, event); 
+    reportResult(REPORT_BUTTON, result);  
+}
 
-	uArm.mController.updateAllServoAngle();
-    uArm.mController.getCurrentXYZ(x, y, z);
 
-    char result[128];
-    ardprintf(result, "X%f Y%f Z%f", x, y, z);   
+void reportPos()
+{
+    double x, y, z, frontEndAngle;
+
+    getCurrentXYZ(x, y, z);
+    frontEndAngle = getServoAngle(SERVO_HAND_ROT_NUM);
+
+    debugPrint("angle = %f", frontEndAngle);
+    char result[RESULT_BUFFER_SIZE];
+    msprintf(result, "X%f Y%f Z%f R%f", x, y, z, frontEndAngle);   
 
     reportResult(REPORT_POS, result);    
 
 }
 
-/*
-char uArmComm::parseParam(String cmnd, const char *parameters, int parameterCount, double valueArray[])
-{
-    for (byte i = 0; i < parameterCount; i++) 
-    {
-        char startIndex = cmnd.indexOf(parameters[i]) + 1;
-        //debugPrint("startIndex = %d", startIndex);
-        if (startIndex == -1)
-        {
-            //Serial.println(F("[F1]"));
-            return ERR1;
-        }
-
-        char endIndex = 0;
-        if (i != parameterCount-1) 
-        {
-            endIndex = cmnd.indexOf(parameters[i+1]);
-            if (endIndex == -1)
-            {
-                //Serial.println(F("[F1]"));
-                return ERR1;
-            }
-        }
-        else
-        {
-            endIndex = cmnd.length();
-        }
-       
-        valueArray[i] = cmnd.substring(startIndex, endIndex).toFloat();
-
-    }
-
-
-
-    return OK;
-}
-
-
-void uArmComm::runCommand(String message)
-{
-	
-	String cmdStr = message.substring(0, 4);
-	double value[4];
-    int i = 0;
-
-	Command iCmd;
-
-	int len = sizeof(command)/sizeof(command[0]);
-
-	for (i = 0; i < len; i++)
-	{
-		memcpy_P(&iCmd, &command[i], sizeof(Command));
-		
-		if (cmdStr == iCmd.cmd)
-		{
-
-			if (iCmd.parametersCount == 0)
-			{
-				iCmd.execute(value);
-			}
-			else if (parseParam(message, iCmd.parameters, iCmd.parametersCount, value) == OK) 
-			{   
-				iCmd.execute(value);
-            }	
-            else
-            {
-                Serial.println("[ERR1]");
-            }
-            break;
-		}
-		
-	}
-
-    if (i == len)
-    {
-        Serial.println("[ERR3]");
-    }
-	
-}
-*/
-
-
-void uArmComm::HandleMoveCmd(int cmdCode, int serialNum, int parameterCount, double value[4])
+static void HandleMoveCmd(int cmdCode, int serialNum, int parameterCount, double value[4])
 {
     unsigned char result = false;
 
@@ -1090,9 +768,11 @@ void uArmComm::HandleMoveCmd(int cmdCode, int serialNum, int parameterCount, dou
         result = cmdSetServoAngleWithOffset(serialNum, parameterCount, value);
         break;
 
+#ifdef MKII
     case 203:
         result = cmdStopMove(serialNum, parameterCount, value);
         break;
+#endif
 
     case 204:
         result = cmdRelativeMove(serialNum, parameterCount, value);
@@ -1113,7 +793,7 @@ void uArmComm::HandleMoveCmd(int cmdCode, int serialNum, int parameterCount, dou
     }
 }
 
-void uArmComm::HandleSettingCmd(int cmdCode, int serialNum, int parameterCount, double value[4])
+static void HandleSettingCmd(int cmdCode, int serialNum, int parameterCount, double value[4])
 {
     unsigned char result = false;
 
@@ -1123,9 +803,11 @@ void uArmComm::HandleSettingCmd(int cmdCode, int serialNum, int parameterCount, 
         result = cmdSetReportInterval(serialNum, parameterCount, value);
         break;
 
+#ifdef MKII
     case 200:
         result = cmdIsMoving(serialNum, parameterCount, value);
         break;
+#endif
 
     case 201:
         result = cmdSetAttachServo(serialNum, parameterCount, value);
@@ -1137,7 +819,7 @@ void uArmComm::HandleSettingCmd(int cmdCode, int serialNum, int parameterCount, 
 
     case 210:
         result = cmdSetBuzz(serialNum, parameterCount, value);
-        break;
+        break;        
 
     case 211:
         result = cmdGetE2PROMData(serialNum, parameterCount, value);
@@ -1146,6 +828,10 @@ void uArmComm::HandleSettingCmd(int cmdCode, int serialNum, int parameterCount, 
     case 212:
         result = cmdSetE2PROMData(serialNum, parameterCount, value);
         break;
+
+    case 213:
+        result = cmdSetButtonService(serialNum, parameterCount, value);
+        break;        
 
     case 220:
         result = cmdCoordinateToAngle(serialNum, parameterCount, value);
@@ -1188,7 +874,7 @@ void uArmComm::HandleSettingCmd(int cmdCode, int serialNum, int parameterCount, 
     }
 }
 
-void uArmComm::HandleQueryCmd(int cmdCode, int serialNum, int parameterCount, double value[4])
+static void HandleQueryCmd(int cmdCode, int serialNum, int parameterCount, double value[4])
 {
     unsigned char result = false;
 
@@ -1257,12 +943,12 @@ void uArmComm::HandleQueryCmd(int cmdCode, int serialNum, int parameterCount, do
     }
 }
 
-bool uArmComm::parseCommand(char *message)
+static bool parseCommand(char *message)
 {
     double value[6];
     int index = 0;
-
-    // Serial.println(message);
+    bool hasSerialNum = false;
+    debugPrint("message=%s", message);
 
 
     int len = strlen(message);
@@ -1270,6 +956,7 @@ bool uArmComm::parseCommand(char *message)
     char *pch;
     char cmdType;
 
+    // skip white space
     while (len > 0)
     {
         if (isspace(message[len-1]))
@@ -1289,20 +976,34 @@ bool uArmComm::parseCommand(char *message)
 
 
 
+    
+
+    if (message[0] == '#')
+    {
+        hasSerialNum = true;
+    }
+
     pch = strtok(message, " ");
     while (pch != NULL && index < 6)
     {
-        // Serial.println(pch);
+        //debugPrint("pch=%s", pch);
         
         switch (index)
         {
         case 0:
-            value[index] = atof(pch);
+            if (!hasSerialNum)
+            {
+                cmdType = *(pch);
+            }
+            value[index] = atof(pch+1);
             break;
 
         case 1:
-            cmdType = *(pch);
-            // Serial.println(cmdType);
+            if (hasSerialNum)
+            {
+                cmdType = *(pch);
+            }
+            //debugPrint("cmdType=%d", cmdType);
             value[index] = atof(pch+1);
             break;
 
@@ -1312,8 +1013,7 @@ bool uArmComm::parseCommand(char *message)
         }
 
 
-        // Serial.print("value=");
-        // Serial.println(value[index]);
+        //debugPrint("value=%f", value[index]);
 
         pch = strtok(NULL, " ");
 
@@ -1322,41 +1022,66 @@ bool uArmComm::parseCommand(char *message)
 
     }
 
-    int serialNum = value[0];
-    int cmdCode = value[1];
-    int parameterCount = index - 2;
+    int serialNum = 0;
+    int cmdCode = 0;
+    int parameterCount = 0;
+    int valueStartIndex = 0;
+
+    if (hasSerialNum)
+    {
+        serialNum = value[0];
+        cmdCode = value[1];
+        parameterCount = index - 2;
+        valueStartIndex = 2;
+    }
+    else
+    {
+        serialNum = 0;
+        cmdCode = value[0];
+        parameterCount = index - 1;        
+        valueStartIndex = 1;
+    }
 
     switch (cmdType)
     {
     case 'G':
-        HandleMoveCmd(cmdCode, serialNum, parameterCount, value+2);
+        HandleMoveCmd(cmdCode, serialNum, parameterCount, value + valueStartIndex);
         break;
 
     case 'M':
-        HandleSettingCmd(cmdCode, serialNum, parameterCount, value+2);
+        HandleSettingCmd(cmdCode, serialNum, parameterCount, value + valueStartIndex);
         break;
 
     case 'P':
-        HandleQueryCmd(cmdCode, serialNum, parameterCount, value+2);
+        HandleQueryCmd(cmdCode, serialNum, parameterCount, value + valueStartIndex);
         break;
 
     }
 
-
-
-
 }
 
-void uArmComm::handleSerialData(char data)
+static void handleSerialData(char data)
 {
-    switch (mState)
+    static unsigned char cmdCount = 0;
+
+
+    switch (commState)
     {
     case IDLE:
-        if (data == '#')
+        if (data == '#' || data == 'G' || data == 'M' || data == 'P')
         {
-            mState = START;
+            commState = START;
             cmdIndex = 0;
+            if (data != '#')
+            {
+                cmdCount = 1;   // get cmd code
+            }
+            else
+            {
+                cmdCount = 0;
+            }
 
+            cmdReceived[cmdIndex++] = data;
         }
         break;
         
@@ -1365,12 +1090,26 @@ void uArmComm::handleSerialData(char data)
         if (cmdIndex >= COM_LEN_MAX)
         {
 
-            mState = IDLE;
+            commState = IDLE;
         }
-        else if (data == '#')
+        else if (data == '#')   // restart 
         {
-
             cmdIndex = 0;
+            cmdCount = 0;
+            cmdReceived[cmdIndex++] = data;
+        } 
+        else if (data == 'G' || data == 'M' || data == 'P')    
+        {
+            if (cmdCount >= 1)  // restart
+            {
+                cmdIndex = 0;
+                cmdReceived[cmdIndex++] = data;
+            }
+            else
+            {
+                cmdCount++;
+                cmdReceived[cmdIndex++] = data;
+            }
         }
         else if (data == '\n')
         {
@@ -1378,7 +1117,7 @@ void uArmComm::handleSerialData(char data)
             cmdReceived[cmdIndex] = '\0';
 
             parseCommand((char*)cmdReceived);
-            mState = IDLE;
+            commState = IDLE;
         }
         else
         {
@@ -1388,13 +1127,13 @@ void uArmComm::handleSerialData(char data)
         break;
         
     default:
-        mState = IDLE;
+        commState = IDLE;
         break;
               
     }
 }
 
-void uArmComm::SerialCmdRun()
+void serialCmdRun()
 {
 
     char data = -1;
@@ -1414,48 +1153,33 @@ void uArmComm::SerialCmdRun()
     }
 }
 
-void uArmComm::run()
+void getSerialCmd()
 {
-	SerialCmdRun();
-}
+    int data = -1;
 
-/*
-void uArmComm::printf(bool success, double *dat, char *letters, unsigned char num)
-{
-    if(success == true)
-        Serial.print(F("[S"));
-    else
-        Serial.print(F("[F"));
-    //print the parameter
-    for(unsigned char i = 0; i < num; i++)
+    while (Serial.available())
     {
-        Serial.print(letters[i]);
-        Serial.print(dat[i]);
+        data = Serial.read();
+
+        if (data != -1)
+        {
+            ringBuffer.put((uint8_t)data);
+        }
+    }    
+}
+
+void handleSerialCmd()
+{
+    uint8_t data = 0;
+
+    while (ringBuffer.get(&data))
+    {
+        handleSerialData(data);
     }
-    Serial.println(F("]"));
-
 }
 
-void uArmComm::printf(bool success, double dat)
+void serialCmdInit()
 {
-    if(success == true)
-        Serial.print(F("[S"));
-    else
-        Serial.print(F("[F"));
-
-    Serial.print(dat);
-    Serial.println(F("]"));
-
+    ringBuffer.init(bufData, RING_BUFFER_SIZE);
 }
 
-void uArmComm::printf(bool success, int dat)
-{
-    if(success == true)
-        Serial.print(F("[S"));
-    else
-        Serial.print(F("[F"));
-
-    Serial.print(dat);
-    Serial.println(F("]"));
-}
-*/

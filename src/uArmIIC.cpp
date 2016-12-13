@@ -53,6 +53,7 @@ unsigned char read_ack()
         {
                 SCL_CLEAR;//  SCL=0
                 iic_stop();
+                PORT_DDR = old_state;
                 return 1;
         }
         else{
@@ -112,9 +113,10 @@ unsigned char iic_receivebyte()
                         byte |= 0x01;
                 delay_us();
                 SCL_CLEAR;//  SCL=0
-                PORT_DDR = old_state;
+               
                 delay_us();
         }
+        PORT_DDR = old_state;
         return byte;
 }
 
