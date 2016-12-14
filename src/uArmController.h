@@ -37,7 +37,8 @@
 #define MATH_UPPER_ARM 		158.8	//160.2 	
 #define MATH_FRONT_HEADER 	29.4	//25.00// the distance between wrist to the front point we use
 #define MATH_UPPER_LOWER 	MATH_UPPER_ARM/MATH_LOWER_ARM
-
+#define MAX_Z				260		// MAX height
+#define MIN_Z				(-120)
 #elif defined(METAL)
 
 #define MATH_PI 			3.141592653589793238463
@@ -48,7 +49,8 @@
 #define MATH_UPPER_ARM 		160.2 	
 #define MATH_FRONT_HEADER 	25.00// the distance between wrist to the front point we use
 #define MATH_UPPER_LOWER 	MATH_UPPER_ARM/MATH_LOWER_ARM
-
+#define MAX_Z				260		// max height
+#define MIN_Z				(-120)
 #endif
 
 
@@ -107,6 +109,7 @@ public:
 	//unsigned char getXYZFromPolar(double& x, double& y, double& z, double s, double r, double h);
 	unsigned char getXYZFromAngle(double& x, double& y, double& z, double rot, double left, double right);
 
+	unsigned char setServoSpeed(unsigned char speed);
 	unsigned char setServoSpeed(byte servoNum, unsigned char speed);
 	unsigned int getServoAnalogData(byte servoNum);
 	unsigned char xyzToAngle(double x, double y, double z, double& angleRot, double& angleLeft, double& angleRight, boolean allowApproximate = true);

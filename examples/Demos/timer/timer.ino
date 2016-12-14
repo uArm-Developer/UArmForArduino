@@ -16,7 +16,7 @@ void setup()
 	debugPrint("debug start"); // uncomment DEBUG in uArmConfig.h to use debug function
 	
 	// TODO
-
+	moveTo(0, 150, 150);	// initial pos
 
 }
 

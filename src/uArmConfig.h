@@ -28,10 +28,10 @@
 
 #ifdef MKII
   #define HW_VER  "3.1"
-  #define SW_VER  "2.2.2"
+  #define SW_VER  "2.2.3"
 #elif defined(METAL)
   #define HW_VER  "2.1"
-  #define SW_VER  "2.2.2"
+  #define SW_VER  "2.2.3"
 #else
   #error "NO machine model defined(METAL, MKII)"
 #endif

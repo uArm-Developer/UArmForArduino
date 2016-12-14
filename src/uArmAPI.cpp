@@ -99,7 +99,10 @@ void uArmInit()
 /*!
    \brief move to pos(x, y, z)
    \param x, y, z in mm
-   \param speed in mm/min
+   \param speed: 
+   			[0]: move to destination directly
+   			[1~99]: change the dutycycle of servo (1~99%)
+   			[100~1000]: mm/min, will do interpolation to control the speed and block process util move done
    \return IN_RANGE if everything is OK
    \return OUT_OF_RANGE_NO_SOLUTION if cannot reach
    \return OUT_OF_RANGE will move to the closest pos
@@ -112,9 +115,16 @@ unsigned char moveTo(double x, double y, double z, double speed)
 	debugPrint("moveTo: x=%f, y=%f, z=%f, speed=%f", x, y, z, speed);
 
 	// when speed less than 100 mm/min, move to destination directly
-	if (speed < 100)
+	if (speed < 0)
 	{
-		// convert to angle and move to target angle directly
+		return OUT_OF_RANGE_NO_SOLUTION;
+	}
+	else if (speed < 100)
+	{
+		unsigned char dutyCycle = map(speed, 0, 99, 0,  255);   
+		Serial.print(dutyCycle);
+		controller.setServoSpeed(dutyCycle);
+
 		double angleB, angleL, angleR;
 		result = controller.xyzToAngle(x, y, z, angleB, angleL, angleR);
 		if (result != OUT_OF_RANGE_NO_SOLUTION)
@@ -122,10 +132,11 @@ unsigned char moveTo(double x, double y, double z, double speed)
 			controller.writeServoAngle(angleB, angleL, angleR);
 		}
 
-		return result;
+		return result;		
 	}
 	else
 	{
+		controller.setServoSpeed(255);
 		result = _moveTo(x, y, z, speed);
 
 		if(result != OUT_OF_RANGE_NO_SOLUTION)
@@ -846,7 +857,7 @@ static unsigned char _moveTo(double x, double y, double z, double speed)
     unsigned char status = 0;
 
     status = controller.xyzToAngle(x, y, z, targetRot, targetLeft, targetRight);
-
+	debugPrint("target B=%f, L=%f, R=%f\r\n", curRot, curLeft, curRight);
 
     if (status == OUT_OF_RANGE_NO_SOLUTION)
     {
@@ -864,6 +875,8 @@ static unsigned char _moveTo(double x, double y, double z, double speed)
     controller.getServoAngles(curRot, curLeft, curRight);
     // get current xyz
     controller.getCurrentXYZ(curX, curY, curZ);
+
+	debugPrint("B=%f, L=%f, R=%f\r\n", curRot, curLeft, curRight);
 
     // calculate max steps
     totalSteps = max(abs(targetRot - curRot), abs(targetLeft - curLeft));
@@ -900,7 +913,7 @@ static unsigned char _moveTo(double x, double y, double z, double speed)
 
     totalSteps = totalSteps < STEP_MAX ? totalSteps : STEP_MAX;
 
-    //debugPrint("totalSteps= %d\n", totalSteps);
+    debugPrint("totalSteps= %d\n", totalSteps);
 
     // trajectory planning
     _interpolate(curX, x, mPathX, totalSteps, INTERP_EASE_INOUT_CUBIC);
@@ -925,6 +938,7 @@ static unsigned char _moveTo(double x, double y, double z, double speed)
 
     if (i < totalSteps)
     {
+    	debugPrint("i < totalSteps\r\n");
     	_interpolate(curRot, targetRot, mPathX, totalSteps, INTERP_EASE_INOUT_CUBIC);
     	_interpolate(curLeft, targetLeft, mPathY, totalSteps, INTERP_EASE_INOUT_CUBIC);
     	_interpolate(curRight, targetRight, mPathZ, totalSteps, INTERP_EASE_INOUT_CUBIC);    	
@@ -958,7 +972,7 @@ static void _controllerRun()
             // ignore the point if cannot reach
 			if (controller.limitRange(mPathX[mCurStep], mPathY[mCurStep], mPathZ[mCurStep]) != OUT_OF_RANGE_NO_SOLUTION)
 			{
-				//debugPrint("curStep:%d, %f, %f, %f", mCurStep, mPathX[mCurStep], mPathY[mCurStep], mPathZ[mCurStep]);
+				debugPrint("curStep:%d, %f, %f, %f", mCurStep, mPathX[mCurStep], mPathY[mCurStep], mPathZ[mCurStep]);
 				if (mCurStep == (mTotalSteps - 1))
                 {
                     double angles[3];

@@ -141,7 +141,7 @@ void uArmController::writeServoAngle(byte servoNum, double servoAngle, boolean w
 
 
 
-
+    servoAngle = constrain(servoAngle, 0.00, 180.00);
 
 	mCurAngle[servoNum] = servoAngle;
     servoAngle = writeWithOffset ? (servoAngle + mServoAngleOffset[servoNum]) : servoAngle;
@@ -181,6 +181,7 @@ void uArmController::readServoCalibrationData(unsigned int address, double& angl
     unsigned int deltaA = 0xffff, deltaB = 0, i, i_min = 0;
     deltaA = 0xffff;
     deltaB = 0;
+
 
     if (abs(angle - 0.0) < 0.001)
     {
@@ -385,6 +386,12 @@ unsigned char uArmController::xyzToAngle(double x, double y, double z, double& a
     y = (double)((int)(y*10)/10.0);
     z = (double)((int)(z*10)/10.0);
 
+
+    if (z > MAX_Z || z < MIN_Z)
+    {
+        return OUT_OF_RANGE_NO_SOLUTION;
+    }
+
     zIn = (z - MATH_L1) / MATH_LOWER_ARM;
 
     if(!allowApproximate)//if need the move to closest point we have to jump over the return function
@@ -443,25 +450,32 @@ unsigned char uArmController::xyzToAngle(double x, double y, double z, double& a
 
 unsigned char uArmController::limitRange(double& angleRot, double& angleLeft, double& angleRight)
 {
+    unsigned char result = IN_RANGE;
+
     //determine if the angle can be reached
     if(isnan(angleRot)||isnan(angleLeft)||isnan(angleRight))
     {
-            return OUT_OF_RANGE_NO_SOLUTION;
+            result = OUT_OF_RANGE_NO_SOLUTION;
     }
-    if(((angleLeft + mServoAngleOffset[SERVO_LEFT_NUM]) < LOWER_ARM_MIN_ANGLE)||((angleLeft + mServoAngleOffset[SERVO_LEFT_NUM]) > LOWER_ARM_MAX_ANGLE))//check the right in range
+    else if(((angleLeft + mServoAngleOffset[SERVO_LEFT_NUM]) < LOWER_ARM_MIN_ANGLE)||((angleLeft + mServoAngleOffset[SERVO_LEFT_NUM]) > LOWER_ARM_MAX_ANGLE))//check the right in range
     {
-            return OUT_OF_RANGE;
+            result = OUT_OF_RANGE;
     }
-    if(((angleRight + mServoAngleOffset[SERVO_RIGHT_NUM]) < UPPER_ARM_MIN_ANGLE)||((angleRight + mServoAngleOffset[SERVO_RIGHT_NUM]) > UPPER_ARM_MAX_ANGLE))//check the left in range
+    else if(((angleRight + mServoAngleOffset[SERVO_RIGHT_NUM]) < UPPER_ARM_MIN_ANGLE)||((angleRight + mServoAngleOffset[SERVO_RIGHT_NUM]) > UPPER_ARM_MAX_ANGLE))//check the left in range
     {
-            return OUT_OF_RANGE;
+            result = OUT_OF_RANGE;
     }
-    if(((180 - angleLeft - angleRight)>LOWER_UPPER_MAX_ANGLE)||((180 - angleLeft - angleRight)<LOWER_UPPER_MIN_ANGLE))//check the angle of upper arm and lowe arm in range
+    else if(((180 - angleLeft - angleRight)>LOWER_UPPER_MAX_ANGLE)||((180 - angleLeft - angleRight)<LOWER_UPPER_MIN_ANGLE))//check the angle of upper arm and lowe arm in range
     {
-            return OUT_OF_RANGE;
+            result = OUT_OF_RANGE;
     }
 
-    return IN_RANGE;
+    angleRot = constrain(angleRot, 0.00, 180.00);
+    angleLeft = constrain(angleLeft, 0.00, 180.00);
+    angleRight = constrain(angleRight, 0.00, 180.00);
+
+
+    return result;
 }
 
 
@@ -720,4 +734,12 @@ double uArmController::readServoAngleOffset(byte servoNum)
 unsigned char uArmController::setServoSpeed(byte servoNum, unsigned char speed)
 {
     mServoSpeed = speed;
+}
+
+unsigned char uArmController::setServoSpeed(unsigned char speed)
+{
+    setServoSpeed(SERVO_ROT_NUM, speed);
+    setServoSpeed(SERVO_LEFT_NUM, speed);
+    setServoSpeed(SERVO_RIGHT_NUM, speed);
+   // setServoSpeed(SERVO_HAND_ROT_NUM, true);
 }

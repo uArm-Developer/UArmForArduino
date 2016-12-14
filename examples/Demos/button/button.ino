@@ -14,7 +14,7 @@ void setup()
 	
 	// TODO
 	service.setButtonService(false);	// disable build in button service
-
+	moveTo(0, 150, 150);	// initial pos
 }
 
 void loop()
