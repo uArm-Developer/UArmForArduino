@@ -122,7 +122,7 @@ unsigned char moveTo(double x, double y, double z, double speed)
 	else if (speed < 100)
 	{
 		unsigned char dutyCycle = map(speed, 0, 99, 0,  255);   
-		Serial.print(dutyCycle);
+		
 		controller.setServoSpeed(dutyCycle);
 
 		double angleB, angleL, angleR;
